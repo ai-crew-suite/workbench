@@ -1,6 +1,6 @@
 {
   "name": "@ai-crew-suite/deploy-kubernetes",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "helm:lint": "helm lint helm/backstage && helm lint helm/platform",

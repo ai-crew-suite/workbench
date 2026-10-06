@@ -1,6 +1,0 @@
-{
-  "name": "@ai-crew-suite/app-config",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Centralized immutable application runtime profiles for the AI Crew Suite platform."
-}

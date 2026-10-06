@@ -1,6 +1,6 @@
 {
   "name": "@ai-crew-suite/containers",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "compose:up": "docker compose -f docker-compose.yml up -d",

@@ -1,6 +1,6 @@
 {
   "name": "@ai-crew-suite/mock-fixturesbase",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
   "description": "",
   "scripts": {
@@ -8,6 +8,7 @@
     "lint:fix": "prettier --write \"**/*.{yaml,yml,html,json}\""
   },
   "devDependencies": {
+    "@ai-crew-suite/cli": "catalog:dev",
     "prettier": "catalog:dev"
   }
 }

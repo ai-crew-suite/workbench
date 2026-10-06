@@ -1,11 +1,8 @@
 .git
 .yarn/cache
-.yarn/unplugged
 .yarn/install-state.gz
 node_modules
-**/node_modules
-**/dist
-**/dist-types
-**/*.tsbuildinfo
-**/.turbo
-packages/app-config/*.local.yaml
+packages/*/src
+packages/*/node_modules
+plugins
+*.local.yaml

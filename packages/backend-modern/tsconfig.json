@@ -1,7 +1,0 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "references": [
-    { "path": "../custom-catalog-kinds" },
-    { "path": "./packages/wiremock-network-interceptor" }
-  ]
-}

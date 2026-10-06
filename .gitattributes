@@ -1,15 +1,1 @@
-# Enforce universal LF line endings for all code files to prevent cross-OS shell script breaks
-* text=auto eol=lf
-
-# Explicitly ensure bash/sh workflow entries preserve executable traits natively
-*.sh text eol=lf
-
-# Treat auto-generated, compressed, or binary files as flat data targets
-*.gz binary
-*.png binary
-*.jpg binary
-
-# Hide compiled code and large static documentation fixture trees from standard diff noise
-actions/**/dist/*.js -diff linguist-generated=true
-**/dist/*.js linguist-generated=true
-packages/mock-fixtures/techdocs/** linguist-generated=true
+.venv/* linguist-vendored

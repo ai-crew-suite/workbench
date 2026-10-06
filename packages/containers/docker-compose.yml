@@ -6,7 +6,7 @@
 services:
   # 🐘 Core Relational Database + Agentic Vector Layer (Mem0 Support)
   postgres:
-    image: pgvector/pgvector:pg17
+    image: pgvector/pgvector:pg18
     container_name: crew-infra-db
     environment:
       POSTGRES_USER: backstage
@@ -26,7 +26,7 @@ services:
 
   # 🏎️ Transient State Cache & Temporal Support Queue
   redis:
-    image: redis:7.4-alpine
+    image: redis:8.10-alpine
     container_name: crew-infra-cache
     ports:
       - "6379:6379"
@@ -40,7 +40,7 @@ services:
 
   # 🔌 Third-Party Driver API Interceptor (PagerDuty, Datadog Mock Plane)
   wiremock:
-    image: wiremock/wiremock:3.9.1-alpine
+    image: wiremock/wiremock:3.13.2-alpine
     container_name: crew-infra-mocks
     ports:
       - "8080:8080"
@@ -53,6 +53,7 @@ services:
       # Enables background scanning so adding new .json mapping files doesn't require a restart
       --global-response-templating
       --async-response-enabled=true
+      --enable-cors # Allow direct browser-to-WireMock cross-origin requests in Storybook
     healthcheck:
       test:
         [

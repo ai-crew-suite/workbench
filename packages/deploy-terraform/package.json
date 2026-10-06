@@ -1,6 +1,6 @@
 {
   "name": "@ai-crew-suite/deploy-terraform",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "tf:init": "terraform init",

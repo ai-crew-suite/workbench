@@ -1,8 +1,11 @@
 # AI Crew Suite — Workbench (`workbench`)
 
-![AI Crew Suite Workbench splash image](./ai-crew-suite-social-share-workbench.jpeg)
+![AI Crew Suite Workbench splash image](./ai-crew-suite-social-share-workbench.jpg)
 
 Centralized Infrastructure-as-Code (IaC), deployment charts, deterministic local development runtimes, and regulatory-compliant mock ecosystems for the AI Crew Suite platform.
+
+> [!WARNING]
+> This repo is pre-beta and under going heavy development as of October, 2026. We are refactoring from LangGraph to a fluent API for workflows in agentic plugins based on Temporal + Mem0 Vercel AI SDK.
 
 ## 📋 Overview
 
@@ -130,6 +133,89 @@ To prevent compilation crashes and ensure absolute cryptographic supply-chain se
 1. When your GitHub Actions runner executes `helm install`, it passes a dynamic identifier (like the PR number: `pr-42`) into the Helm values.
 2. Your Ingress manifest detects this and creates an AWS Application Load Balancer with a dynamic rule.
 3. **ExternalDNS** intercepts this rule, hooks into AWS Route 53, and automatically registers a transient record: `https://preview-pr-42.ai-crew-suite.dev`.
+
+## Playwright Tests
+
+When Playwright boots up to test your user-facing Agent interfaces, the base driver fixtures are already completely populated in WireMock by the backend module.
+
+If your Playwright script needs to force a specific behavior (like simulating a flaky Datadog agent stream during an execution cycle), it simply pulls the *exact same class definition* to alter the environment rules dynamically:
+
+```typescript
+// apps/agents-e2e/tests/agent-triaging.spec.ts
+import { test, expect } from '@playwright/test';
+import { WireMockClient } from '@internal/wiremock-utils'; // Same code resource!
+
+test.describe('Agentic Error Resolution Interface Checks', () => {
+  const wm = new WireMockClient();
+
+  test.afterEach(async () => {
+    // Clear out any messy test-specific modifications. 
+    // Note: Re-triggering backend initialization or hitting a reload hook will restore the original baselines.
+    await wm.clearDynamicMocks();
+  });
+
+  test('should gracefully surface a UI notification banner if the driver API drops connectivity', async ({ page }) => {
+    // 1. Override the baseline driver responses with a test-specific 500 error stub
+    await wm.registerStub({
+      request: { method: 'GET', url: '/api/v1/pagerduty/history' },
+      response: { status: 500 }
+    });
+
+    // 2. Drive the UI with Playwright
+    await page.goto('/agents/incident-dashboard');
+    const alertBanner = page.locator('[data-testid="error-alert"]');
+    
+    await expect(alertBanner).toBeVisible();
+    await expect(alertBanner).toContainText('PagerDuty link degraded');
+  });
+});
+```
+
+## Vitest inside Storybook (Component & User-Flow Testing)
+
+Storybook uses Vitest to power its **Interaction Tests** (playing the role that Testing Library used to play). When testing your agent UI components inside Storybook:
+
+- **The Problem:** Your agent UI components make API calls to the Backstage backend, which in turn calls the drivers, which call WireMock. Alternatively, your components might hit a proxy that goes straight to WireMock.
+- **The Solution:** Inside a Storybook `.stories.tsx` file, you can use the `play` function (Storybook's built-in interaction testing phase powered by Vitest) to programmatically prep WireMock right before the component renders.
+
+```typescript
+// packages/app/src/components/AgentDashboard.stories.tsx
+import type { Meta, StoryObj } from '@storybook/react';
+import { AgentDashboard } from './AgentDashboard';
+import { WireMockClient } from '@internal/wiremock-utils';
+import { userEvent, within, expect } from '@storybook/test'; // Storybook's Vitest-backed testing utilities
+
+const wm = new WireMockClient('http://localhost:8080'); // Point directly to the WireMock port
+
+const meta: Meta<typeof AgentDashboard> = {
+  component: AgentDashboard,
+  title: 'Agents/Dashboard',
+};
+export default meta;
+
+type Story = StoryObj<typeof AgentDashboard>;
+
+export const OvercapacityAlertState: Story = {
+  // The 'play' function is executed by Vitest during Storybook test runs
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // 1. Programmatically set up the exact network state this UI component needs
+    await wm.registerStub({
+      request: { method: 'GET', url: '/api/v1/metrics/vector-capacity' },
+      response: {
+        status: 200,
+        jsonBody: { utilization: 98.4, status: 'CRITICAL' }
+      }
+    });
+
+    // 2. Assert that the UI reacted correctly to the WireMock state we just injected
+    const alert = await canvas.findByTestId('capacity-alert-banner');
+    await expect(alert).toBeInTarget();
+    await expect(alert).toHaveTextContent('Vector Engine Approaching Limit');
+  },
+};
+```
 
 ## ⚖️ Compliance and Licensing
 

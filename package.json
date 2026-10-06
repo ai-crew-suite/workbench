@@ -1,11 +1,11 @@
 {
-  "name": "@ai-crew-suite/infra-root",
+  "name": "@ai-crew-suite/workbench",
+  "description": "Testing and dev server setup for AI Crew Suite",
   "private": true,
-  "version": "1.0.0",
   "packageManager": "yarn@4.18.1",
   "engines": {
     "node": "22 || 24",
-    "yarn": ">=4.0.0"
+    "npm": "Please use Yarn instead (Corepack enable)"
   },
   "workspaces": [
     "packages/*"
@@ -29,6 +29,7 @@
     "tf:validate": "turbo run tf:validate --filter=@ai-crew-suite/deploy-terraform"
   },
   "devDependencies": {
+    "@ai-crew-suite/cli": "catalog:dev",
     "turbo": "catalog:dev"
   }
 }

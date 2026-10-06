@@ -1,121 +1,36 @@
 {
-  "eslint.nodePath": ".yarn/sdks",
-  "files.associations": {
-    "**/actions/**/action.yaml": "yaml",
-    "**/actions/**/action.yml": "yaml"
+  "cSpell.customDictionaries": {
+    "org-words": {
+      "path": "./.cspell/shared.txt",
+      "addWords": false
+    }
   },
-  "github-actions.workflows.validation.secrets": false,
-  "github-actions.workflows.validation.variables": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.formatOnSave": true,
   "json.schemas": [
     {
       "fileMatch": [".yarnrc.yml"],
-      "url": "https://schemastore.org"
+      "url": "https://yarnpkg.com/configuration/yarnrc.json"
     }
   ],
-  "prettier.prettierPath": ".yarn/sdks/prettier/index.cjs",
+  "json.schemaDownload.trustedDomains": {
+    "https://*.turborepo.dev": true
+  },
   "search.exclude": {
     "**/.yarn": true,
-    "**/.pnp.*": true
+    "**/node_modules": true,
+    "**/.turbo": true,
+    "**/dist": true,
+    "**/.cache": true,
+    "**/coverage": true
   },
   "yaml.schemas": {
-    "https://backstage.io": "app-config*.yaml",
-    "https://schemastore.org": ["master-catalogs.yml"],
-    "node_modules/@ai-crew-suite/custom-catalog-kinds/src/catalog.schema.json": "**/catalog-info.yaml"
+    "https://json.schemastore.org/catalog-info.json": [
+      "**/catalog-info.yaml",
+      "master-catalogs.yml"
+    ]
   },
-  "yaml.schemaStore.enable": false,
-  "js/ts.tsdk": "node_modules/typescript/lib",
-  "js/ts.tsdk.path": ".yarn/sdks/typescript/lib",
-  "ts.enablePromptUseWorkspaceTsdk": true,
-  "cSpell.words": [
-    "Accum",
-    "actioned",
-    "agentic",
-    "AKIA",
-    "arounds",
-    "azdev",
-    "azuredevops",
-    "baprs",
-    "buildx",
-    "Contextualizer",
-    "creds",
-    "demultiplexing",
-    "ehthumbs",
-    "entitites",
-    "exfiltration",
-    "Fazure",
-    "FINRA",
-    "glpat",
-    "hdrs",
-    "healthz",
-    "HITL",
-    "HNSW",
-    "IDOR",
-    "Ilshidur",
-    "incidentio",
-    "isready",
-    "jsdom",
-    "jsons",
-    "knex",
-    "llms",
-    "Milvus",
-    "msgpackr",
-    "nektos",
-    "nindent",
-    "nvmrc",
-    "Ollama",
-    "oncalls",
-    "oriflame",
-    "ossp",
-    "PABC",
-    "pgdata",
-    "pgdg",
-    "pgvector",
-    "PINC",
-    "PNOTE",
-    "PPOL",
-    "PPRI",
-    "PSVC",
-    "PTEAM",
-    "PUSR",
-    "pylint",
-    "Qdrant",
-    "repudiable",
-    "rerank",
-    "Reranker",
-    "rerankers",
-    "rharkor",
-    "rjsf",
-    "roadiehq",
-    "SCAF",
-    "scoree",
-    "smhd",
-    "sonarqube",
-    "SPOF",
-    "stringifying",
-    "tfstate",
-    "tfvars",
-    "tini",
-    "trixie",
-    "unbuilt",
-    "uncited",
-    "uncompiled",
-    "unconfigured",
-    "unestimated",
-    "ungated",
-    "unparseable",
-    "unposted",
-    "unredacted",
-    "Unrouted",
-    "unsourced",
-    "unstub",
-    "untimed",
-    "upserts",
-    "Vercel",
-    "westus",
-    "xlarge",
-    "xoxb",
-    "xoxp",
-    "yarnrc",
-    "zipfs"
-  ]
+  "yaml.validate": true
 }
