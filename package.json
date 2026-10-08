@@ -29,7 +29,11 @@
     "tf:validate": "turbo run tf:validate --filter=@ai-crew-suite/deploy-terraform"
   },
   "devDependencies": {
-    "@ai-crew-suite/cli": "catalog:dev",
+    "@ai-crew-suite/crew-cli": "catalog:dev",
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev",
     "turbo": "catalog:dev"
+  },
+  "resolutions": {
+    "got": "11.8.6"
   }
 }

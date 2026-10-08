@@ -1,6 +1,5 @@
 {
   "name": "@ai-crew-suite/workbench-backend",
-  "version": "0.0.1",
   "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -53,7 +52,8 @@
     "react-router-dom": "catalog:prod"
   },
   "devDependencies": {
-    "@ai-crew-suite/cli": "catalog:dev",
+    "@ai-crew-suite/crew-cli": "catalog:dev",
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev",
     "@tsconfig/node22": "catalog:dev",
     "@types/node": "catalog:dev",
     "typescript": "catalog:dev"

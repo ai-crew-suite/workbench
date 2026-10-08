@@ -1,0 +1,119 @@
+{
+  "$schema": "https://turbo.build",
+  "globalEnv": [
+    "BACKSTAGE_APP_CONFIG",
+    "BACKSTAGE_USER_SECRET",
+    "CI",
+    "NODE_ENV",
+    "POSTGRES_PASSWORD",
+    "POSTGRES_USER"
+  ],
+  "tasks": {
+    // Global root-level task
+    "//#format:turbo": {
+      "cache": false,
+      "inputs": ["turbo.jsonc", "packages/**/turbo.jsonc"],
+      "outputs": []
+    },
+    "//#lint:turbo": {
+      "cache": false,
+      "inputs": ["turbo.jsonc", "packages/**/turbo.jsonc"],
+      "outputs": []
+    },
+    // Package tasks
+    "build": {
+      "cache": true,
+      "dependsOn": ["^build", "clean"],
+      "inputs": ["src/**", "package.json"],
+      "outputs": ["dist/**"],
+      "env": ["FORCE_COLOR"]
+    },
+    "clean": {
+      "cache": false,
+      "dependsOn": []
+    },
+    "format": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": [],
+      "outputs": []
+    },
+    "lint": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": [],
+      "outputs": []
+    },
+    /** Synchronizes TypeScript Project References alphabetically and heals roots */
+    "sync": {
+      "cache": false,
+      "dependsOn": ["^build"],
+      "inputs": ["packages/**/package.json"],
+      "outputs": ["packages/**/tsconfig.json", "tsconfig.json"]
+    },
+    "test": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["src/**"]
+    },
+    "test:unit": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["src/**"],
+      "outputs": []
+    },
+    "test:unit:coverage": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["src/**"],
+      "outputs": ["coverage/**"]
+    },
+    "typecheck": {
+      "cache": true,
+      /** TypeScript needs built internal dependency declarations (.d.ts) */
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "tsconfig.json"],
+      "outputs": []
+    },
+    "compose:up": {
+      "cache": false,
+      "persistent": true
+    },
+    "compose:down": {
+      "cache": false
+    },
+    "image:build": {
+      "dependsOn": ["build"],
+      "cache": true,
+      "outputs": []
+    },
+    "helm:lint": {
+      "cache": true,
+      "outputs": []
+    },
+    "helm:template": {
+      "cache": true,
+      "outputs": []
+    },
+    "tf:init": {
+      "cache": true,
+      "outputs": [".terraform/**", ".terraform.lock.hcl"]
+    },
+    "tf:validate": {
+      "dependsOn": ["tf:init"],
+      "cache": true,
+      "outputs": []
+    },
+    "tf:plan": {
+      "dependsOn": ["tf:validate"],
+      "cache": false,
+      "passThroughEnv": [
+        "TF_VAR_database_secure_password",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_SESSION_TOKEN",
+        "AWS_DEFAULT_REGION"
+      ]
+    }
+  }
+}
