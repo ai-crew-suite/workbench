@@ -60,6 +60,14 @@ yarn start:modern      # Launches the Modern DI Backstage testing instance
 yarn start:legacy      # Launches the Traditional Express Backstage testing instance
 ```
 
+### 4. Adding Packages
+
+This repo sets `enableImmutableCache` to `true` in `.yarnrc.yml` for compliance with FINRA, SOC-2, and HIPAA enterprise environments. This enforces cryptographic reproducibility and supply-chain immutability in the repo. It also blocks adding or upgrading package versions locally. Renovatebot handles this automatically by executing Yarn in a mode equivalent to `--mode=update-lockfile`. To add a package locally:
+
+```bash
+YARN_ENABLE_IMMUTABLE_CACHE=false yarn install
+```
+
 ## 📡 Consuming the Dev / Test Server in Other Repos
 
 ## 🛡️ Verification & Compliance Standards
