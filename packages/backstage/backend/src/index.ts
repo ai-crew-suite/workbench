@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 import { createBackend } from '@backstage/backend-defaults';
-import appPluginAlpha from '@backstage/plugin-app-backend/alpha';
-import proxyPluginAlpha from '@backstage/plugin-proxy-backend/alpha';
-import catalogPluginAlpha from '@backstage/plugin-catalog-backend/alpha';
-import techdocsPluginAlpha from '@backstage/plugin-techdocs-backend/alpha';
-import scaffolderPluginAlpha from '@backstage/plugin-scaffolder-backend/alpha';
+import appPlugin from '@backstage/plugin-app-backend';
+import proxyPlugin from '@backstage/plugin-proxy-backend';
+import catalogPlugin from '@backstage/plugin-catalog-backend';
+import techdocsPluginAlpha from '@backstage/plugin-techdocs-backend';
+import scaffolderPlugin from '@backstage/plugin-scaffolder-backend';
 import authPlugin from '@backstage/plugin-auth-backend';
 import authGithubModule from '@backstage/plugin-auth-backend-module-github-provider';
 
@@ -31,11 +31,11 @@ import { wiremockBootstrapperModule } from './modules/wiremock-bootstrapper';
 const backend = createBackend();
 
 // 2. Attach modern core system plugins and alpha boundary routers
-backend.add(appPluginAlpha);
-backend.add(proxyPluginAlpha);
-backend.add(catalogPluginAlpha);
+backend.add(appPlugin);
+backend.add(proxyPlugin);
+backend.add(catalogPlugin);
 backend.add(techdocsPluginAlpha);
-backend.add(scaffolderPluginAlpha);
+backend.add(scaffolderPlugin);
 
 // 3. Attach authentication lifecycle plugins
 backend.add(authPlugin);
@@ -48,6 +48,8 @@ backend.add(PermissionModule);
 backend.add(EnterpriseCustomKindsProcessor);
 backend.add(globalWiremockInterceptorModule);
 backend.add(wiremockBootstrapperModule);
+
+//backend.add(import('../src')); // Automatically registers your plugin locally
 
 // 5. Fire the runtime network execution loop
 backend.start();
