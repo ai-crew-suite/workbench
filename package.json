@@ -13,20 +13,18 @@
   "scripts": {
     "build": "turbo run build",
     "clean": "turbo run clean",
-    "compile": "turbo run build",
-    "helm:lint": "turbo run helm:lint --filter=@ai-crew-suite/deploy-kubernetes",
-    "helm:template": "turbo run helm:template --filter=@ai-crew-suite/deploy-kubernetes",
+    "helm:lint": "turbo run helm:lint",
+    "helm:template": "turbo run helm:template",
     "image:build": "docker buildx build --builder=default --no-cache --load -t ai-crew-suite/backstage:latest -f packages/containers/backstage-node22.Dockerfile .",
     "infra:down": "turbo run compose:down --filter=@ai-crew-suite/containers",
     "infra:logs": "yarn workspace @ai-crew-suite/containers run compose:logs",
     "infra:up": "turbo run compose:up --filter=@ai-crew-suite/containers",
-    "install:clean": "rm -rf node_modules .yarn/cache .yarn/unplugged yarn.lock",
     "lint": "turbo run lint",
-    "start:legacy": "turbo run start --filter=@ai-crew-suite/backend-legacy",
-    "start:modern": "turbo run start --filter=@ai-crew-suite/backend-modern",
-    "tf:init": "turbo run tf:init --filter=@ai-crew-suite/deploy-terraform",
-    "tf:plan": "turbo run tf:plan --filter=@ai-crew-suite/deploy-terraform",
-    "tf:validate": "turbo run tf:validate --filter=@ai-crew-suite/deploy-terraform"
+    "start": "turbo run start",
+    "tf:init": "turbo run tf:init",
+    "tf:plan": "turbo run tf:plan",
+    "tf:validate": "turbo run tf:validate",
+    "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",

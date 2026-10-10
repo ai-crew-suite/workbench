@@ -1,0 +1,6 @@
+{
+  "extends": "@ai-crew-suite/typescript-shared-config/node",
+  "compilerOptions": {
+    "composite": true
+  }
+}

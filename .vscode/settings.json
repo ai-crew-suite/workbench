@@ -35,7 +35,9 @@
   "yaml.validate": true,
   "cSpell.words": [
     "FINRA",
+    "HNSW",
     "jsdom",
+    "pgvector",
     "SARIF"
   ]
 }

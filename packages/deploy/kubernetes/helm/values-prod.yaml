@@ -1,0 +1,30 @@
+# ====================================================================================
+# 🛡️ PRODUCTION ENVIRONMENT RESOURCE PARAMETERS
+# Frameworks: SOC 2 Type II Compliance | Invariant High-Availability Boundaries
+# ====================================================================================
+
+# packages/deploy-kubernetes/helm/values-prod.yaml
+global:
+  environment: production
+  domain: backstage.ai-crew-suite.dev
+
+backstage:
+  replicaCount: 3
+  image:
+    repository: "${AWS_ACCOUNT_ID}://"
+    tag: latest
+  envFromSecret: "crew-production-backend-secrets"
+
+# 🤖 Temporal workers and Mem0 data bindings
+platform:
+  replicaCount: 2
+  image:
+    repository: "${AWS_ACCOUNT_ID}://"
+    tag: latest
+  envFromSecret: "crew-production-platform-secrets"
+
+  # 🐘 Inject environment instructions telling the Mem0 application code 
+  # to target our secure AWS RDS Postgres cluster instead of local mocks
+  config:
+    vectorDbProvider: "postgres"
+    databaseHost: "://amazonaws.com"

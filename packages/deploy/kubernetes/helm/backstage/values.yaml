@@ -1,0 +1,24 @@
+# ====================================================================================
+# ⚓ DEFAULT DEVELOPMENT VALUE SCHEMAS
+# ====================================================================================
+
+global:
+  environment: development
+  domain: localhost
+
+backstage:
+  replicaCount: 1
+  image:
+    repository: ai-crew-suite/backstage
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: "500m"
+      memory: 1Gi
+    requests:
+      cpu: "250m"
+      memory: 512Mi
+  config:
+    baseUrl: "http://localhost:7007" # Safe local fallback
+  envFromSecret: "crew-local-backend-secrets"

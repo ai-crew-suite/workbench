@@ -1,0 +1,282 @@
+apiVersion: backstage.io/v1alpha1
+
+# Defines the architectural type (Component, System, Domain, API).
+# Legal values are governed by the catalog.rules allow list.
+kind: Component
+
+# This section holds system nomenclature and third-party plugin invocation hooks.
+metadata:
+  # The system-internal ID. Must be URL-safe, alphanumeric, lowercase, and unique within its kind. Required.
+  name: platform-component
+  # The human-readable display string printed on front-facing UI dashboards. Optional.
+  title: Platform Component
+  # A summary explaining what the software component delivers. Optional.
+  description: Handles Temporal loops and Mem0 semantic workflows.
+  # Key-value map of indexing tags used primarily for catalog sorting and filtering. Optional.
+  labels:
+    tier: core
+  # Renders dynamic shortcut action cards directly on the entity homepage header. Optional.
+  links:
+    # Provides an explicit shortcut to your Confluence/Wiki handbook.
+    - url: https://ai-crew-suite.dev
+      title: Engineering Wiki Handbook
+      icon: help
+      type: wiki
+    # Provides a metrics link.
+    - url: https://datadoghq.com
+      title: Live Telemetry Dashboard
+      icon: dashboard
+      type: metrics
+  # Dictates isolation perimeters. If omitted, it defaults to default. It controls tenancy
+  # bounds so you can run separate teams under totally discrete scopes within one single
+  # catalog database cluster. Optional.
+  namespace: default
+  # Flat, lowercase, indexable keywords used specifically for quick semantic filtering
+  # in search bars.  Optional.
+  tags:
+    - platform
+    - core
+    - temporal
+    - mem0
+  # The structural hooks for plugins. These keys tell plugins where to pull data from. Optional.
+  annotations:
+    # Points the UI directly to your canonical Git repository URL
+    backstage.io/source-location: url:https://github.com/ai-crew-suite/platform
+    # Tells the documentation reader where your Markdown sits for techdocs. Points to
+    # the uncompiled raw Markdown files and the mkdocs.yml schema file. Optional.
+    backstage.io/techdocs-ref: dir:.
+    # A raw, literal string that directly matches the physical namespace name configured
+    # inside the actual, running Temporal Orchestration Cluster backend daemon.
+    #
+    # // Inside your separate ai-crew-suite/platform application repository code
+    # const client = await Connection.connect({ address: 'localhost:7233' });
+    # const worker = await Worker.create({
+    #   namespace: 'default', // 🎯 THIS is the literal string the annotation targets!
+    #   taskQueue: 'agentic-workflow-queue',
+    #   workflowsPath: require.resolve('./workflows'),
+    # });
+    temporal.io/namespace: default
+
+# Defines how components anchor together to compose your platform mesh.
+spec:
+  # The functional variant of the component. Common industry standards
+  # include service, website, library, or config. Required.
+  type: service
+  # The current operational maturity state. Common tokens include
+  # experimental, development, staged, or production. Required.
+  lifecycle: production
+  # The string matching the specific team identity (Group entity)
+  # responsible for maintaining the asset. Required.
+  owner: platform-team
+  # The name identifier of the broader bounding system this component helps compose. Optional.
+  system: crew-suite
+  # Implements a hierarchical parent-child relationship model inside the catalog. Optional.
+  subcomponentOf: parent-monorepo
+  # Declares a list of external kind: API entities that this component queries to function correctly. Optional.
+  consumesApis:
+    - platform-api
+  # A list of string targets mapping out what APIs this specific code server actively exposes. Optional.
+  providesApis:
+    - platform-workflow-api
+  # Outbound engineering relationship lines. Tells Backstage what upstream microservices, tools,
+  # or third-party resources this file depends on to execute successfully. Optional.
+  dependsOn:
+    - component:drivers
+    - resource:postgres-vector-db
+
+---
+
+apiVersion: backstage.io/v1alpha1
+# System kind groups multiple backend servers, libraries, and
+# user interfaces into a single high-level business capability.
+kind: System
+metadata:
+  name: platform-system
+spec:
+  owner: platform-team
+  # Captures the root-level enterprise boundary this system operates within. Optional.
+  domain: agentic-capabilities
+
+---
+
+apiVersion: backstage.io/v1alpha1
+# The highest tier of classification. Used to organize massive operational divisions
+# across an organization (e.g., data-analytics, core-infrastructure, agentic-capabilities).
+kind: Domain
+metadata:
+  name: platform-domain
+spec:
+  owner: platform-team
+
+---
+
+apiVersion: backstage.io/v1alpha1
+# Exposes machine-readable service contracts so engineers can inspect endpoint properties seamlessly.
+kind: API
+metadata:
+  name: platform-api
+spec:
+  # Specifies the formatting interface engine standard. Common options
+  # include openapi, grpc, graphql, or asyncapi. Required.
+  type: openapi
+  lifecycle: production
+  owner: platform-team
+  # The raw string schema payload containing your endpoints, parameters, and response
+  # structures. Drop raw OpenAPI / Swagger YAML/JSON specs, GraphQL schemas, or Protobuf
+  # (gRPC) definitions directly into this key. Required.
+  definition: |
+    openapi: 3.0.3
+    info:
+      title: Agent Workflow Controller
+      version: 1.0.0
+    paths:
+      /v1/memories:
+        post:
+          summary: Store long-term episodic context vector in Mem0
+          responses:
+            '201':
+              description: Semantic memory embedded successfully
+
+---
+
+apiVersion: backstage.io/v1alpha1
+# The background configuration poller hook. Tells Backstage to
+# fetch catalog files from external paths automatically.
+kind: Location
+metadata:
+  name: platform-api
+spec:
+  # The ingestion driver mechanism. For your air-gapped setup, this is locked
+  # to file (local disk). For cloud tracking, this shifts to url. Required.
+  type: file
+  # A collection of relative string file paths or remote repo paths to scan for additional entities. Required.
+  targets:
+    - ./additional-fixtures.yaml
+
+---
+
+apiVersion: backstage.io/v1alpha1
+# Represents organizational hierarchies, product verticals, or engineering squads.
+kind: Group
+metadata:
+  name: platform-team
+  title: Core Platform Engineering Crew
+  description: Responsible for Temporal workflow infrastructure, memory banks, and DevOps tooling.
+spec:
+  type: team
+  children: []
+
+---
+
+apiVersion: backstage.io/v1alpha1
+# Represents an individual person inside the engineering organization.
+# It maps their name, email, and structural corporate settings.
+kind: User
+metadata:
+  name: kevin-workstation
+  title: Kevin
+spec:
+  profile:
+    email: kevin@ai-crew-suite.dev
+  memberOf: [
+    platform-team
+  ]
+
+---
+
+apiVersion: backstage.io/v1alpha1
+# Represents physical or cloud infrastructure dependencies managed by software.
+kind: Resource
+metadata:
+  name: postgres-vector-db
+  title: Managed RDS pgvector Instance Cluster
+  description: Shared PostgreSQL 17 cluster storing core relational tables and agent semantic embeddings.
+spec:
+  type: database
+  owner: platform-team
+
+---
+
+# yaml-language-server: $schema=node_modules/@ai-crew-suite/custom-catalog-kinds/catalog.schema.json
+apiVersion: ai-crew-suite.dev/v1alpha1
+# Custom type for data mesh & analytics modeling
+kind: DataProduct
+metadata:
+  name: corporate-episodic-memory-warehouse
+  title: Long-Term Semantic Vector Memory Dataset
+spec:
+  owner: platform-team
+  # Custom parameter: Privacy/compliance tier
+  dataGovernancePolicy: soc2-type2-strict
+  # Custom parameter: Data freshness pipeline target
+  slaTarget: "99.95%"
+  # Custom parameter: Ingestion telemetry tracking
+  upstreamDataPipelines:
+    - pipeline:temporal-memory-flusher
+
+---
+
+# yaml-language-server: $schema=node_modules/@ai-crew-suite/custom-catalog-kinds/catalog.schema.json
+apiVersion: ai-crew-suite.dev/v1alpha1
+# Custom type for inventory raw weights, neural networks, and trained algorithms.
+kind: Model
+metadata:
+  name: cognitive-routing-network
+  title: Multi-Agent Intent Routing LLM
+spec:
+  owner: platform-team
+  trainingDataset: dataproduct:corporate-episodic-memory-warehouse # Custom parameter: Snapshot data lineage link
+  accuracyThreshold: 0.94                     # Custom parameter: Minimal validation score limit
+  baseFramework: pytorch-v2.5                 # Custom parameter: Underlying execution machine format
+
+---
+
+# yaml-language-server: $schema=node_modules/@ai-crew-suite/custom-catalog-kinds/catalog.schema.json
+apiVersion: ai-crew-suite.dev/v1alpha1
+# Custom type to map technical microservices onto commercial product definitions
+kind: Product
+metadata:
+  name: customer-support-autonomous-crew
+  title: Commercial Autonomous Support Agent Suite
+spec:
+  owner: product-ux-team
+  # Custom parameter: Business leadership binding
+  productOwner: "product-manager-id"
+  # Custom parameter: Ticket management synchronization path
+  jiraEpicLink: "PROJ-1024"
+  # Custom parameter: Product monetize category tier
+  billingTier: enterprise-premium
+
+---
+
+# yaml-language-server: $schema=node_modules/@ai-crew-suite/custom-catalog-kinds/catalog.schema.json
+apiVersion: ai-crew-suite.dev/v1alpha1
+# Custom type to track long-term risks
+kind: Vulnerability
+metadata:
+  name: cve-2026-vector-leak
+  title: Memory Embedding Prompt Injection Flaw
+spec:
+  owner: security-crew-team
+  # Custom parameter: Targets the affected codebase
+  targetComponent: component:platform
+  # Custom parameter: CVSS score tier
+  severity: critical
+  # Custom parameter: Mitigate life track
+  remediationStatus: in-progress
+
+---
+
+# yaml-language-server: $schema=node_modules/@ai-crew-suite/custom-catalog-kinds/catalog.schema.json
+apiVersion: ai-crew-suite.dev/v1alpha1
+# Custom type for Architectural Decision Records (ADRs)
+kind: ArchitectureDecision
+metadata:
+  name: adr-004-pgvector-consolidation
+  title: "ADR 004: Consolidate Vector Operations on pgvector"
+spec:
+  owner: platform-team
+  # Custom parameter: Current design agreement status
+  status: accepted
+  # Custom parameter: Architecture log chain tracking
+  supersedes: adr-001-isolated-qdrant

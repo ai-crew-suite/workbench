@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org",
+  "title": "AI Crew Suite Custom Catalog Schema",
+  "description": "Validation profile mapping standard Backstage configurations alongside custom enterprise kinds.",
+  "type": "object",
+  "oneOf": [
+    {
+      "description": "Fallback constraint mapping standard native Backstage entities",
+      "properties": {
+        "apiVersion": { "enum": ["backstage.io/v1alpha1", "backstage.io/v1beta1"] },
+        "kind": { "enum": ["Component", "System", "Domain", "API", "Template", "Location", "Resource", "User", "Group"] }
+      },
+      "required": ["apiVersion", "kind", "metadata", "spec"]
+    },
+    {
+      "description": "Custom Layer: DataProduct Validation Bounds",
+      "properties": {
+        "apiVersion": { "const": "ai-crew-suite.dev/v1alpha1" },
+        "kind": { "const": "DataProduct" },
+        "metadata": { "type": "object", "properties": { "name": { "type": "string" } }, "required": ["name"] },
+        "spec": {
+          "type": "object",
+          "properties": {
+            "owner": { "type": "string" },
+            "dataGovernancePolicy": { "type": "string" },
+            "slaTarget": { "type": "string" },
+            "upstreamDataPipelines": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["owner", "dataGovernancePolicy", "slaTarget"]
+        }
+      },
+      "required": ["apiVersion", "kind", "metadata", "spec"]
+    },
+    {
+      "description": "Custom Layer: Model Validation Bounds",
+      "properties": {
+        "apiVersion": { "const": "ai-crew-suite.dev/v1alpha1" },
+        "kind": { "const": "Model" },
+        "metadata": { "type": "object", "properties": { "name": { "type": "string" } }, "required": ["name"] },
+        "spec": {
+          "type": "object",
+          "properties": {
+            "owner": { "type": "string" },
+            "trainingDataset": { "type": "string" },
+            "accuracyThreshold": { "type": "number", "minimum": 0, "maximum": 1 },
+            "baseFramework": { "type": "string" }
+          },
+          "required": ["owner", "trainingDataset", "accuracyThreshold"]
+        }
+      },
+      "required": ["apiVersion", "kind", "metadata", "spec"]
+    },
+    {
+      "description": "Custom Layer: Vulnerability Validation Bounds",
+      "properties": {
+        "apiVersion": { "const": "ai-crew-suite.dev/v1alpha1" },
+        "kind": { "const": "Vulnerability" },
+        "metadata": { "type": "object", "properties": { "name": { "type": "string" } }, "required": ["name"] },
+        "spec": {
+          "type": "object",
+          "properties": {
+            "owner": { "type": "string" },
+            "targetComponent": { "type": "string" },
+            "severity": { "enum": ["low", "medium", "high", "critical"] },
+            "remediationStatus": { "enum": ["open", "in-progress", "resolved"] }
+          },
+          "required": ["owner", "targetComponent", "severity"]
+        }
+      },
+      "required": ["apiVersion", "kind", "metadata", "spec"]
+    }
+  ]
+}

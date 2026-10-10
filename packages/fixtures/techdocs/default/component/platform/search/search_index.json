@@ -1,0 +1,18 @@
+{
+  "config": {
+    "lang": ["en"],
+    "pipeline": ["trimmer", "stopWordFilter", "stemmer"]
+  },
+  "docs": [
+    {
+      "location": "",
+      "title": "Core Workflow Orchestration Engine Configuration",
+      "text": "Welcome to the technical baseline documentation architecture. This service hosts Temporal workflows and logs long-term agent contexts within Mem0 semantic tables."
+    },
+    {
+      "location": "operations/",
+      "title": "Runtime Execution and Maintenance Manual",
+      "text": "This path maps out operations routines. When semantic distance precision drifts recalculate vector indexes using REINDEX."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=../../custom-catalog-kinds/src/catalog.schema.json
+# ====================================================================================
+# 📡 MASTER RECURSIVE DISCOVERY GATEWAY (MOCK GIT ENGINE)
+# ====================================================================================
+
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: platform-workbench-autodiscovery
+  description: Automatically crawls and indexes all loose mock catalog entities across the workspace.
+spec:
+  type: file
+  targets:
+    - ./catalog/**/*.yaml
+    - ./catalog/**/*.yml

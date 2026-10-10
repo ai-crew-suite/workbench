@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-worker
+  labels:
+    app: platform-worker
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: platform-worker
+  template:
+    metadata:
+      labels:
+        app: platform-worker
+    spec:
+      containers:
+        - name: worker-node
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # Worker nodes pull secure environment contexts for DB / Redis / Temporal loops
+          envFrom:
+            - secretRef:
+                name: {{ .Values.envFromSecret }}
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

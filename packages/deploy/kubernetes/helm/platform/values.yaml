@@ -1,0 +1,20 @@
+# ====================================================================================
+# 🤖 DEFAULT PLATFORM WORKER CONFIGURATIONS
+# ====================================================================================
+
+replicaCount: 1
+
+image:
+  repository: ai-crew-suite/platform-engine
+  tag: latest
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: "1000m"
+    memory: 2Gi
+  requests:
+    cpu: "500m"
+    memory: 1Gi
+
+envFromSecret: "crew-local-platform-secrets"

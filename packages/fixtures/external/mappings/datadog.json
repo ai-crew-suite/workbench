@@ -1,0 +1,34 @@
+{
+  "mappings": [
+    {
+      "id": "bc1122aa-33bb-44cc-dd55-6677889900aa",
+      "name": "datadog_validate_key_stub",
+      "request": {
+        "method": "POST",
+        "url": "/api/v1/validate"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"valid\": true}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "id": "dc3344ee-55ff-66aa-bb77-889900aabbcc",
+      "name": "datadog_get_active_monitors",
+      "request": {
+        "method": "GET",
+        "urlPath": "/api/v1/monitor"
+      },
+      "response": {
+        "status": 200,
+        "bodyFileName": "datadog-monitors.json",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    }
+  ]
+}

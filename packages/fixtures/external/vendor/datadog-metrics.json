@@ -1,0 +1,14 @@
+{
+  "status": "ok",
+  "series": [
+    {
+      "metric": "ai_crew_suite.mem0.vector_distance_precision",
+      "points": [
+        [1787875200, 0.965],
+        [1787878800, 0.942]
+      ],
+      "type": "gauge",
+      "unit": "percentage"
+    }
+  ]
+}
