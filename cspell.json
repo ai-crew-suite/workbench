@@ -3,6 +3,15 @@
   "version": "0.2",
   "words": [
     "buildx",
-    "rjsf"
+    "FINRA",
+    "HNSW",
+    "isready",
+    "jsdom",
+    "pgdata",
+    "pgvector",
+    "rjsf",
+    "SARIF",
+    "tini",
+    "yarnrc"
   ]
 }

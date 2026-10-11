@@ -26,9 +26,53 @@ import { EnterpriseCustomKindsProcessor } from './modules/catalog-schema-extensi
 import { PermissionModule } from './modules/test-permission-policy';
 import { globalWiremockInterceptorModule } from './modules/wiremock-interceptor';
 import { wiremockBootstrapperModule } from './modules/wiremock-bootstrapper';
+import { rootConfigServiceFactory } from '@backstage/backend-defaults/rootConfig';
+import { yourCustomBackendPlugin } from '../src';
 
 // 1. Initialize the core Dependency Injection assembly container
 const backend = createBackend();
+
+// Override the default configuration service parameters
+backend.add(
+  rootConfigServiceFactory({
+    argv: [
+      '--config', 'app-config.yaml',
+      '--config', 'app-config.local.yaml', // Merges multi-layered local overrides
+    ],
+    remote: {
+      reloadIntervalSeconds: 60, // Poll for changes remotely every minute
+    },
+  })
+);
+
+/* OR
+// Define a type-safe internal config service completely in-memory
+const mockConfigService = createServiceFactory({
+  service: coreServices.rootConfig,
+  deps: {},
+  async factory() {
+    // Generate isolated configuration data programmatically
+    const source = ConfigSources.inline({
+      data: {
+        app: { baseUrl: 'http://localhost:3000' },
+        backend: {
+          baseUrl: 'http://localhost:7007',
+          cors: { origin: 'http://localhost:3000' },
+        },
+        myCustomPlugin: {
+          secureApiKey: 'mock-dev-token-1234', // Hardcoded local credential fallback
+        },
+      },
+      context: 'dev-sandbox-environment',
+    });
+
+    return await ConfigSources.toConfig(source);
+  },
+});
+
+// Register your mock service container override
+backend.add(mockConfigService);
+*/
 
 // 2. Attach modern core system plugins and alpha boundary routers
 backend.add(appPlugin);

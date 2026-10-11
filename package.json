@@ -30,6 +30,7 @@
     "@ai-crew-suite/crew-cli": "catalog:dev",
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
     "@backstage/cli": "backstage:^",
+    "@changesets/cli": "catalog:dev",
     "turbo": "catalog:dev"
   },
   "resolutions": {

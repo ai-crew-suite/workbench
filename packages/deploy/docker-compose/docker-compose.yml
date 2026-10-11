@@ -2,8 +2,35 @@
 # 🛡️ COMPLIANCE & ORCHESTRATION LAYER (HIGH-COMPLIANCE SANDBOX)
 # Frameworks: SOC 2 Type II | FINRA | HIPAA Data Isolation
 # ====================================================================================
+version: "3.8"
 
 services:
+  backstage-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend.dev
+    volumes:
+      - .:/app
+      - /app/node_modules # Prevents local node_modules from overriding container binaries
+    ports:
+      - "7007:7007"
+    environment:
+      NODE_ENV: development
+    command: yarn workspace @internal/backend start
+
+  backstage-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend.dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+    command: yarn workspace @internal/app start
+
   # 🐘 Core Relational Database + Agentic Vector Layer (Mem0 Support)
   postgres:
     image: pgvector/pgvector:pg18
