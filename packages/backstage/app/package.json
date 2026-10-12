@@ -8,8 +8,8 @@
     "app",
     "backstage"
   ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "src/index.tsx",
+  "types": "src/index.tsx",
   "backstage": {
     "role": "frontend"
   },

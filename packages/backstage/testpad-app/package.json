@@ -2,6 +2,9 @@
   "name": "@ai-crew-suite/testpad-app",
   "version": "0.0.1",
   "private": true,
+  "backstage": {
+    "role": "frontend-plugin"
+  },
   "scripts": {
     "start": "backstage-dev-app"
   },

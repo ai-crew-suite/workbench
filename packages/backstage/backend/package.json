@@ -3,8 +3,8 @@
   "description": "A published Backstage backend server for use in Dockerfiles",
   "version": "1.0.0",
   "license": "Apache-2.0",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "src/index.tsx",
+  "types": "src/index.tsx",
   "bin": {
     "backstage-dev-server": "./launcher.js"
   },

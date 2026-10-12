@@ -23,7 +23,7 @@ const configPath = path.resolve(skeletonPath, 'app-config.dev.yaml');
 console.log(`[Dev-Frontend] Booting isolated UI workspace via Backstage CLI...`);
 console.log(`[Dev-Frontend] Configuration target: ${configPath}`);
 
-const backstageCliBinary = require.resolve('@backstage/cli/bin/bin/backstage-cli');
+const backstageCliBinary = require.resolve('@backstage/cli/bin/backstage-cli');
 const runArgs = ['package', 'start', '--config', configPath];
 
 const child = spawn('node', [backstageCliBinary, ...runArgs], {
