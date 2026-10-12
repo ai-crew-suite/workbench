@@ -13,53 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// packages/backstage/app/src/index.tsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createApp } from '@backstage/app-defaults';
 import { FlatRoutes } from '@backstage/core-app-api';
 import { Route } from 'react-router-dom';
 
-// 1. Initialize your organizational standard branding layout shell
-const app = createApp({
-  plugins: [],
-  apis: [], // Bind standard corporate global mock APIs here if needed
-});
+/**
+ * Reusable workbench bootstrapper for isolated plugin UI development.
+ * Consuming frontend plugins call this from their local `dev/index.tsx` file.
+ */
+export function bootstrapFrontendWorkbench(PluginComponent: React.ComponentType) {
+  const app = createApp({
+    plugins: [],
+    apis: [], // Bind standard corporate global mock APIs here if needed
+  });
 
-const AppProvider = app.getProvider();
-const AppRouter = app.getRouter();
-
-async function renderApp() {
-  let ConsumerPluginPage = () => (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h2>Isolated Frontend Workbench Active</h2>
-      <p>Please ensure your local frontend plugin exports a <code>RootPage</code> component target.</p>
-    </div>
-  );
-
-  try {
-    // Look directly into the calling site's runtime path to load the plugin
-    // The Backstage CLI builder sets up alias mappings for local execution paths
-    const consumerModule = await import('DYNAMIC_PLUGIN_ENTRY');
-
-    if (consumerModule.RootPage) {
-      ConsumerPluginPage = consumerModule.RootPage;
-    } else if (consumerModule.default) {
-      ConsumerPluginPage = consumerModule.default;
-    }
-  } catch (e) {
-    console.warn('[Dev-Frontend] No custom entry component detected in active workspace. Using fallback screen.', e);
-  }
+  const AppProvider = app.getProvider();
+  const AppRouter = app.getRouter();
 
   ReactDOM.createRoot(document.getElementById('root')!).render(
-    <AppProvider>
-      <AppRouter>
-        <FlatRoutes>
-          {/* Automatically mount and serve the plugin screen straight on the base route */}
-          <Route path="/" element={<ConsumerPluginPage />} />
-        </FlatRoutes>
-      </AppRouter>
-    </AppProvider>
+    <React.StrictMode>
+      <AppProvider>
+        <AppRouter>
+          <FlatRoutes>
+            {/* Automatically mount the plugin under test onto the root directory route */}
+            <Route path="/" element={<PluginComponent />} />
+          </FlatRoutes>
+        </AppRouter>
+      </AppProvider>
+    </React.StrictMode>
   );
 }
-
-renderApp();

@@ -1,16 +1,14 @@
 {
   "name": "@ai-crew-suite/testpad-app",
-  "version": "1.0.0",
-  "backstage": {
-    "role": "backend-plugin"
-  },
+  "version": "0.0.1",
+  "private": true,
   "scripts": {
-    "start": "backstage-dev-server"
+    "start": "backstage-dev-app"
   },
   "dependencies": {
-    "@backstage/backend-plugin-api": "backstage:^"
+    "@ai-crew-suite/workbench-app": "workspace:*"
   },
   "devDependencies": {
-    "@ai-crew-suite/workbench-backend": "workspace:*"
+    "@ai-crew-suite/crew-cli": "catalog:dev"
   }
 }

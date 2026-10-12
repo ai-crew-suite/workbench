@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 /*
  * Copyright 2026 The AI Crew Suite Authors
  *
@@ -21,21 +22,29 @@ const mocks = vi.hoisted(() => {
   return { createApp, createRoot };
 });
 
+// 1. Mock the defaults and engine configurations
 vi.mock('@backstage/frontend-defaults', () => ({ createApp: mocks.createApp }));
-vi.mock('@backstage/plugin-catalog/alpha', () => ({ default: 'catalog' }));
-vi.mock('@backstage/plugin-notifications/alpha', () => ({
-  default: 'notifications',
-}));
-vi.mock('@backstage/plugin-search/alpha', () => ({ default: 'search' }));
 vi.mock('./modules/nav', () => ({ navModule: 'navigation' }));
 
-describe('App', () => {
+// 2. Mock out every complex upstream feature plugin imported by App.tsx
+// This isolates your module and completely stops the internal directory resolution crashes!
+vi.mock('@backstage/plugin-catalog/alpha', () => ({ default: 'catalog' }));
+vi.mock('@backstage/plugin-notifications/alpha', () => ({ default: 'notifications' }));
+vi.mock('@backstage/plugin-search/alpha', () => ({ default: 'search' }));
+vi.mock('@backstage/plugin-app-visualizer', () => ({ default: 'app-visualizer' }));
+vi.mock('@backstage/plugin-app-react', () => ({
+  AppRootWrapperBlueprint: {
+    make: vi.fn(() => 'diagnostics-overlay-feature'),
+  },
+}));
+
+describe('App Layout Suite', () => {
   beforeEach(() => {
     vi.resetModules();
   });
 
   it('creates the application root from the configured feature set', async () => {
-    const { default: App } = await import('./App');
+    const { default: App } = await import('../App');
 
     expect(mocks.createRoot).toHaveBeenCalledWith();
     expect(App).toBe('app-root');

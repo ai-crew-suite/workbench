@@ -1,5 +1,5 @@
 {
-  "name": "workbench-app",
+  "name": "@ai-crew-suite/workbench-app",
   "bundled": true,
   "license": "Apache-2.0",
   "keywords": [
@@ -11,7 +11,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "backstage": {
-    "role": "common-library"
+    "role": "frontend"
   },
   "bin": {
     "backstage-dev-app": "./launcher.js"
@@ -31,7 +31,7 @@
     "directory": "packages/app"
   },
   "scripts": {
-    "build": "crew build",
+    "build": "tsc --emitDeclarationOnly && crew build",
     "clean": "crew clean",
     "lint": "crew lint",
     "test:e2e": "crew test:e2e",
@@ -93,6 +93,8 @@
     "@testing-library/user-event": "catalog:dev",
     "@types/react": "catalog:dev",
     "@types/react-dom": "catalog:dev",
+    "jsdom": "catalog:dev",
+    "typescript": "catalog:dev",
     "vitest": "catalog:dev"
   },
   "browserslist": {

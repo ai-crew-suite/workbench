@@ -132,8 +132,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/testpad-app@workspace:packages/backstage/testpad-app"
   dependencies:
-    "@ai-crew-suite/workbench-backend": "workspace:*"
-    "@backstage/backend-plugin-api": "backstage:^"
+    "@ai-crew-suite/crew-cli": "catalog:dev"
+    "@ai-crew-suite/workbench-app": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -166,6 +166,69 @@ __metadata:
     vitest: "catalog:dev"
   bin:
     backstage-dev-server: ./launcher.js
+  languageName: unknown
+  linkType: soft
+
+"@ai-crew-suite/workbench-app@workspace:*, @ai-crew-suite/workbench-app@workspace:packages/backstage/app":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/workbench-app@workspace:packages/backstage/app"
+  dependencies:
+    "@ai-crew-suite/crew-cli": "catalog:dev"
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    "@backstage/app-defaults": "backstage:^"
+    "@backstage/cli": "backstage:^"
+    "@backstage/config": "backstage:^"
+    "@backstage/core-app-api": "backstage:^"
+    "@backstage/core-compat-api": "backstage:^"
+    "@backstage/core-components": "backstage:^"
+    "@backstage/core-plugin-api": "backstage:^"
+    "@backstage/frontend-defaults": "backstage:^"
+    "@backstage/frontend-dev-utils": "backstage:^"
+    "@backstage/frontend-plugin-api": "backstage:^"
+    "@backstage/frontend-test-utils": "backstage:^"
+    "@backstage/integration-react": "backstage:^"
+    "@backstage/plugin-api-docs": "backstage:^"
+    "@backstage/plugin-app-react": "backstage:^"
+    "@backstage/plugin-app-visualizer": "backstage:^"
+    "@backstage/plugin-auth": "backstage:^"
+    "@backstage/plugin-catalog": "backstage:^"
+    "@backstage/plugin-catalog-graph": "backstage:^"
+    "@backstage/plugin-catalog-import": "backstage:^"
+    "@backstage/plugin-kubernetes": "backstage:^"
+    "@backstage/plugin-notifications": "backstage:^"
+    "@backstage/plugin-org": "backstage:^"
+    "@backstage/plugin-scaffolder": "backstage:^"
+    "@backstage/plugin-scaffolder-react": "backstage:^"
+    "@backstage/plugin-search": "backstage:^"
+    "@backstage/plugin-signals": "backstage:^"
+    "@backstage/plugin-techdocs": "backstage:^"
+    "@backstage/plugin-techdocs-module-addons-contrib": "backstage:^"
+    "@backstage/plugin-user-settings": "backstage:^"
+    "@backstage/ui": "backstage:^"
+    "@emotion/react": "catalog:prod"
+    "@emotion/styled": "catalog:prod"
+    "@material-ui/core": "catalog:prod"
+    "@material-ui/icons": "catalog:prod"
+    "@mui/material": "catalog:prod"
+    "@playwright/test": "catalog:dev"
+    "@rjsf/utils": "catalog:prod"
+    "@testing-library/dom": "catalog:dev"
+    "@testing-library/jest-dom": "catalog:dev"
+    "@testing-library/react": "catalog:dev"
+    "@testing-library/user-event": "catalog:dev"
+    "@types/react": "catalog:dev"
+    "@types/react-dom": "catalog:dev"
+    i18next: "catalog:prod"
+    jsdom: "catalog:dev"
+    prop-types: "catalog:prod"
+    react: "catalog:prod"
+    react-dom: "catalog:prod"
+    react-router: "catalog:prod"
+    react-router-dom: "catalog:prod"
+    typescript: "catalog:dev"
+    vitest: "catalog:dev"
+  bin:
+    backstage-dev-app: ./launcher.js
   languageName: unknown
   linkType: soft
 
@@ -22830,7 +22893,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsdom@npm:*, jsdom@npm:^30.1.1":
+"jsdom@npm:*, jsdom@npm:^30.1.1, jsdom@npm:^30.1.2":
   version: 30.1.2
   resolution: "jsdom@npm:30.1.2"
   dependencies:
@@ -33620,67 +33683,6 @@ __metadata:
   checksum: 10c0/7ed2e44f3c33c5c3e3771134d2b0aee4314c9e49c749e37f464bf69f2bcdf0cbf9419ca638098e2717cff4875c47f56a007532f6111c3319f557a2ca91278e92
   languageName: node
   linkType: hard
-
-"workbench-app@workspace:packages/backstage/app":
-  version: 0.0.0-use.local
-  resolution: "workbench-app@workspace:packages/backstage/app"
-  dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
-    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
-    "@backstage/app-defaults": "backstage:^"
-    "@backstage/cli": "backstage:^"
-    "@backstage/config": "backstage:^"
-    "@backstage/core-app-api": "backstage:^"
-    "@backstage/core-compat-api": "backstage:^"
-    "@backstage/core-components": "backstage:^"
-    "@backstage/core-plugin-api": "backstage:^"
-    "@backstage/frontend-defaults": "backstage:^"
-    "@backstage/frontend-dev-utils": "backstage:^"
-    "@backstage/frontend-plugin-api": "backstage:^"
-    "@backstage/frontend-test-utils": "backstage:^"
-    "@backstage/integration-react": "backstage:^"
-    "@backstage/plugin-api-docs": "backstage:^"
-    "@backstage/plugin-app-react": "backstage:^"
-    "@backstage/plugin-app-visualizer": "backstage:^"
-    "@backstage/plugin-auth": "backstage:^"
-    "@backstage/plugin-catalog": "backstage:^"
-    "@backstage/plugin-catalog-graph": "backstage:^"
-    "@backstage/plugin-catalog-import": "backstage:^"
-    "@backstage/plugin-kubernetes": "backstage:^"
-    "@backstage/plugin-notifications": "backstage:^"
-    "@backstage/plugin-org": "backstage:^"
-    "@backstage/plugin-scaffolder": "backstage:^"
-    "@backstage/plugin-scaffolder-react": "backstage:^"
-    "@backstage/plugin-search": "backstage:^"
-    "@backstage/plugin-signals": "backstage:^"
-    "@backstage/plugin-techdocs": "backstage:^"
-    "@backstage/plugin-techdocs-module-addons-contrib": "backstage:^"
-    "@backstage/plugin-user-settings": "backstage:^"
-    "@backstage/ui": "backstage:^"
-    "@emotion/react": "catalog:prod"
-    "@emotion/styled": "catalog:prod"
-    "@material-ui/core": "catalog:prod"
-    "@material-ui/icons": "catalog:prod"
-    "@mui/material": "catalog:prod"
-    "@playwright/test": "catalog:dev"
-    "@rjsf/utils": "catalog:prod"
-    "@testing-library/dom": "catalog:dev"
-    "@testing-library/jest-dom": "catalog:dev"
-    "@testing-library/react": "catalog:dev"
-    "@testing-library/user-event": "catalog:dev"
-    "@types/react": "catalog:dev"
-    "@types/react-dom": "catalog:dev"
-    i18next: "catalog:prod"
-    prop-types: "catalog:prod"
-    react: "catalog:prod"
-    react-dom: "catalog:prod"
-    react-router: "catalog:prod"
-    react-router-dom: "catalog:prod"
-    vitest: "catalog:dev"
-  bin:
-    backstage-dev-app: ./launcher.js
-  languageName: unknown
-  linkType: soft
 
 "wrap-ansi-cjs@npm:wrap-ansi@^7.0.0, wrap-ansi@npm:^7.0.0":
   version: 7.0.0

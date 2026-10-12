@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// packages/backstage/testpad-app/src/index.ts
-import { createPlugin } from '@backstage/core-plugin-api';
+import React from 'react';
 
-export const testpadAppPlugin = createPlugin({
-  id: 'testpad-app',
-});
+export const RootPage = () => {
+  return React.createElement(
+    'div',
+    { style: { padding: '3rem', backgroundColor: '#f0f4f8', borderRadius: '8px' } },
+    React.createElement('h1', null, 'Hello from inside testpad-app!'),
+    React.createElement('p', null, 'Your isolated frontend workbench wrapper is fully functional.')
+  );
+};
