@@ -3,8 +3,38 @@
   "extends": "@ai-crew-suite/typescript-shared-config/node",
   "files": [],
   "references": [
-    { "path": "./packages/backstage/app" },
-    { "path": "./packages/backstage/backend" },
-    { "path": "./packages/wiremock" }
+    {
+      "path": "./packages/backstage/app"
+    },
+    {
+      "path": "./packages/backstage/backend"
+    },
+    {
+      "path": "./packages/backstage/server-dependencies-app"
+    },
+    {
+      "path": "./packages/backstage/server-dependencies-backend"
+    },
+    {
+      "path": "./packages/backstage/testpad-app"
+    },
+    {
+      "path": "./packages/backstage/testpad-backend"
+    },
+    {
+      "path": "./packages/deploy/kubernetes"
+    },
+    {
+      "path": "./packages/deploy/terraform"
+    },
+    {
+      "path": "./packages/dockerfiles"
+    },
+    {
+      "path": "./packages/fixtures"
+    },
+    {
+      "path": "./packages/wiremock"
+    }
   ]
 }

@@ -1,6 +1,5 @@
 {
   "name": "workbench-app",
-  "private": true,
   "bundled": true,
   "license": "Apache-2.0",
   "keywords": [
@@ -9,11 +8,18 @@
     "app",
     "backstage"
   ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "backstage": {
-    "role": "frontend"
+    "role": "common-library"
+  },
+  "bin": {
+    "backstage-dev-app": "./launcher.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "skeleton",
+    "launcher.js"
   ],
   "bugs": {
     "url": "https://github.com/ai-crew-suite/workbench/issues",
@@ -34,8 +40,10 @@
     "typecheck": "crew typecheck"
   },
   "dependencies": {
+    "@backstage/app-defaults": "backstage:^",
     "@backstage/cli": "backstage:^",
     "@backstage/config": "backstage:^",
+    "@backstage/core-app-api": "backstage:^",
     "@backstage/core-compat-api": "backstage:^",
     "@backstage/core-components": "backstage:^",
     "@backstage/core-plugin-api": "backstage:^",

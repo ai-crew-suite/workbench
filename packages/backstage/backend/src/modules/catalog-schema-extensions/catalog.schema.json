@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org",
+  "$schema": "http://json-schema.org/draft-07/schema",
   "title": "AI Crew Suite Custom Catalog Schema",
   "description": "Validation profile mapping standard Backstage configurations alongside custom enterprise kinds.",
   "type": "object",

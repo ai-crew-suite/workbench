@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { createFlatConfigForWorkspace } from '@ai-crew-suite/crew-cli';
 
 /**
  * Linting is handled by the ai-crew-suite CLI. This file is necessary
  * for IDE ESLint extensions to automatically pick up linting config.
  */
-import { createFlatConfigForWorkspace } from '@ai-crew-suite/crew-cli/config/eslint';
 export default createFlatConfigForWorkspace();

@@ -1,41 +1,64 @@
+/*
+ * Copyright 2026 The AI Crew Suite Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { createBackendModule } from '@backstage/backend-plugin-api';
+import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node';
 import { CatalogProcessor, CatalogProcessorEmit } from '@backstage/plugin-catalog-node';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
 import { Entity } from '@backstage/catalog-model';
 
-export class EnterpriseCustomKindsProcessor implements CatalogProcessor {
-  // 1. Tell the catalog loader engine the name of this compliance processor
+interface EnterpriseCustomSpec {
+  owner?: string;
+  dataGovernancePolicy?: string;
+  slaTarget?: string;
+  trainingDataset?: string;
+  accuracyThreshold?: number;
+  targetComponent?: string;
+  severity?: string;
+  status?: string;
+}
+
+export class CustomKindsProcessor implements CatalogProcessor {
   getProcessorName(): string {
-    return 'EnterpriseCustomKindsProcessor';
+    return 'CustomKindsProcessor';
   }
 
-  // 2. Intercept entity validation loops on boot/sync ticks
   async validateEntityKind(entity: Entity): Promise<boolean> {
     const validCustomKinds = ['DataProduct', 'Model', 'Product', 'Vulnerability', 'ArchitectureDecision'];
 
-    // If the entity matches our custom domains, intercept it to validate its custom specs
     if (validCustomKinds.includes(entity.kind)) {
       if (entity.apiVersion !== 'ai-crew-suite.dev/v1alpha1') {
         throw new Error(`Invalid apiVersion for custom kind ${entity.kind}. Expected 'ai-crew-suite.dev/v1alpha1'`);
       }
-      return true; // Validates kind identity signature matching
+      return true;
     }
 
-    return false; // Pass through to standard native Backstage validators
+    return false;
   }
 
-  // 3. Deep compliance data structure checking
   async postProcessEntity(
     entity: Entity,
     _location: LocationSpec,
     _emit: CatalogProcessorEmit,
   ): Promise<Entity> {
-    const spec = entity.spec as Record<string, any>;
+    const spec = entity.spec as EnterpriseCustomSpec | undefined;
 
     if (!spec || !spec.owner) {
       throw new Error(`Entity ${entity.kind}/${entity.metadata.name} is missing the mandatory 'spec.owner' property.`);
     }
 
-    // Custom deep field assertions matching your specification rules
     switch (entity.kind) {
       case 'DataProduct':
         if (!spec.dataGovernancePolicy || !spec.slaTarget) {
@@ -62,3 +85,17 @@ export class EnterpriseCustomKindsProcessor implements CatalogProcessor {
     return entity;
   }
 }
+
+// Normalized: Define and export the backend module wrapper token directly from the source code file
+export const CustomKindsModule = createBackendModule({
+  pluginId: 'catalog',
+  moduleId: 'custom-kinds-processor',
+  register(reg) {
+    reg.registerInit({
+      deps: { catalog: catalogProcessingExtensionPoint },
+      async init({ catalog }) {
+        catalog.addProcessor(new CustomKindsProcessor());
+      },
+    });
+  },
+});

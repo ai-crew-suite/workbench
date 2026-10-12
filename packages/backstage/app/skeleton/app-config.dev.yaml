@@ -1,0 +1,13 @@
+app:
+  title: AI Crew Suite Dev App
+  baseUrl: http://localhost:3000
+
+backend:
+  baseUrl: http://localhost:7007
+  cors:
+    origin: http://localhost:3000
+
+# Basic required inline catalog and driver placeholders
+catalog:
+  import:
+    entityFilename: catalog-info.yaml

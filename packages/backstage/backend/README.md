@@ -1,5 +1,42 @@
 # `@ai-crew-suite/backend-modern`
 
+Call site:
+
+```bash
+yarn add -D ts-node
+```
+
+Call site command:
+
+```json
+{
+  "name": "@org/plugin-custom-feature-backend",
+  "scripts": {
+    "start": "ts-node node_modules/@org/backstage-dev-backend/dist/cli.js"
+  }
+}
+```
+
+If using the launcher.js script:
+
+```json
+"scripts": {
+  "start": "backstage-dev-server"
+}
+```
+
+Client code supplying their own app-config.yml file:
+
+```bash
+yarn start --config ./custom-local-config.yaml
+```
+
+### Run commands
+
+```bash
+yarn turbo run test:unit:coverage --filter=@ai-crew-suite/workbench-backend
+```
+
 🚀 Modern dependency-injection backend integration test bench and validation engine for the AI Crew Suite platform.
 
 ## Overview

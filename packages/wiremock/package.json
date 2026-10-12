@@ -3,6 +3,12 @@
   "version": "0.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "backstage": {
+    "role": "common-library"
+  },
+  "bin": {
+    "backstage-dev-server": "./launcher.js"
+  },
   "engines": {
     "node": "22 || 24"
   },
@@ -27,16 +33,20 @@
     "dist"
   ],
   "scripts": {
-    "build": "backstage-cli package build",
-    "start": "backstage-cli package start --config ../app-config/app-config.yaml",
-    "lint": "backstage-cli package lint",
-    "clean": "backstage-cli package clean"
+    "build": "ncc build src/index.ts -o dist --source-map --license third-party-licenses.txt",
+    "clean": "crew clean",
+    "lint": "crew lint",
+    "test:unit": "crew test:unit",
+    "test:unit:coverage": "crew test:unit:coverage",
+    "typecheck": "crew typecheck"
   },
   "devDependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
     "@tsconfig/node22": "catalog:dev",
     "@types/node": "catalog:dev",
-    "typescript": "catalog:dev"
+    "@vercel/ncc": "catalog:dev",
+    "typescript": "catalog:dev",
+    "vitest": "catalog:dev"
   }
 }

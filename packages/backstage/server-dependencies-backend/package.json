@@ -1,0 +1,16 @@
+{
+  "name": "@ai-crew-suite/server-dependencies-backend",
+  "version": "1.0.0",
+  "backstage": {
+    "role": "backend-plugin"
+  },
+  "scripts": {
+    "start": "backstage-dev-server"
+  },
+  "dependencies": {
+    "@backstage/backend-plugin-api": "backstage:^"
+  },
+  "devDependencies": {
+    "@ai-crew-suite/workbench-backend": "workspace:*"
+  }
+}

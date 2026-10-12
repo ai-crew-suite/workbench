@@ -1,19 +1,27 @@
 {
   "name": "@ai-crew-suite/workbench-backend",
-  "private": true,
+  "description": "A published Backstage backend server for use in Dockerfiles",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "backstage-dev-server": "./launcher.js"
+  },
   "engines": {
     "node": "22 || 24"
   },
   "packageManager": "yarn@4.18.0",
-  "license": "Apache-2.0",
   "keywords": [
     "agentic workflow",
     "ai-crew-suite",
     "app",
     "backstage"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "backstage": {
     "role": "backend"
   },
@@ -24,28 +32,39 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ai-crew-suite/workbench",
-    "directory": "packages/workbench-backend"
+    "directory": "packages/backstage/backend"
   },
   "files": [
-    "dist"
+    "dist",
+    "skeleton",
+    "launcher.js"
   ],
   "scripts": {
-    "build": "backstage-cli package build",
+    "build": "crew build",
+    "clean": "crew clean",
+    "lint": "crew lint",
     "start": "backstage-cli package start --config ../app-config/app-config.yaml",
-    "lint": "backstage-cli package lint",
-    "clean": "backstage-cli package clean"
+    "sync-config-types": "node scripts/sync-config-types.mjs",
+    "test:e2e": "crew test:e2e",
+    "test:unit": "crew test:unit",
+    "test:unit:coverage": "crew test:unit:coverage",
+    "typecheck": "crew typecheck"
   },
   "dependencies": {
+    "@ai-crew-suite/utils-wiremock": "workspace:^",
     "@backstage/backend-defaults": "backstage:^",
+    "@backstage/backend-plugin-api": "backstage:^",
     "@backstage/config": "backstage:^",
     "@backstage/core-app-api": "backstage:^",
     "@backstage/plugin-app-backend": "backstage:^",
     "@backstage/plugin-auth-backend": "backstage:^",
     "@backstage/plugin-auth-backend-module-github-provider": "backstage:^",
     "@backstage/plugin-catalog-backend": "backstage:^",
+    "@backstage/plugin-permission-backend": "backstage:^",
     "@backstage/plugin-proxy-backend": "backstage:^",
     "@backstage/plugin-scaffolder-backend": "backstage:^",
     "@backstage/plugin-techdocs-backend": "backstage:^",
+    "commander": "catalog:prod",
     "react": "catalog:prod",
     "react-dom": "catalog:prod",
     "react-router": "catalog:prod",
@@ -54,8 +73,11 @@
   "devDependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
+    "@backstage/backend-test-utils": "backstage:^",
     "@tsconfig/node22": "catalog:dev",
     "@types/node": "catalog:dev",
-    "typescript": "catalog:dev"
+    "@vercel/ncc": "catalog:dev",
+    "typescript": "catalog:dev",
+    "vitest": "catalog:dev"
   }
 }

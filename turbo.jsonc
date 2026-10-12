@@ -44,6 +44,12 @@
       "inputs": [],
       "outputs": []
     },
+    "start": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": [],
+      "outputs": []
+    },
     /** Synchronizes TypeScript Project References alphabetically and heals roots */
     "sync": {
       "cache": false,

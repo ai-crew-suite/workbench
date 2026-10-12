@@ -1,10 +1,26 @@
+/*
+ * Copyright 2026 The AI Crew Suite Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import { coreServices, createBackendModule } from '@backstage/backend-plugin-api';
-import { WireMockClient } from '@ai-crew-suite/wiremock-utils';
+import { WireMockClient } from '@ai-crew-suite/utils-wiremock';
 import path from 'path';
 import fs from 'fs';
 
+// Export the framework orchestration token matching what the unit tests expect
 export const wiremockBootstrapperModule = createBackendModule({
-  pluginId: 'api', // Scopes neatly to your common core layer
+  pluginId: 'api',
   moduleId: 'wiremock-automatic-fixtures',
   register(env) {
     env.registerInit({
@@ -12,7 +28,7 @@ export const wiremockBootstrapperModule = createBackendModule({
         config: coreServices.rootConfig,
       },
       async init({ config }) {
-        const mockProxyUrl = config.getOptionalString('drivers.mockProxyUrl') || process.env.MOCK_PROXY_URL;
+        const mockProxyUrl = config.getOptionalString('drivers.mockProxyUrl') || process.env['MOCK_PROXY_URL'];
         if (!mockProxyUrl) {
           console.info('[WireMock Ingestion] MOCK_PROXY_URL flag inactive. Skipping automatic directory scans.');
           return;
@@ -21,7 +37,6 @@ export const wiremockBootstrapperModule = createBackendModule({
         const wm = new WireMockClient(mockProxyUrl);
         console.info('[WireMock Ingestion] Activating automatic workspace scans for plugin baseline fixtures...');
 
-        // In a typical Backstage monorepo layout, plugins live in the 'plugins' or 'packages' folder roots
         const searchRoots = [
           path.resolve(__dirname, '../../../../plugins'),
           path.resolve(__dirname, '../../../../packages'),
@@ -32,7 +47,6 @@ export const wiremockBootstrapperModule = createBackendModule({
 
           const directories = fs.readdirSync(root);
           for (const dirName of directories) {
-            // Target path structure: plugins/your-driver-plugin/src/__mocks__/wiremock
             const mockPath = path.join(root, dirName, 'src', '__mocks__', 'wiremock');
 
             if (fs.existsSync(mockPath)) {
