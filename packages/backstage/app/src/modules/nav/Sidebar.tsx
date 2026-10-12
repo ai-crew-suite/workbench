@@ -7,12 +7,12 @@ import {
   SidebarSpace,
 } from '@backstage/core-components';
 import { NavContentBlueprint } from '@backstage/plugin-app-react';
-import { SidebarLogo } from './SidebarLogo';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import { SidebarSearchModal } from '@backstage/plugin-search';
 import { UserSettingsSignInAvatar } from '@backstage/plugin-user-settings';
 import { NotificationsSidebarItem } from '@backstage/plugin-notifications';
+import { SidebarLogo } from './SidebarLogo';
 
 export const SidebarContent = NavContentBlueprint.make({
   params: {

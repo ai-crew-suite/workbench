@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createExtension } from '@backstage/frontend-plugin-api';
 
 const mocks = vi.hoisted(() => {
   const createRoot = vi.fn(() => 'app-root');
@@ -27,16 +28,25 @@ vi.mock('@backstage/frontend-defaults', () => ({ createApp: mocks.createApp }));
 vi.mock('./modules/nav', () => ({ navModule: 'navigation' }));
 
 // 2. Mock out every complex upstream feature plugin imported by App.tsx
-// This isolates your module and completely stops the internal directory resolution crashes!
 vi.mock('@backstage/plugin-catalog/alpha', () => ({ default: 'catalog' }));
 vi.mock('@backstage/plugin-notifications/alpha', () => ({ default: 'notifications' }));
 vi.mock('@backstage/plugin-search/alpha', () => ({ default: 'search' }));
 vi.mock('@backstage/plugin-app-visualizer', () => ({ default: 'app-visualizer' }));
-vi.mock('@backstage/plugin-app-react', () => ({
-  AppRootWrapperBlueprint: {
-    make: vi.fn(() => 'diagnostics-overlay-feature'),
-  },
-}));
+vi.mock('@backstage/plugin-app-react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@backstage/plugin-app-react')>();
+  return {
+    ...actual,
+    AppRootWrapperBlueprint: {
+      make: vi.fn(() => createExtension({
+        kind: 'app',
+        name: 'mocked-root-wrapper',
+        attachTo: { id: 'app/root', input: 'components' },
+        output: [],
+        factory: () => [],
+      })),
+    },
+  };
+});
 
 describe('App Layout Suite', () => {
   beforeEach(() => {
