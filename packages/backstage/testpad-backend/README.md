@@ -5,3 +5,7 @@
 ```bash
 yarn turbo run start --filter=@ai-crew-suite/testpad-backend
 ```
+
+```bash
+http://localhost:7007/api/hello-world/health
+```

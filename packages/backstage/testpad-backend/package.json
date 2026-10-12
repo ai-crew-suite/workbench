@@ -5,7 +5,7 @@
     "role": "backend-plugin"
   },
   "scripts": {
-    "start": "backend-plugin"
+    "start": "backstage-dev-server"
   },
   "dependencies": {
     "@backstage/backend-plugin-api": "backstage:^"

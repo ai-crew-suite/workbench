@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /*
  * Copyright 2026 The AI Crew Suite Authors
  *
@@ -16,24 +15,27 @@
  */
 const { spawn } = require('child_process');
 const path = require('path');
+const os = require('os');
 
 const currentPluginRoot = process.cwd();
-const skeletonPath = path.resolve(__dirname, './skeleton'); // Updated path
+const skeletonPath = path.resolve(__dirname, './skeleton');
+const configPath = path.resolve(skeletonPath, 'app-config.dev.yaml');
 
 console.log(`[Dev-Backend] Booting with full Backstage CLI orchestration...`);
 
 const backstageCliBinary = require.resolve('@backstage/cli/bin/backstage-cli');
-const runArgs = ['package', 'start'];
+const runArgs = ['package', 'start', '--config', configPath];
 
 const processEnv = {
   ...process.env,
-  // Point to the YAML config inside the skeleton folder
-  APP_CONFIG: path.resolve(skeletonPath, 'app-config.dev.yaml')
+  // Force SWC to bypass using home directory and write its binary
+  // cache to a secure machine runtime temp folder root
+  SWC_NATIVE_BINDING_CACHE: path.join(os.tmpdir(), '.swc-cache')
 };
 
 const child = spawn('node', [backstageCliBinary, ...runArgs], {
   cwd: currentPluginRoot,
-  env: processEnv,
+  env: processEnv, // Pass the patched environment map here
   stdio: 'inherit',
   shell: true
 });

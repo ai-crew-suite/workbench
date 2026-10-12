@@ -68,7 +68,8 @@
     "react": "catalog:prod",
     "react-dom": "catalog:prod",
     "react-router": "catalog:prod",
-    "react-router-dom": "catalog:prod"
+    "react-router-dom": "catalog:prod",
+    "sqlite3": "catalog:prod"
   },
   "devDependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",

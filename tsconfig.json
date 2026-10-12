@@ -22,6 +22,9 @@
       "path": "./packages/backstage/testpad-backend"
     },
     {
+      "path": "./packages/deploy/docker-compose"
+    },
+    {
       "path": "./packages/deploy/kubernetes"
     },
     {

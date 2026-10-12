@@ -13,3 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  createBackendPlugin,
+  coreServices
+} from '@backstage/backend-plugin-api';
+import express from 'express';
+
+/**
+ * A minimal "Hello World" Backstage backend plugin to verify our local dev package orchestrator.
+ * Following official standards, it is re-exported as the DEFAULT export.
+ */
+export default createBackendPlugin({
+  pluginId: 'hello-world',
+  register(env) {
+    env.registerInit({
+      deps: {
+        httpRouter: coreServices.httpRouter,
+        logger: coreServices.logger,
+      },
+      async init({ httpRouter, logger }) {
+        logger.info('Initializing the Hello World testpad plugin...');
+
+        const router = express.Router();
+
+        router.get('/health', (_req: express.Request, res: express.Response) => {
+          res.json({
+            status: 'ok',
+            message: 'Hello from your isolated testpad-backend plugin!',
+            timestamp: new Date().toISOString()
+          });
+        });
+
+        // Register the endpoint route under /api/hello-world
+        httpRouter.use(router);
+
+        logger.info('Hello World testpad plugin successfully registered and listening!');
+      },
+    });
+  },
+});

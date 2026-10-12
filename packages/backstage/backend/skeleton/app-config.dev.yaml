@@ -1,0 +1,83 @@
+# yaml-language-server: https://json.schemastore.org/app-config.json
+# ====================================================================================
+# 🛡️ UNIFIED COMPLIANCE CONFIGURATION LAYER (ADAPTIVE SANDBOX PROFILE)
+# Frameworks: SOC 2 Type II System Isolation | Variable-Driven Workstation Freedom
+# ====================================================================================
+app:
+  title: AI Crew Suite Platform
+  baseUrl: http://${APP_BASE_HOST:-localhost}:${APP_PORT:-7007}
+
+organization:
+  name: AI Crew Suite
+
+backend:
+  baseUrl: http://${APP_BASE_HOST:-localhost}:${APP_PORT:-7007}
+
+  listen:
+    port: 7007
+
+  cors:
+    origin: http://localhost:7007
+    methods: [GET, POST, PUT, DELETE]
+    allowedHeaders: [Content-Type, Authorization]
+    credentials: true
+
+  database:
+    client: sqlite3
+    connection: ':memory:'
+    plugin:
+      scaffolder:
+        client: sqlite3
+        connection: ':memory:'
+      auth:
+        client: sqlite3
+        connection: ':memory:'
+
+  # 🔒 Strict Network Sandbox: Enforces absolute dark-site testing within the AWS VPC
+  reading:
+    allow:
+      - host: "${ALLOWED_HOST:-localhost}"
+
+# ====================================================================================
+# 🛡️ CI STAGING/TESTING CONFIGURATION BLUEPRINT (AIR-GAPPED ENVIRONMENT)
+# ====================================================================================
+
+catalog:
+  rules:
+    - allow: [
+        API,
+        ArchitectureDecision,
+        Component,
+        DataProduct,
+        Domain,
+        Group,
+        Location,
+        Model,
+        Product,
+        Resource,
+        System,
+        Template,
+        User,
+        Vulnerability,
+      ]
+  locations:
+    - type: file
+      target: "${MOCK_FIXTURES_PATH:-../../mock-fixtures}/location.yaml"
+
+    - type: "${CONSUMER_CATALOG_TYPE:-file}"
+      target: "${CONSUMER_CATALOG_TARGET:-../../platform-scaffolds/empty-fallback.yaml}"
+
+techdocs:
+  builder: 'local'
+  generator:
+    runIn: 'local'
+  publisher:
+    type: 'local'
+    local:
+      publishFolder: "${CONSUMER_TECHDOCS_ROOT:-../../mock-fixtures}/techdocs"
+
+scaffolder:
+  concurrentTasks: 5
+
+drivers:
+  mockProxyUrl: "${MOCK_PROXY_URL:-http://localhost:8080}"
