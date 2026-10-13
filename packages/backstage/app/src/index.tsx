@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2026 The AI Crew Suite Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,36 +13,62 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// packages/backstage/app/src/index.tsx
+import '@backstage/ui/css/styles.css'; // must be first import
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { createApp } from '@backstage/app-defaults';
-import { FlatRoutes } from '@backstage/core-app-api';
-import { Route } from 'react-router-dom';
+import { buildDevApp } from './App';
 
-/**
- * Reusable workbench bootstrapper for isolated plugin UI development.
- * Consuming frontend plugins call this from their local `dev/index.tsx` file.
- */
+const originalConsoleWarn = console.warn;
+const originalConsoleError = console.error;
+
+const SILENCED_PATTERNS = [
+  'findDOMNode is deprecated', // Quiets the React StrictMode layout noise
+  'registered as IconComponent, which is deprecated', // Quiets Backstage legacy icon registry noise
+];
+
+console.warn = (...args: any[]) => {
+  const message = args.join(' ');
+  if (SILENCED_PATTERNS.some(pattern => message.includes(pattern))) {
+    return; // Block the warning from rendering in the developer logs
+  }
+  originalConsoleWarn(...args);
+};
+
+console.error = (...args: any[]) => {
+  const message = args.join(' ');
+  if (SILENCED_PATTERNS.some(pattern => message.includes(pattern))) {
+    return; // Block the stack trace if it manifests via console.error
+  }
+  originalConsoleError(...args);
+};
+
+console.log('[Dev-Workbench] Shared wrapper bundle evaluated completely.');
+
 export function bootstrapFrontendWorkbench(PluginComponent: React.ComponentType) {
-  const app = createApp({
-    plugins: [],
-    apis: [], // Bind standard corporate global mock APIs here if needed
-  });
+  console.log('[Dev-Workbench] bootstrapFrontendWorkbench invoked with target component:', PluginComponent);
 
-  const AppProvider = app.getProvider();
-  const AppRouter = app.getRouter();
+  const rootDomNode = document.getElementById('root');
+  if (!rootDomNode) {
+    console.error('[Dev-Workbench] CRITICAL Error: target DOM node <div id="root"></div> was not found in the document!');
+    return;
+  }
 
-  ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-      <AppProvider>
-        <AppRouter>
-          <FlatRoutes>
-            {/* Automatically mount the plugin under test onto the root directory route */}
-            <Route path="/" element={<PluginComponent />} />
-          </FlatRoutes>
-        </AppRouter>
-      </AppProvider>
-    </React.StrictMode>
-  );
+  try {
+    const app = buildDevApp({ PluginComponent });
+    console.log('[Dev-Workbench] Backstage App Next factory constructed successfully:', app);
+
+    const rootElement = app.createRoot();
+    console.log('[Dev-Workbench] app.createRoot() executed. Dom tree node element returned:', rootElement);
+
+    console.log('[Dev-Workbench] Mounting the React feature tree onto <div id="root"></div>...');
+    ReactDOM.createRoot(rootDomNode).render(
+      <React.StrictMode>
+        {rootElement}
+      </React.StrictMode>
+    );
+    console.log('[Dev-Workbench] Mount process completed successfully!');
+  } catch (error) {
+    console.error('[Dev-Workbench] Framework initialization crashed during factory bootstrap:', error);
+  }
 }

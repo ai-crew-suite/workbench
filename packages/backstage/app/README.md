@@ -26,14 +26,22 @@ To remove complex and brittle path mapping aliases inside your build tools, this
 
 ## 📈 Local Engine Maintenance (This Package)
 
-These commands are for maintaining, building, and running tests on this wrapper orchestrator library inside our core system platform repository.
+These commands are for maintaining, linting, and running tests on this wrapper orchestrator library inside our core system platform repository.
 
-### Workspace Code Compilation
+### Running Lint
 
-To build the frontend utility and export distribution targets, execute:
+To trigger the Crew CLI provided ESLint configuration, execute:
 
 ```bash
-yarn turbo run build --filter=@ai-crew-suite/workbench-app
+yarn turbo run lint --filter=@ai-crew-suite/workbench-app
+```
+
+### Running Unit Test Suites
+
+To trigger a `tsc` typecheck run, execute:
+
+```bash
+yarn turbo run typecheck --filter=@ai-crew-suite/workbench-app
 ```
 
 ### Running Unit Test Suites
@@ -102,13 +110,14 @@ export const RootPage = () => {
 ### 4. Boot up the Hot-Reloaded App Server
 
 To spin up your isolated local web server instance, run:
+
 ```bash
-yarn turbo run start --filter=@ai-crew-suite/testpad-app
+LOG_LEVEL=debug yarn turbo run start --filter=@ai-crew-suite/testpad-app
 ```
 
 ---
 
 ## 📄 Compliance and Licensing
 
-Copyright © 2026 The AI Crew Suite Authors.  
+Copyright © 2026 The AI Crew Suite Authors.
 Licensed under the **Apache License, Version 2.0**.

@@ -1,13 +1,19 @@
 app:
   title: AI Crew Suite Dev App
-  baseUrl: http://localhost:3000
+  baseUrl: http://${APP_HOST:-localhost}:${APP_PORT:-3000}
 
 backend:
-  baseUrl: http://localhost:7007
+  baseUrl: http://${BACKEND_HOST:-localhost}:${BACKEND_PORT:-7007}
   cors:
-    origin: http://localhost:3000
+    origin: http://${APP_HOST:-localhost}:${APP_PORT:-3000}
 
-# Basic required inline catalog and driver placeholders
+proxy:
+  endpoints:
+    '/api':
+      target: http://${BACKEND_HOST:-localhost}:${BACKEND_PORT:-7007}
+      changeOrigin: true
+      secure: false
+
 catalog:
   import:
     entityFilename: catalog-info.yaml

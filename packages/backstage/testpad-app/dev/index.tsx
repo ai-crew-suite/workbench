@@ -16,4 +16,12 @@
 import { bootstrapFrontendWorkbench } from '@ai-crew-suite/workbench-app';
 import { RootPage } from '../src/index';
 
-bootstrapFrontendWorkbench(RootPage);
+console.log('[Dev-Client] Client dev/index.tsx file executed.');
+
+try {
+  bootstrapFrontendWorkbench(RootPage);
+  console.log('[Dev-Client] Bootstrapper function call completed without returning errors.');
+} catch (error) {
+  console.error('[Dev-Client] Exception caught during invocation bridge:', error);
+}
+

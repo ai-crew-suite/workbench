@@ -1,3 +1,18 @@
+/**
+ * Copyright 2026 The AI Crew Suite Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import {
   Sidebar,
   SidebarDivider,
@@ -13,36 +28,51 @@ import { SidebarSearchModal } from '@backstage/plugin-search';
 import { UserSettingsSignInAvatar } from '@backstage/plugin-user-settings';
 import { NotificationsSidebarItem } from '@backstage/plugin-notifications';
 import { SidebarLogo } from './SidebarLogo';
+import React from 'react'; // Ensure React is imported
 
 export const SidebarContent = NavContentBlueprint.make({
   params: {
     component: ({ navItems }) => {
       const nav = navItems.withComponent(item => (
-        <SidebarItem icon={() => item.icon} to={item.href} text={item.title} />
+        <SidebarItem
+          icon={item.icon ? () => item.icon : () => null}
+          to={item.href}
+          text={item.title}
+        />
       ));
 
-      // Skipped items
-      nav.take('page:search'); // Using search modal instead
+      nav.take('page:search');
 
       return (
         <Sidebar>
           <SidebarLogo />
+
           <SidebarGroup label="Search" icon={<SearchIcon />} to="/search">
             <SidebarSearchModal />
           </SidebarGroup>
+
           <SidebarDivider />
+
+          {/* Explicitly enclose loose menu items inside a designated root group container */}
           <SidebarGroup label="Menu" icon={<MenuIcon />}>
             {nav.take('page:catalog')}
             {nav.take('page:scaffolder')}
+
             <SidebarDivider />
+
             <SidebarScrollWrapper>
               {nav.rest({ sortBy: 'title' })}
             </SidebarScrollWrapper>
           </SidebarGroup>
+
           <SidebarSpace />
           <SidebarDivider />
+
+          {/* Real-time event notifications link */}
           <NotificationsSidebarItem />
+
           <SidebarDivider />
+
           <SidebarGroup
             label="Settings"
             icon={<UserSettingsSignInAvatar />}

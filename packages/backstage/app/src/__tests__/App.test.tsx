@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createExtension } from '@backstage/frontend-plugin-api';
 
@@ -25,14 +26,15 @@ const mocks = vi.hoisted(() => {
 
 // 1. Mock the defaults and engine configurations
 vi.mock('@backstage/frontend-defaults', () => ({ createApp: mocks.createApp }));
-vi.mock('./modules/nav', () => ({ navModule: 'navigation' }));
+vi.mock('../src/modules/nav', () => ({ navModule: 'navigation' }));
 
 // 2. Mock out every complex upstream feature plugin imported by App.tsx
 vi.mock('@backstage/plugin-catalog/alpha', () => ({ default: 'catalog' }));
 vi.mock('@backstage/plugin-notifications/alpha', () => ({ default: 'notifications' }));
 vi.mock('@backstage/plugin-search/alpha', () => ({ default: 'search' }));
 vi.mock('@backstage/plugin-app-visualizer', () => ({ default: 'app-visualizer' }));
-vi.mock('@backstage/plugin-app-react', async (importOriginal) => {
+
+vi.mock('@backstage/plugin-app-react/alpha', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@backstage/plugin-app-react')>();
   return {
     ...actual,
@@ -45,18 +47,51 @@ vi.mock('@backstage/plugin-app-react', async (importOriginal) => {
         factory: () => [],
       })),
     },
+    SignInPageBlueprint: {
+      make: vi.fn(() => createExtension({
+        kind: 'sign-in-page',
+        name: 'mocked-sign-in',
+        attachTo: { id: 'app/root', input: 'components' },
+        output: [],
+        factory: () => [],
+      })),
+    },
+    ThemeBlueprint: {
+      make: vi.fn(() => createExtension({
+        kind: 'theme',
+        name: 'mocked-theme',
+        attachTo: { id: 'app/root', input: 'components' },
+        output: [],
+        factory: () => [],
+      })),
+    },
   };
 });
 
+vi.mock('@backstage/theme', () => ({
+  themes: {
+    light: { id: 'light' },
+    dark: { id: 'dark' },
+  },
+  UnifiedThemeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 describe('App Layout Suite', () => {
   beforeEach(() => {
-    vi.resetModules();
+    vi.clearAllMocks();
   });
 
   it('creates the application root from the configured feature set', async () => {
-    const { default: App } = await import('../App');
+    const { buildDevApp } = await import('../App');
 
-    expect(mocks.createRoot).toHaveBeenCalledWith();
-    expect(App).toBe('app-root');
+    const DummyComponent = () => <div>Test pad view target</div>;
+
+    // Invoke your clean structural factory function natively
+    const app = buildDevApp({ PluginComponent: DummyComponent });
+
+    // Assert that buildDevApp correctly aggregates features and calls the core factory
+    expect(mocks.createApp).toHaveBeenCalled();
+    expect(app.createRoot()).toBe('app-root');
   });
 });
+

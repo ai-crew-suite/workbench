@@ -204,6 +204,7 @@ __metadata:
     "@backstage/plugin-techdocs": "backstage:^"
     "@backstage/plugin-techdocs-module-addons-contrib": "backstage:^"
     "@backstage/plugin-user-settings": "backstage:^"
+    "@backstage/theme": "backstage:^"
     "@backstage/ui": "backstage:^"
     "@emotion/react": "catalog:prod"
     "@emotion/styled": "catalog:prod"
@@ -248,19 +249,22 @@ __metadata:
     "@backstage/plugin-auth-backend": "backstage:^"
     "@backstage/plugin-auth-backend-module-github-provider": "backstage:^"
     "@backstage/plugin-catalog-backend": "backstage:^"
+    "@backstage/plugin-events-backend": "backstage:^"
+    "@backstage/plugin-notifications-backend": "backstage:^"
     "@backstage/plugin-permission-backend": "backstage:^"
     "@backstage/plugin-proxy-backend": "backstage:^"
     "@backstage/plugin-scaffolder-backend": "backstage:^"
+    "@backstage/plugin-signals-backend": "backstage:^"
     "@backstage/plugin-techdocs-backend": "backstage:^"
     "@tsconfig/node22": "catalog:dev"
     "@types/node": "catalog:dev"
     "@vercel/ncc": "catalog:dev"
+    better-sqlite3: "catalog:prod"
     commander: "catalog:prod"
     react: "catalog:prod"
     react-dom: "catalog:prod"
     react-router: "catalog:prod"
     react-router-dom: "catalog:prod"
-    sqlite3: "catalog:prod"
     typescript: "catalog:dev"
     vitest: "catalog:dev"
   bin:
@@ -275,6 +279,7 @@ __metadata:
     "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
     "@backstage/cli": "backstage:^"
+    "@backstage/cli-defaults": "backstage:^"
     "@changesets/cli": "catalog:dev"
     turbo: "catalog:dev"
   languageName: unknown
@@ -1945,7 +1950,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@backstage/cli-defaults@npm:^0.1.6":
+"@backstage/cli-defaults@backstage:^::backstage=1.55.3&npm=0.1.6, @backstage/cli-defaults@npm:^0.1.6":
   version: 0.1.6
   resolution: "@backstage/cli-defaults@npm:0.1.6"
   dependencies:
@@ -3307,6 +3312,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@backstage/plugin-events-backend@backstage:^::backstage=1.55.3&npm=0.6.6, @backstage/plugin-events-backend@npm:^0.6.6":
+  version: 0.6.6
+  resolution: "@backstage/plugin-events-backend@npm:0.6.6"
+  dependencies:
+    "@backstage/backend-openapi-utils": "npm:^0.7.2"
+    "@backstage/backend-plugin-api": "npm:^1.10.1"
+    "@backstage/config": "npm:^1.3.9"
+    "@backstage/errors": "npm:^1.3.1"
+    "@backstage/plugin-events-node": "npm:^0.4.26"
+    "@backstage/types": "npm:^1.2.2"
+    "@types/express": "npm:^4.17.6"
+    content-type: "npm:^1.0.5"
+    express: "npm:^4.22.0"
+    express-promise-router: "npm:^4.1.0"
+    knex: "npm:^3.0.0"
+  checksum: 10c0/0b1f263cec35fcdffc8ec5ccb01deb239a85e9e0f7c90bfbae2bdbf7cb2c929614862118ee601a2758c1009f1bc60e0eadd3b10b49f014acf28f3c431ff09c8d
+  languageName: node
+  linkType: hard
+
 "@backstage/plugin-events-node@npm:^0.4.26":
   version: 0.4.26
   resolution: "@backstage/plugin-events-node@npm:0.4.26"
@@ -3424,6 +3448,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@backstage/plugin-notifications-backend@backstage:^::backstage=1.55.3&npm=0.6.9, @backstage/plugin-notifications-backend@npm:^0.6.9":
+  version: 0.6.9
+  resolution: "@backstage/plugin-notifications-backend@npm:0.6.9"
+  dependencies:
+    "@backstage/backend-openapi-utils": "npm:^0.7.2"
+    "@backstage/backend-plugin-api": "npm:^1.10.1"
+    "@backstage/catalog-model": "npm:^1.10.1"
+    "@backstage/config": "npm:^1.3.9"
+    "@backstage/errors": "npm:^1.3.1"
+    "@backstage/plugin-catalog-node": "npm:^2.2.5"
+    "@backstage/plugin-notifications-common": "npm:^0.2.4"
+    "@backstage/plugin-notifications-node": "npm:^0.2.30"
+    "@backstage/plugin-signals-node": "npm:^0.2.5"
+    "@backstage/types": "npm:^1.2.2"
+    express: "npm:^4.22.0"
+    express-promise-router: "npm:^4.1.0"
+    knex: "npm:^3.0.0"
+    p-throttle: "npm:^4.1.1"
+  checksum: 10c0/de0125b1482955291f65d3006838ec63299b3052c1ad9ef71dd11d752faad56c2966967a25f49f946c474a91eca0f7c6b7032c931ac15da3043882b1eb63f900
+  languageName: node
+  linkType: hard
+
 "@backstage/plugin-notifications-common@npm:^0.2.4":
   version: 0.2.4
   resolution: "@backstage/plugin-notifications-common@npm:0.2.4"
@@ -3431,6 +3477,16 @@ __metadata:
     "@backstage/config": "npm:^1.3.9"
     "@backstage/types": "npm:^1.2.2"
   checksum: 10c0/fa19c95eb0ce08c71ad96646d74ed6f79e087495206d709a9473882c03526ac28bddcbd2532662f8d4d840da78ab630704f11b4b309a42cdf78045d4acfad070
+  languageName: node
+  linkType: hard
+
+"@backstage/plugin-notifications-node@npm:^0.2.30":
+  version: 0.2.30
+  resolution: "@backstage/plugin-notifications-node@npm:0.2.30"
+  dependencies:
+    "@backstage/backend-plugin-api": "npm:^1.10.1"
+    "@backstage/plugin-notifications-common": "npm:^0.2.4"
+  checksum: 10c0/98d362f4449951ed292df56ffdefc8c67406baccc601a2b20eb74ce352ee3898214e93ebc10b52730b67ff804ef6c3c528a0eba41b3162d75807f3299e4b7a51
   languageName: node
   linkType: hard
 
@@ -3879,6 +3935,33 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@backstage/plugin-signals-backend@backstage:^::backstage=1.55.3&npm=0.3.19, @backstage/plugin-signals-backend@npm:^0.3.19":
+  version: 0.3.19
+  resolution: "@backstage/plugin-signals-backend@npm:0.3.19"
+  dependencies:
+    "@backstage/backend-plugin-api": "npm:^1.10.1"
+    "@backstage/config": "npm:^1.3.9"
+    "@backstage/plugin-events-node": "npm:^0.4.26"
+    "@backstage/plugin-signals-node": "npm:^0.2.5"
+    "@backstage/types": "npm:^1.2.2"
+    express: "npm:^4.22.0"
+    express-promise-router: "npm:^4.1.0"
+    ws: "npm:^8.20.1"
+  checksum: 10c0/e1ece844c6c4643e1e9ba335a1e4a9f948eb7e1d9162eac164ca115a906a62a60586ab06599692e2e958edb72622ba42da98ff4b45ff733fae2e787b709cff8d
+  languageName: node
+  linkType: hard
+
+"@backstage/plugin-signals-node@npm:^0.2.5":
+  version: 0.2.5
+  resolution: "@backstage/plugin-signals-node@npm:0.2.5"
+  dependencies:
+    "@backstage/backend-plugin-api": "npm:^1.10.1"
+    "@backstage/plugin-events-node": "npm:^0.4.26"
+    "@backstage/types": "npm:^1.2.2"
+  checksum: 10c0/79b05eff0ff18936481cc78cfc37b2cd80024276b2c16aeea22323a9c13630e5d803f8914df81a87c9a627c41c57d260883ab912137c77dcee3252d3899fab69
+  languageName: node
+  linkType: hard
+
 "@backstage/plugin-signals-react@npm:^0.0.26":
   version: 0.0.26
   resolution: "@backstage/plugin-signals-react@npm:0.0.26"
@@ -4172,7 +4255,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@backstage/theme@npm:^0.7.3":
+"@backstage/theme@backstage:^::backstage=1.55.3&npm=0.7.3, @backstage/theme@npm:^0.7.3":
   version: 0.7.3
   resolution: "@backstage/theme@npm:0.7.3"
   dependencies:
@@ -14050,13 +14133,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"abbrev@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "abbrev@npm:4.0.0"
-  checksum: 10c0/b4cc16935235e80702fc90192e349e32f8ef0ed151ef506aa78c81a7c455ec18375c4125414b99f84b2e055199d66383e787675f0bcd87da7a4dbd59f9eac1d5
-  languageName: node
-  linkType: hard
-
 "abbrev@npm:^5.0.0":
   version: 5.0.0
   resolution: "abbrev@npm:5.0.0"
@@ -15180,6 +15256,16 @@ __metadata:
     node-gyp: "npm:latest"
     prebuild-install: "npm:^7.1.1"
   checksum: 10c0/162d3fa6c19a68191d09537bd113bd54a636c9fb38b0fc0796f4f270032770695ef35a1bca041a0a0fa9bfa47e20b9e17c94484a3899c31f38881af4d12b7fa5
+  languageName: node
+  linkType: hard
+
+"better-sqlite3@npm:^13.0.3":
+  version: 13.0.3
+  resolution: "better-sqlite3@npm:13.0.3"
+  dependencies:
+    node-addon-api: "npm:^8.0.0"
+    node-gyp: "npm:latest"
+  checksum: 10c0/3daaad4fbd39b3ebddd9840c1aab0a7ccc94a01054fb03f6660ec2c226422b5daf3eb8e55a14103eddb84c2cd16f8e70ae9d41f0e2892b58c8c6152ee7ff09c0
   languageName: node
   linkType: hard
 
@@ -25655,26 +25741,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-gyp@npm:12.x":
-  version: 12.4.0
-  resolution: "node-gyp@npm:12.4.0"
-  dependencies:
-    env-paths: "npm:^2.2.0"
-    exponential-backoff: "npm:^3.1.1"
-    graceful-fs: "npm:^4.2.6"
-    nopt: "npm:^9.0.0"
-    proc-log: "npm:^6.0.0"
-    semver: "npm:^7.3.5"
-    tar: "npm:^7.5.4"
-    tinyglobby: "npm:^0.2.12"
-    undici: "npm:^6.25.0"
-    which: "npm:^6.0.0"
-  bin:
-    node-gyp: bin/node-gyp.js
-  checksum: 10c0/9acb7c798e124275a6f9c1f7eb64b5abd6196bb885a3945fb44ee0dccf435514e88cdfb0f228ee7ff76ef25107c1f39ff37a067bf92fd00b9aff9234db29ff9e
-  languageName: node
-  linkType: hard
-
 "node-gyp@npm:latest":
   version: 13.1.0
   resolution: "node-gyp@npm:13.1.0"
@@ -25766,17 +25832,6 @@ __metadata:
   bin:
     nopt: bin/nopt.js
   checksum: 10c0/980d89257f9587f3e1f77877ddbf905d6aa3b738ec33e49a4fa1a059a0dd82eb28063982b150654a7ae9de386f2ead60e56172db7d37cf56de545f7392a2a26a
-  languageName: node
-  linkType: hard
-
-"nopt@npm:^9.0.0":
-  version: 9.0.0
-  resolution: "nopt@npm:9.0.0"
-  dependencies:
-    abbrev: "npm:^4.0.0"
-  bin:
-    nopt: bin/nopt.js
-  checksum: 10c0/1822eb6f9b020ef6f7a7516d7b64a8036e09666ea55ac40416c36e4b2b343122c3cff0e2f085675f53de1d2db99a2a89a60ccea1d120bcd6a5347bf6ceb4a7fd
   languageName: node
   linkType: hard
 
@@ -27597,7 +27652,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prebuild-install@npm:^7.0.1, prebuild-install@npm:^7.1.1, prebuild-install@npm:^7.1.3":
+"prebuild-install@npm:^7.0.1, prebuild-install@npm:^7.1.1":
   version: 7.1.3
   resolution: "prebuild-install@npm:7.1.3"
   dependencies:
@@ -30531,27 +30586,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sqlite3@npm:^6.0.1":
-  version: 6.0.1
-  resolution: "sqlite3@npm:6.0.1"
-  dependencies:
-    bindings: "npm:^1.5.0"
-    node-addon-api: "npm:^8.0.0"
-    node-gyp: "npm:12.x"
-    prebuild-install: "npm:^7.1.3"
-    tar: "npm:^7.5.10"
-  peerDependencies:
-    node-gyp: 12.x
-  dependenciesMeta:
-    node-gyp:
-      optional: true
-  peerDependenciesMeta:
-    node-gyp:
-      optional: true
-  checksum: 10c0/519e1b84168e4404872d68b5261d73326dd6551bbf2a6b9d6318f3193efe5392ee2c1061a10e18f3d7dcbe6dc4c753513e3f83986d3bca703f363545eba2fb8e
-  languageName: node
-  linkType: hard
-
 "ssh-remote-port-forward@npm:^1.0.4":
   version: 1.0.4
   resolution: "ssh-remote-port-forward@npm:1.0.4"
@@ -31471,7 +31505,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar@npm:^7.5.10, tar@npm:^7.5.21, tar@npm:^7.5.3, tar@npm:^7.5.4, tar@npm:^7.5.7":
+"tar@npm:^7.5.21, tar@npm:^7.5.3, tar@npm:^7.5.7":
   version: 7.5.22
   resolution: "tar@npm:7.5.22"
   dependencies:
@@ -32537,13 +32571,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^6.25.0":
-  version: 6.29.0
-  resolution: "undici@npm:6.29.0"
-  checksum: 10c0/3fb2117985be977ba8b6bd6a242fec915e1b1d0f9681f5adb3f508fb1717352452d65bcfd3bed09e7c776cfda403a4e8edb24a318492f8b2d793439af2b8699b
-  languageName: node
-  linkType: hard
-
 "undici@npm:^7.21.0, undici@npm:^7.24.0, undici@npm:^7.24.5":
   version: 7.30.0
   resolution: "undici@npm:7.30.0"
@@ -33600,17 +33627,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"which@npm:^6.0.0":
-  version: 6.0.1
-  resolution: "which@npm:6.0.1"
-  dependencies:
-    isexe: "npm:^4.0.0"
-  bin:
-    node-which: bin/which.js
-  checksum: 10c0/7e710e54ea36d2d6183bee2f9caa27a3b47b9baf8dee55a199b736fcf85eab3b9df7556fca3d02b50af7f3dfba5ea3a45644189836df06267df457e354da66d5
-  languageName: node
-  linkType: hard
-
 "which@npm:^7.0.0":
   version: 7.0.0
   resolution: "which@npm:7.0.0"
@@ -33745,7 +33761,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:*, ws@npm:^8.18.0, ws@npm:^8.18.2, ws@npm:^8.21.1, ws@npm:^8.8.0":
+"ws@npm:*, ws@npm:^8.18.0, ws@npm:^8.18.2, ws@npm:^8.20.1, ws@npm:^8.21.1, ws@npm:^8.8.0":
   version: 8.22.0
   resolution: "ws@npm:8.22.0"
   peerDependencies:

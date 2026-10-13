@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// packages/backstage/backend/launcher.js
 const { spawn } = require('child_process');
 const path = require('path');
 const os = require('os');
@@ -20,22 +21,23 @@ const os = require('os');
 const currentPluginRoot = process.cwd();
 const skeletonPath = path.resolve(__dirname, './skeleton');
 const configPath = path.resolve(skeletonPath, 'app-config.dev.yaml');
+const absoluteEntrypointPath = path.resolve(__dirname, 'src/index.ts');
 
 console.log(`[Dev-Backend] Booting with full Backstage CLI orchestration...`);
+console.log(`[Dev-Backend] Enforcing entrypoint: ${absoluteEntrypointPath}`);
 
 const backstageCliBinary = require.resolve('@backstage/cli/bin/backstage-cli');
+
 const runArgs = ['package', 'start', '--config', configPath];
 
 const processEnv = {
   ...process.env,
-  // Force SWC to bypass using home directory and write its binary
-  // cache to a secure machine runtime temp folder root
   SWC_NATIVE_BINDING_CACHE: path.join(os.tmpdir(), '.swc-cache')
 };
 
 const child = spawn('node', [backstageCliBinary, ...runArgs], {
   cwd: currentPluginRoot,
-  env: processEnv, // Pass the patched environment map here
+  env: processEnv,
   stdio: 'inherit',
   shell: true
 });

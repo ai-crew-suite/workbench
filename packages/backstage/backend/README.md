@@ -29,14 +29,22 @@ To hook a plugin into our server, calling sites add a simple `dev/index.ts` file
 
 ## 📈 Local Engine Maintenance (This Package)
 
-These commands are for maintaining, testing, and building the orchestrator utility package itself within our core platform repository.
+These commands are for maintaining, testing, and linting the orchestrator utility package itself within our core platform repository.
 
-### Monorepo Build Execution
+### Running Lint
 
-To heal TypeScript project references, align graph configurations, and build the shared backend tool, execute:
+To trigger the Crew CLI provided ESLint configuration, execute:
 
 ```bash
-yarn turbo run build --filter=@ai-crew-suite/workbench-backend
+yarn turbo run lint --filter=@ai-crew-suite/workbench-backend
+```
+
+### Running Unit Test Suites
+
+To trigger a `tsc` typecheck run, execute:
+
+```bash
+yarn turbo run typecheck --filter=@ai-crew-suite/workbench-backend
 ```
 
 ### Running Unit Tests & Test Coverage
@@ -126,13 +134,19 @@ export default createBackendPlugin({
 To fire up the server inside the plugin directory and activate hot-reloading, execute:
 
 ```bash
-yarn turbo run start --filter=@ai-crew-suite/testpad-backend
+LOG_LEVEL=debug yarn turbo run start --filter=@ai-crew-suite/testpad-backend
 ```
 
 To override the default dev configuration with a custom local profile, pass the configuration flag directly through the execution args:
 
 ```bash
 yarn start --config ./custom-local-config.yaml
+```
+
+### 5. Verify Dev Server is Running Correctly
+
+```bash
+curl -i -H "Authorization: Bearer dev-secret-token-placeholder" http://localhost:7007/api/hello-world/health
 ```
 
 ## 🛡️ Architectural Configuration Invariants

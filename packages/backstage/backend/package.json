@@ -3,8 +3,8 @@
   "description": "A published Backstage backend server for use in Dockerfiles",
   "version": "1.0.0",
   "license": "Apache-2.0",
-  "main": "src/index.tsx",
-  "types": "src/index.tsx",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "bin": {
     "backstage-dev-server": "./launcher.js"
   },
@@ -56,16 +56,19 @@
     "@backstage/plugin-auth-backend": "backstage:^",
     "@backstage/plugin-auth-backend-module-github-provider": "backstage:^",
     "@backstage/plugin-catalog-backend": "backstage:^",
+    "@backstage/plugin-events-backend": "backstage:^",
+    "@backstage/plugin-notifications-backend": "backstage:^",
     "@backstage/plugin-permission-backend": "backstage:^",
     "@backstage/plugin-proxy-backend": "backstage:^",
     "@backstage/plugin-scaffolder-backend": "backstage:^",
+    "@backstage/plugin-signals-backend": "backstage:^",
     "@backstage/plugin-techdocs-backend": "backstage:^",
+    "better-sqlite3": "catalog:prod",
     "commander": "catalog:prod",
     "react": "catalog:prod",
     "react-dom": "catalog:prod",
     "react-router": "catalog:prod",
-    "react-router-dom": "catalog:prod",
-    "sqlite3": "catalog:prod"
+    "react-router-dom": "catalog:prod"
   },
   "devDependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",

@@ -66,6 +66,7 @@
     "@backstage/plugin-techdocs": "backstage:^",
     "@backstage/plugin-techdocs-module-addons-contrib": "backstage:^",
     "@backstage/plugin-user-settings": "backstage:^",
+    "@backstage/theme": "backstage:^",
     "@backstage/ui": "backstage:^",
     "@emotion/react": "catalog:prod",
     "@emotion/styled": "catalog:prod",

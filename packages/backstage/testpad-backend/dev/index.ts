@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2026 The AI Crew Suite Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,21 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createBackend } from '@backstage/backend-defaults';
+import { startDevBackend } from '@ai-crew-suite/workbench-backend';
 
-import helloWorldPlugin from '../src/index';
-
-async function main() {
-  const backend = createBackend();
-
-  // 1. Add your local framework-compliant test plugin directly to the initialization pool
-  backend.add(helloWorldPlugin);
-
-  // 2. Start the isolated backend server safely
-  await backend.start();
-}
-
-main().catch(err => {
-  console.error('Standalone testpad container collapsed:', err);
+startDevBackend().catch(err => {
+  console.error('Standalone platform workbench container collapsed:', err);
   process.exit(1);
 });

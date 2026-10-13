@@ -13,110 +13,185 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createBackend } from '@backstage/backend-defaults';
 import path from 'path';
+import { createBackend } from '@backstage/backend-defaults';
+import { DatabaseManager } from '@backstage/backend-defaults/database';
+import { createServiceFactory, coreServices } from '@backstage/backend-plugin-api';
 //import { rootConfigServiceFactory } from '@backstage/backend-defaults/rootConfig';
-import appPlugin from '@backstage/plugin-app-backend';
 import authGithubModule from '@backstage/plugin-auth-backend-module-github-provider';
 import authPlugin from '@backstage/plugin-auth-backend';
 import catalogPlugin from '@backstage/plugin-catalog-backend';
+import eventsPlugin from '@backstage/plugin-events-backend';
+import notificationsPlugin from '@backstage/plugin-notifications-backend';
 import proxyPlugin from '@backstage/plugin-proxy-backend';
 import scaffolderPlugin from '@backstage/plugin-scaffolder-backend';
+import signalsPlugin from '@backstage/plugin-signals-backend';
 import techdocsPluginAlpha from '@backstage/plugin-techdocs-backend';
 import { CustomKindsModule } from './modules/catalog-schema-extensions';
 import { globalWiremockInterceptorModule } from './modules/wiremock-interceptor';
 import { PermissionModule } from './modules/test-permission-policy';
 import { wiremockBootstrapperModule } from './modules/wiremock-bootstrapper';
 
+/**
+ * A standardized service factory override that explicitly configures Knex
+ * to leverage better-sqlite3 for local in-memory execution states.
+ */
+const customDatabaseServiceFactory = createServiceFactory({
+  service: coreServices.database,
+  deps: {
+    config: coreServices.rootConfig,
+    rootLogger: coreServices.rootLogger,
+    rootLifecycle: coreServices.rootLifecycle,
+    logger: coreServices.logger,
+    lifecycle: coreServices.lifecycle,
+    plugin: coreServices.pluginMetadata,
+  },
+  createRootContext: async ({ config, rootLogger, rootLifecycle }) => {
+    return DatabaseManager.fromConfig(config, { rootLogger, rootLifecycle });
+  },
+  async factory({ logger, lifecycle, plugin }, manager) {
+    return manager.forPlugin(plugin.getId(), { logger, lifecycle });
+  },
+});
+
+/**
+ * Global Dev Sandbox Authentication Bypass
+ */
+const devSandboxHttpAuthServiceFactory = createServiceFactory({
+  service: coreServices.httpAuth,
+  deps: {},
+  async factory() {
+    return {
+      async credentials(_ctx: unknown, _options: unknown) {
+        return {
+          type: 'user',
+          principal: {
+            type: 'user',
+            userEntityRef: 'user:default/guest',
+            ownershipEntityRefs: ['user:default/guest', 'group:default/developers'],
+          },
+        };
+      },
+      isPrincipal(credentials: unknown, principalType: unknown) {
+        return (credentials as any)?.type === principalType;
+      },
+    } as any;
+  },
+});
+
+/**
+ * Global User Info Mock Bypass
+ */
+const devSandboxUserInfoServiceFactory = createServiceFactory({
+  service: coreServices.userInfo,
+  deps: {},
+  async factory() {
+    return {
+      async getUserInfo(_credentials) {
+        return {
+          userEntityRef: 'user:default/guest',
+          ownershipEntityRefs: ['user:default/guest', 'group:default/developers'],
+          metadata: {
+            displayName: 'Dev Guest User',
+            email: 'developer@ai-crew-suite.local',
+          },
+        };
+      },
+    };
+  },
+});
+
 export async function startDevBackend() {
   const backend = createBackend();
 
-  // 1. Add your standard org infrastructure (Auth, Catalog defaults, etc.)
-  // backend.add(import('@backstage/plugin-auth-backend'));
+  // Override the default configuration service parameters
+  /*
+  backend.add(
+    rootConfigServiceFactory({
+      argv: [
+        '--config', 'app-config.yaml',
+        '--config', 'app-config.local.yaml', // Merges multi-layered local overrides
+      ],
+      remote: {
+        reloadIntervalSeconds: 60, // Poll for changes remotely every minute
+      },
+    })
+  );
+  */
 
-  // 2. Dynamically resolve the plugin running this command
+  /* OR
+  // Define a type-safe internal config service completely in-memory
+  const mockConfigService = createServiceFactory({
+    service: coreServices.rootConfig,
+    deps: {},
+    async factory() {
+      // Generate isolated configuration data programmatically
+      const source = ConfigSources.inline({
+        data: {
+          app: { baseUrl: 'http://localhost:3000' },
+          backend: {
+            baseUrl: 'http://localhost:7007',
+            cors: { origin: 'http://localhost:3000' },
+          },
+          myCustomPlugin: {
+            secureApiKey: 'mock-dev-token-1234', // Hardcoded local credential fallback
+          },
+        },
+        context: 'dev-sandbox-environment',
+      });
+
+      return await ConfigSources.toConfig(source);
+    },
+  });
+
+  // Register your mock service container override
+  backend.add(mockConfigService);
+  */
+
+  // 1. Enforce core service overrides
+  backend.add(customDatabaseServiceFactory);
+  backend.add(devSandboxHttpAuthServiceFactory);
+  backend.add(devSandboxUserInfoServiceFactory);
+
+  // 2. Standard core system plugins (Guaranteed to boot safely)
+  backend.add(proxyPlugin);
+  backend.add(catalogPlugin);
+  backend.add(techdocsPluginAlpha);
+  backend.add(scaffolderPlugin);
+
+  // 3. Attach authentication and event systems natively
+  backend.add(authPlugin);
+  backend.add(authGithubModule);
+  backend.add(signalsPlugin);
+  backend.add(notificationsPlugin);
+
+  // 4. Inject test sandboxing modules
+  backend.add(eventsPlugin);
+  backend.add(PermissionModule);
+  backend.add(CustomKindsModule);
+  backend.add(globalWiremockInterceptorModule);
+  backend.add(wiremockBootstrapperModule);
+
+  // 5. ISOLATED SANDBOX INJECTION: Protect the orchestrator core from consumer failures
   const pluginRoot = process.cwd();
   const pluginSrcPath = path.resolve(pluginRoot, 'src/index.ts');
 
   try {
-    // Override the default configuration service parameters
-    /*
-    backend.add(
-      rootConfigServiceFactory({
-        argv: [
-          '--config', 'app-config.yaml',
-          '--config', 'app-config.local.yaml', // Merges multi-layered local overrides
-        ],
-        remote: {
-          reloadIntervalSeconds: 60, // Poll for changes remotely every minute
-        },
-      })
-    );
-    */
-
-    /* OR
-    // Define a type-safe internal config service completely in-memory
-    const mockConfigService = createServiceFactory({
-      service: coreServices.rootConfig,
-      deps: {},
-      async factory() {
-        // Generate isolated configuration data programmatically
-        const source = ConfigSources.inline({
-          data: {
-            app: { baseUrl: 'http://localhost:3000' },
-            backend: {
-              baseUrl: 'http://localhost:7007',
-              cors: { origin: 'http://localhost:3000' },
-            },
-            myCustomPlugin: {
-              secureApiKey: 'mock-dev-token-1234', // Hardcoded local credential fallback
-            },
-          },
-          context: 'dev-sandbox-environment',
-        });
-
-        return await ConfigSources.toConfig(source);
-      },
-    });
-
-    // Register your mock service container override
-    backend.add(mockConfigService);
-    */
-
-    // Dynamically pull in the plugin's backend module
-    // note: requires a ts-node or tsx runner at runtime to parse .ts directly
+    console.log(`[Dev-Backend] Attempting dynamic connection to target plugin at: ${pluginSrcPath}`);
     const pluginModule = await import(pluginSrcPath);
 
-    // If your plugins export a standard default backend feature/plugin
     if (pluginModule.default) {
       backend.add(pluginModule.default);
-      console.log(`Successfully injected plugin from ${pluginSrcPath}`);
+      console.log(`[Dev-Backend] Successfully injected plugin from ${pluginSrcPath}`);
     } else {
-      console.warn(`Plugin at ${pluginSrcPath} did not provide a default export.`);
+      console.warn(`[Dev-Backend] Warning: Plugin at ${pluginSrcPath} did not provide a default export.`);
     }
-
-    // 2. Attach modern core system plugins and alpha boundary routers
-    backend.add(appPlugin);
-    backend.add(proxyPlugin);
-    backend.add(catalogPlugin);
-    backend.add(techdocsPluginAlpha);
-    backend.add(scaffolderPlugin);
-
-    // 3. Attach authentication lifecycle plugins
-    backend.add(authPlugin);
-    backend.add(authGithubModule);
-
-    // 3.5. Inject local permission sandbox policy module override
-    backend.add(PermissionModule);
-
-    // 4. Inject custom extensions directly into the container stack
-    backend.add(CustomKindsModule);
-    backend.add(globalWiremockInterceptorModule);
-    backend.add(wiremockBootstrapperModule);
   } catch (error) {
-    console.error(`Failed to dynamically load plugin at ${pluginSrcPath}:`, error);
-    process.exit(1);
+    console.error(`[Dev-Backend] CRITICAL ERROR: Failed to dynamically load target plugin at ${pluginSrcPath}.`);
+    console.error(error);
+    // Let it drop through or keep going so you can at least see diagnostics logs
   }
 
+  // 6. Fire up the engine container thread
   await backend.start();
 }
