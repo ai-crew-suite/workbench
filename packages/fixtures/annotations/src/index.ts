@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 import { Entity } from '@backstage/catalog-model';
+import { getPaymentServiceNotes } from './fixtures/paymentService';
 
-export function getPaymentServiceNotes(entity: Entity): Record<string, string> {
-  return {
-    '://ai-crew.com': new Date().toISOString(),
-    '://ai-crew.com': 'active',
-    '://ai-crew.com': `Automated fixture for ${entity.metadata.name}. Managed by the AI Crew Suite platform.`,
-  };
-}
+type AnnotationFactory = (entity: Entity) => Record<string, string>;
+
+// Map entity names to their respective factory functions
+export const annotationsFixtureRegistry: Record<string, AnnotationFactory> = {
+  'payment-service': getPaymentServiceNotes,
+  // Add future fixtures here
+};

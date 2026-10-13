@@ -35,7 +35,7 @@ yarn install
 To check that your data documents, catalog entities, and raw HTML runbook fragments strictly pass standard syntax formatting guidelines, run the workspace linter task:
 
 ```bash
-yarn workspace @ai-crew-suite/mock-fixtures run lint
+yarn turbo run lint --filter=@ai-crew-suite/mock-fixtures
 ```
 
 ### Automated Code Style Fixing
@@ -43,7 +43,7 @@ yarn workspace @ai-crew-suite/mock-fixtures run lint
 To automatically fix formatting errors, trailing spaces, or indentation variations inside your mock assets instantly, run:
 
 ```bash
-yarn workspace @ai-crew-suite/mock-fixtures run lint:fix
+yarn turbo run format --filter=@ai-crew-suite/mock-fixtures
 ```
 
 ## Consumer Data Checklist

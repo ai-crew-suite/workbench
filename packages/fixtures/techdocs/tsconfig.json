@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig.json",
+  "extends": "@ai-crew-suite/typescript-shared-config/node",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

@@ -19,6 +19,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ai-crew-suite/annotations-fixtures@workspace:packages/fixtures/annotations":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/annotations-fixtures@workspace:packages/fixtures/annotations"
+  dependencies:
+    "@ai-crew-suite/crew-cli": "catalog:dev"
+    "@backstage/catalog-model": "backstage:^"
+    typescript: "catalog:dev"
+    vitest: "catalog:dev"
+    zod: "catalog:dev"
+  languageName: unknown
+  linkType: soft
+
 "@ai-crew-suite/containers@workspace:packages/dockerfiles":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/containers@workspace:packages/dockerfiles"
@@ -1931,7 +1943,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@backstage/catalog-model@npm:^1.10.1":
+"@backstage/catalog-model@backstage:^::backstage=1.55.3&npm=1.10.1, @backstage/catalog-model@npm:^1.10.1":
   version: 1.10.1
   resolution: "@backstage/catalog-model@npm:1.10.1"
   dependencies:
@@ -11752,44 +11764,44 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@turbo/darwin-64@npm:2.11.7":
-  version: 2.11.7
-  resolution: "@turbo/darwin-64@npm:2.11.7"
+"@turbo/darwin-64@npm:2.11.8":
+  version: 2.11.8
+  resolution: "@turbo/darwin-64@npm:2.11.8"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@turbo/darwin-arm64@npm:2.11.7":
-  version: 2.11.7
-  resolution: "@turbo/darwin-arm64@npm:2.11.7"
+"@turbo/darwin-arm64@npm:2.11.8":
+  version: 2.11.8
+  resolution: "@turbo/darwin-arm64@npm:2.11.8"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@turbo/linux-64@npm:2.11.7":
-  version: 2.11.7
-  resolution: "@turbo/linux-64@npm:2.11.7"
+"@turbo/linux-64@npm:2.11.8":
+  version: 2.11.8
+  resolution: "@turbo/linux-64@npm:2.11.8"
   conditions: (os=android | os=linux) & cpu=x64
   languageName: node
   linkType: hard
 
-"@turbo/linux-arm64@npm:2.11.7":
-  version: 2.11.7
-  resolution: "@turbo/linux-arm64@npm:2.11.7"
+"@turbo/linux-arm64@npm:2.11.8":
+  version: 2.11.8
+  resolution: "@turbo/linux-arm64@npm:2.11.8"
   conditions: (os=android | os=linux) & cpu=arm64
   languageName: node
   linkType: hard
 
-"@turbo/windows-64@npm:2.11.7":
-  version: 2.11.7
-  resolution: "@turbo/windows-64@npm:2.11.7"
+"@turbo/windows-64@npm:2.11.8":
+  version: 2.11.8
+  resolution: "@turbo/windows-64@npm:2.11.8"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@turbo/windows-arm64@npm:2.11.7":
-  version: 2.11.7
-  resolution: "@turbo/windows-arm64@npm:2.11.7"
+"@turbo/windows-arm64@npm:2.11.8":
+  version: 2.11.8
+  resolution: "@turbo/windows-arm64@npm:2.11.8"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
@@ -32222,16 +32234,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"turbo@npm:^2.11.4":
-  version: 2.11.7
-  resolution: "turbo@npm:2.11.7"
+"turbo@npm:^2.11.8":
+  version: 2.11.8
+  resolution: "turbo@npm:2.11.8"
   dependencies:
-    "@turbo/darwin-64": "npm:2.11.7"
-    "@turbo/darwin-arm64": "npm:2.11.7"
-    "@turbo/linux-64": "npm:2.11.7"
-    "@turbo/linux-arm64": "npm:2.11.7"
-    "@turbo/windows-64": "npm:2.11.7"
-    "@turbo/windows-arm64": "npm:2.11.7"
+    "@turbo/darwin-64": "npm:2.11.8"
+    "@turbo/darwin-arm64": "npm:2.11.8"
+    "@turbo/linux-64": "npm:2.11.8"
+    "@turbo/linux-arm64": "npm:2.11.8"
+    "@turbo/windows-64": "npm:2.11.8"
+    "@turbo/windows-arm64": "npm:2.11.8"
   dependenciesMeta:
     "@turbo/darwin-64":
       optional: true
@@ -32247,7 +32259,7 @@ __metadata:
       optional: true
   bin:
     turbo: bin/turbo
-  checksum: 10c0/42ad4f562a10b5f18be19dd13d24dec9276696818258ce5f31acbd507a8dfbdfab7bcee275b8b9c7f5446fde6549b90200950d7456f32042d604774338e6168a
+  checksum: 10c0/717c0ba7b6b19ae672ca17ceeabd7d549664552d626e4543d05c78b3ad0cdd1cdec5c0a2eaed8ec28803f7cc9c63741ee3fef7803a60cf60cd42c32198489f56
   languageName: node
   linkType: hard
 
@@ -34063,6 +34075,13 @@ __metadata:
   version: 3.25.76
   resolution: "zod@npm:3.25.76"
   checksum: 10c0/5718ec35e3c40b600316c5b4c5e4976f7fee68151bc8f8d90ec18a469be9571f072e1bbaace10f1e85cf8892ea12d90821b200e980ab46916a6166a4260a983c
+  languageName: node
+  linkType: hard
+
+"zod@npm:^4.6.7":
+  version: 4.6.7
+  resolution: "zod@npm:4.6.7"
+  checksum: 10c0/4ce2eb14034317b7254e347ca37b5ad591cf8333147030cf05b9b5d31692d45073f7f2747aa50cf8c6b29012194d2b22978cecc89969cf34a0d18e89d0ee7d7b
   languageName: node
   linkType: hard
 

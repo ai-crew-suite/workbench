@@ -52,8 +52,7 @@ class FixtureAnnotationProcessor implements CatalogProcessor {
   }
 }
 
-// Export the module using the New Backend System patterns
-export const catalogModuleFixtureAnnotations = createBackendModule({
+export const dynamicAnnotationProcessor = createBackendModule({
   pluginId: 'catalog',
   moduleId: 'fixture-annotations',
   register(env) {
@@ -62,11 +61,10 @@ export const catalogModuleFixtureAnnotations = createBackendModule({
         catalog: catalogProcessingExtensionPoint,
       },
       async init({ catalog }) {
-        // Wire the custom processor directly into the catalog processing engine
         catalog.addProcessor(new FixtureAnnotationProcessor());
       },
     });
   },
 });
 
-export default catalogModuleFixtureAnnotations;
+export default dynamicAnnotationProcessor;

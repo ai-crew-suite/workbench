@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 import { Entity } from '@backstage/catalog-model';
-import { getPaymentServiceNotes } from './fixtures/paymentService';
 
-type AnnotationFactory = (entity: Entity) => Record<string, string>;
-
-// Map entity names to their respective factory functions
-export const catalogFixtureRegistry: Record<string, AnnotationFactory> = {
-  'payment-service': getPaymentServiceNotes,
-  // Add future fixtures here
-};
+export function getPaymentServiceNotes(entity: Entity): Record<string, string> {
+  return {
+    '://ai-crew.com': JSON.stringify({
+      generatedAt: new Date().toISOString(),
+      fixtureStatus: 'active',
+      notes: `Automated workspace fixture targeting entity: ${entity.metadata.name}.`
+    })
+  };
+}

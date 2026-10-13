@@ -32,6 +32,7 @@ import searchPlugin from '@backstage/plugin-search-backend';
 import signalsPlugin from '@backstage/plugin-signals-backend';
 import techdocsPluginAlpha from '@backstage/plugin-techdocs-backend';
 import { CustomKindsModule } from './modules/catalog-schema-extensions';
+//import { dynamicAnnotationProcessor } from './modules/dynamic-annotation-processor';
 import { testPermissionModule } from './modules/test-permission-policy';
 import { globalWiremockInterceptorModule } from './modules/wiremock-interceptor';
 import { wiremockBootstrapperModule } from './modules/wiremock-bootstrapper';
@@ -246,6 +247,9 @@ export async function startDevBackend() {
   backend.add(CustomKindsModule);
   backend.add(globalWiremockInterceptorModule);
   backend.add(wiremockBootstrapperModule);
+
+  // Seeders
+  //backend.add(dynamicAnnotationProcessor);
 
   // ISOLATED SANDBOX INJECTION: Protect the orchestrator core from consumer failures
   const pluginRoot = process.cwd();
