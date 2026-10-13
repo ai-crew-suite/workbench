@@ -14,32 +14,31 @@
  * limitations under the License.
  */
 import { createBackendModule } from '@backstage/backend-plugin-api';
-import {
-  PolicyDecision,
-  AuthorizeResult,
-} from '@backstage/plugin-permission-common';
-import {
-  PermissionPolicy,
-  PolicyQuery,
-  PolicyQueryUser,
-} from '@backstage/plugin-permission-node';
 import { policyExtensionPoint } from '@backstage/plugin-permission-node/alpha';
+import { PermissionPolicy, PolicyQuery, PolicyQueryUser } from '@backstage/plugin-permission-node';
+import { AuthorizeResult, PolicyDecision } from '@backstage/plugin-permission-common';
 
 export class TestPermissionPolicy implements PermissionPolicy {
   async handle(
-    _request: PolicyQuery,
+    request: PolicyQuery,
     _user?: PolicyQueryUser,
   ): Promise<PolicyDecision> {
+    if (request.permission.name === 'scaffolder.template.execute') {
+      return { result: AuthorizeResult.ALLOW };
+    }
+
     return { result: AuthorizeResult.ALLOW };
   }
 }
 
-export const PermissionModule = createBackendModule({
+export const testPermissionModule = createBackendModule({
   pluginId: 'permission',
-  moduleId: 'permission-policy',
+  moduleId: 'custom-policy',
   register(reg) {
     reg.registerInit({
-      deps: { policy: policyExtensionPoint },
+      deps: {
+        policy: policyExtensionPoint
+      },
       async init({ policy }) {
         policy.setPolicy(new TestPermissionPolicy());
       },

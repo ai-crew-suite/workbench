@@ -23,13 +23,16 @@ import authPlugin from '@backstage/plugin-auth-backend';
 import catalogPlugin from '@backstage/plugin-catalog-backend';
 import eventsPlugin from '@backstage/plugin-events-backend';
 import notificationsPlugin from '@backstage/plugin-notifications-backend';
+import permissionsPlugin from '@backstage/plugin-permission-backend';
 import proxyPlugin from '@backstage/plugin-proxy-backend';
 import scaffolderPlugin from '@backstage/plugin-scaffolder-backend';
+import searchCatalogCollatorPlugin from '@backstage/plugin-search-backend-module-catalog';
+import searchPlugin from '@backstage/plugin-search-backend';
 import signalsPlugin from '@backstage/plugin-signals-backend';
 import techdocsPluginAlpha from '@backstage/plugin-techdocs-backend';
 import { CustomKindsModule } from './modules/catalog-schema-extensions';
+import { testPermissionModule } from './modules/test-permission-policy';
 import { globalWiremockInterceptorModule } from './modules/wiremock-interceptor';
-import { PermissionModule } from './modules/test-permission-policy';
 import { wiremockBootstrapperModule } from './modules/wiremock-bootstrapper';
 
 /**
@@ -44,13 +47,13 @@ const customDatabaseServiceFactory = createServiceFactory({
     rootLifecycle: coreServices.rootLifecycle,
     logger: coreServices.logger,
     lifecycle: coreServices.lifecycle,
-    plugin: coreServices.pluginMetadata,
+    pluginMetadata: coreServices.pluginMetadata,
   },
   createRootContext: async ({ config, rootLogger, rootLifecycle }) => {
     return DatabaseManager.fromConfig(config, { rootLogger, rootLifecycle });
   },
-  async factory({ logger, lifecycle, plugin }, manager) {
-    return manager.forPlugin(plugin.getId(), { logger, lifecycle });
+  async factory({ logger, lifecycle, pluginMetadata }, manager) {
+    return manager.forPlugin(pluginMetadata.getId(), { logger, lifecycle });
   },
 });
 
@@ -101,6 +104,66 @@ const devSandboxUserInfoServiceFactory = createServiceFactory({
   },
 });
 
+/**
+ * Global Dev Sandbox Auth Service Bypass
+ *
+ * Companion to {@link devSandboxHttpAuthServiceFactory}: the sandbox guest
+ * credentials minted by the HTTP auth mock carry no signed token, so the real
+ * core auth service rejects them in `getPluginRequestToken` (used by e.g. the
+ * search backend's /query route). This mock issues static tokens instead and
+ * hands out properly shaped internal credentials elsewhere.
+ */
+const devSandboxAuthServiceFactory = createServiceFactory({
+  service: coreServices.auth,
+  deps: {},
+  async factory() {
+    const serviceCredentials = {
+      $$type: '@backstage/BackstageCredentials',
+      version: 'v1',
+      principal: { type: 'service', subject: 'dev-sandbox' },
+    };
+    const guestUserCredentials = {
+      $$type: '@backstage/BackstageCredentials',
+      version: 'v1',
+      principal: {
+        type: 'user',
+        userEntityRef: 'user:default/guest',
+        ownershipEntityRefs: ['user:default/guest', 'group:default/developers'],
+      },
+    };
+    return {
+      async authenticate(_token: string) {
+        return guestUserCredentials;
+      },
+      async isPrincipal(credentials: unknown, principalType: string) {
+        return (credentials as any)?.principal?.type === principalType;
+      },
+      async getNoneCredentials() {
+        return {
+          $$type: '@backstage/BackstageCredentials',
+          version: 'v1',
+          principal: { type: 'none' },
+        };
+      },
+      async getOwnServiceCredentials() {
+        return serviceCredentials;
+      },
+      async getPluginRequestToken(_options: unknown) {
+        return { token: 'dev-sandbox-plugin-token' };
+      },
+      async getLimitedUserToken(_credentials: unknown) {
+        return {
+          token: 'dev-sandbox-limited-user-token',
+          expiresAt: new Date(Date.now() + 3_600_000),
+        };
+      },
+      async listPublicServiceKeys() {
+        return { keys: [] };
+      },
+    } as any;
+  },
+});
+
 export async function startDevBackend() {
   const backend = createBackend();
 
@@ -148,31 +211,38 @@ export async function startDevBackend() {
   backend.add(mockConfigService);
   */
 
-  // 1. Enforce core service overrides
+  // Enforce core service overrides
   backend.add(customDatabaseServiceFactory);
   backend.add(devSandboxHttpAuthServiceFactory);
   backend.add(devSandboxUserInfoServiceFactory);
+  backend.add(devSandboxAuthServiceFactory);
 
-  // 2. Standard core system plugins (Guaranteed to boot safely)
+  // Standard core system plugins (Guaranteed to boot safely)
   backend.add(proxyPlugin);
   backend.add(catalogPlugin);
   backend.add(techdocsPluginAlpha);
   backend.add(scaffolderPlugin);
 
-  // 3. Attach authentication and event systems natively
+  // Serves the /api/search/query endpoint used by the frontend search page,
+  // with the catalog collator indexing mock-fixture entities into the index.
+  backend.add(searchPlugin);
+  backend.add(searchCatalogCollatorPlugin);
+
+  // Attach authentication and event systems natively
   backend.add(authPlugin);
   backend.add(authGithubModule);
   backend.add(signalsPlugin);
   backend.add(notificationsPlugin);
 
-  // 4. Inject test sandboxing modules
+  // Inject test sandboxing modules
   backend.add(eventsPlugin);
-  backend.add(PermissionModule);
+  backend.add(permissionsPlugin);
+  backend.add(testPermissionModule);
   backend.add(CustomKindsModule);
   backend.add(globalWiremockInterceptorModule);
   backend.add(wiremockBootstrapperModule);
 
-  // 5. ISOLATED SANDBOX INJECTION: Protect the orchestrator core from consumer failures
+  // ISOLATED SANDBOX INJECTION: Protect the orchestrator core from consumer failures
   const pluginRoot = process.cwd();
   const pluginSrcPath = path.resolve(pluginRoot, 'src/index.ts');
 
@@ -192,6 +262,6 @@ export async function startDevBackend() {
     // Let it drop through or keep going so you can at least see diagnostics logs
   }
 
-  // 6. Fire up the engine container thread
+  // Fire up the engine container thread
   await backend.start();
 }

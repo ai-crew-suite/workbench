@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 import { describe, it, expect } from 'vitest';
-import { PermissionModule, TestPermissionPolicy } from '../TestPermissionPolicy';
+import { testPermissionModule, TestPermissionPolicy } from '../TestPermissionPolicy';
 import { AuthorizeResult } from '@backstage/plugin-permission-common';
 import { PolicyQuery } from '@backstage/plugin-permission-node';
 
-describe('PermissionModule Stack', () => {
+describe('testPermissionModule Stack', () => {
   it('should export a valid backend feature token wrapper', () => {
-    expect(PermissionModule).toBeDefined();
+    expect(testPermissionModule).toBeDefined();
     // Verifies it conforms to the standard Backstage feature structure safely
-    expect(typeof PermissionModule).toBe('object');
+    expect(typeof testPermissionModule).toBe('object');
   });
 
   it('should apply a blanket approval ALLOW verdict for incoming requests', async () => {

@@ -1,0 +1,9 @@
+# Empty fallback catalog entities for sandbox environments
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: empty-fallback-root
+  description: "A safe, empty fallback root location for sandbox environments."
+spec:
+  type: file
+  targets: [] # Intentionally left empty so no child entities are fetched

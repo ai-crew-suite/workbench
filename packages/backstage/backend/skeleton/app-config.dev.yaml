@@ -82,10 +82,10 @@ catalog:
       ]
   locations:
     - type: file
-      target: "${MOCK_FIXTURES_PATH:-../../mock-fixtures}/location.yaml"
+      target: "${MOCK_FIXTURES_PATH:-../../../fixtures}/location.yaml"
 
     - type: "${CONSUMER_CATALOG_TYPE:-file}"
-      target: "${CONSUMER_CATALOG_TARGET:-../../platform-scaffolds/empty-fallback.yaml}"
+      target: "./platform-scaffolds/empty-fallback.yaml"
 
 techdocs:
   builder: 'local'
@@ -98,6 +98,16 @@ techdocs:
 
 scaffolder:
   concurrentTasks: 5
+
+# Keeps the frontend /search page backed by the catalog collator without
+# waiting on its fallback cadence during interactive dev sessions.
+search:
+  collators:
+    catalog:
+      schedule:
+        frequency: { seconds: 60 }
+        timeout: { minutes: 3 }
+        initialDelay: { seconds: 15 }
 
 drivers:
   mockProxyUrl: "${MOCK_PROXY_URL:-http://localhost:8080}"
