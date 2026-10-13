@@ -17,6 +17,7 @@ import '@backstage/ui/css/styles.css'; // must be first import
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { FrontendFeature } from '@backstage/frontend-plugin-api';
 import { buildDevApp } from './App';
 
 const originalConsoleWarn = console.warn;
@@ -45,8 +46,8 @@ console.error = (...args: any[]) => {
 
 console.log('[Dev-Workbench] Shared wrapper bundle evaluated completely.');
 
-export function bootstrapFrontendWorkbench(PluginComponent: React.ComponentType) {
-  console.log('[Dev-Workbench] bootstrapFrontendWorkbench invoked with target component:', PluginComponent);
+export function bootstrapFrontendWorkbench(TargetPlugin: FrontendFeature) {
+  console.log('[Dev-Workbench] bootstrapFrontendWorkbench invoked with target plugin:', TargetPlugin);
 
   const rootDomNode = document.getElementById('root');
   if (!rootDomNode) {
@@ -55,13 +56,10 @@ export function bootstrapFrontendWorkbench(PluginComponent: React.ComponentType)
   }
 
   try {
-    const app = buildDevApp({ PluginComponent });
+    const app = buildDevApp({ TargetPlugin });
     console.log('[Dev-Workbench] Backstage App Next factory constructed successfully:', app);
 
     const rootElement = app.createRoot();
-    console.log('[Dev-Workbench] app.createRoot() executed. Dom tree node element returned:', rootElement);
-
-    console.log('[Dev-Workbench] Mounting the React feature tree onto <div id="root"></div>...');
     ReactDOM.createRoot(rootDomNode).render(
       <React.StrictMode>
         {rootElement}

@@ -35,6 +35,12 @@
     "https://json.schemastore.org/catalog-info.json": [
       "**/catalog-info.yaml",
       "master-catalogs.yml"
+    ],
+    "": [
+      "**/app-config.yaml",
+      "**/app-config.yml",
+      "**/app-config.*.yaml",
+      "**/app-config.*.yml"
     ]
   },
   "yaml.validate": true,

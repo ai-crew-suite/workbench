@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 import React from 'react';
+import { createFrontendPlugin, PageBlueprint, createRouteRef } from '@backstage/frontend-plugin-api';
 
-export const RootPage = () => {
+const CustomWorkspacePanel = () => {
   return React.createElement(
     'div',
     { style: { padding: '3rem', backgroundColor: '#f0f4f8', borderRadius: '8px' } },
@@ -23,3 +24,18 @@ export const RootPage = () => {
     React.createElement('p', null, 'Your isolated frontend workbench wrapper is fully functional.')
   );
 };
+
+export const helloWorldPluginRouteRef = createRouteRef();
+
+export default createFrontendPlugin({
+  pluginId: 'custom-view-feature',
+  extensions: [
+    PageBlueprint.make({
+      name: 'root-landing-page',
+      params: {
+        path: '/custom-feature',
+        loader: async () => React.createElement(CustomWorkspacePanel),
+      },
+    }),
+  ],
+});

@@ -16,7 +16,7 @@
  */
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createExtension } from '@backstage/frontend-plugin-api';
+import { createExtension, createFrontendModule } from '@backstage/frontend-plugin-api';
 
 const mocks = vi.hoisted(() => {
   const createRoot = vi.fn(() => 'app-root');
@@ -26,12 +26,13 @@ const mocks = vi.hoisted(() => {
 
 // 1. Mock the defaults and engine configurations
 vi.mock('@backstage/frontend-defaults', () => ({ createApp: mocks.createApp }));
-vi.mock('../src/modules/nav', () => ({ navModule: 'navigation' }));
+vi.mock('../plugins/nav/plugin', () => ({ customNavModule: 'navigation' }));
 
 // 2. Mock out every complex upstream feature plugin imported by App.tsx
 vi.mock('@backstage/plugin-catalog/alpha', () => ({ default: 'catalog' }));
 vi.mock('@backstage/plugin-notifications/alpha', () => ({ default: 'notifications' }));
 vi.mock('@backstage/plugin-search/alpha', () => ({ default: 'search' }));
+vi.mock('@backstage/plugin-user-settings/alpha', () => ({ default: 'user-settings' }));
 vi.mock('@backstage/plugin-app-visualizer', () => ({ default: 'app-visualizer' }));
 
 vi.mock('@backstage/plugin-app-react/alpha', async (importOriginal) => {
@@ -69,6 +70,11 @@ vi.mock('@backstage/plugin-app-react/alpha', async (importOriginal) => {
 });
 
 vi.mock('@backstage/theme', () => ({
+  createUnifiedTheme: vi.fn(() => ({})),
+  palettes: {
+    light: { primary: {} },
+    dark: { primary: {} },
+  },
   themes: {
     light: { id: 'light' },
     dark: { id: 'dark' },
@@ -84,14 +90,22 @@ describe('App Layout Suite', () => {
   it('creates the application root from the configured feature set', async () => {
     const { buildDevApp } = await import('../App');
 
-    const DummyComponent = () => <div>Test pad view target</div>;
+    const TargetPlugin = createFrontendModule({
+      pluginId: 'test-target-plugin',
+      extensions: [
+        createExtension({
+          kind: 'app',
+          name: 'test-target-plugin-root',
+          attachTo: { id: 'app/root', input: 'components' },
+          output: [],
+          factory: () => [],
+        }),
+      ],
+    });
 
-    // Invoke your clean structural factory function natively
-    const app = buildDevApp({ PluginComponent: DummyComponent });
+    const app = buildDevApp({ TargetPlugin });
 
-    // Assert that buildDevApp correctly aggregates features and calls the core factory
     expect(mocks.createApp).toHaveBeenCalled();
     expect(app.createRoot()).toBe('app-root');
   });
 });
-

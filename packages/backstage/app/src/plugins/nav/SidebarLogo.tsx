@@ -13,39 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  Link,
-  sidebarConfig,
-  useSidebarOpenState,
-} from '@backstage/core-components';
-import { makeStyles } from '@material-ui/core';
+import Box from '@mui/material/Box';
+import { Link } from 'react-router-dom';
 import { LogoFull } from './LogoFull';
 import { LogoIcon } from './LogoIcon';
 
-const useSidebarLogoStyles = makeStyles({
-  root: {
-    width: sidebarConfig.drawerWidthClosed,
-    height: 3 * sidebarConfig.logoHeight,
-    display: 'flex',
-    flexFlow: 'row nowrap',
-    alignItems: 'center',
-    marginBottom: -14,
-  },
-  link: {
-    width: sidebarConfig.drawerWidthClosed,
-    marginLeft: 24,
-  },
-});
+interface SidebarLogoProps {
+  isOpen: boolean;
+}
 
-export const SidebarLogo = () => {
-  const classes = useSidebarLogoStyles();
-  const { isOpen } = useSidebarOpenState();
-
+export const SidebarLogo = ({ isOpen }: SidebarLogoProps) => {
   return (
-    <div className={classes.root}>
-      <Link to="/" underline="none" className={classes.link} aria-label="Home">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '100%',
+        '& svg': {
+          display: 'block',
+          width: isOpen ? '130px' : '32px',
+          height: 'auto',
+          transition: 'width 0.1s ease-in-out',
+        }
+      }}
+    >
+      <Link
+        to="/"
+        aria-label="Home"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textDecoration: 'none',
+        }}
+      >
         {isOpen ? <LogoFull /> : <LogoIcon />}
       </Link>
-    </div>
+    </Box>
   );
 };

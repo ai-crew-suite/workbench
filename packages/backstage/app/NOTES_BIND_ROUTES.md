@@ -11,7 +11,7 @@ import { scaffolderPlugin } from '@backstage/plugin-scaffolder';
 
 const app = createApp({
   features: [ catalogPlugin, scaffolderPlugin ],
-  
+
   bindRoutes({ bind }) {
     // We are binding Catalog's external hook to Scaffolder's real route
     bind(catalogPlugin.externalRoutes, {
@@ -21,13 +21,13 @@ const app = createApp({
 });
 ```
 
-##  Route Binding Handling via YAML Configuration
+## Route Binding Handling via YAML Configuration
 
 ```yaml
 # app-config.yaml
 app:
   listen: { port: 3000 }
-  
+
 bindRoutes:
   catalog.externalRoutes.createComponent: scaffolder.routes.root
 ```
@@ -101,7 +101,7 @@ export const useDynamicRouteResolver = () => {
     try {
       // 1. Ask the discovery API where this plugin's backend is hosted
       const baseUrl = await discoveryApi.getBaseUrl(pluginId);
-      
+
       // 2. Append your deep link sub-path
       return `${baseUrl}${subPath}`;
     } catch (error) {
@@ -196,7 +196,7 @@ export const MyCustomBackendDataComponent = () => {
     async function fetchData() {
       // 1. Dynamically discover the main proxy endpoint base URL
       const proxyBaseUrl = await discoveryApi.getBaseUrl('proxy');
-      
+
       // 2. Append your custom plugin's proxy endpoint path
       const targetUrl = `${proxyBaseUrl}/my-custom-plugin/health`; // or your custom route
 
@@ -223,29 +223,27 @@ export const MyCustomBackendDataComponent = () => {
 
 To see this full loop in action across your custom backend and frontend plugins, you will need two open terminal windows on your machine:
 
-1. **Terminal 1 (Start the Backend):**
-   Navigate to your custom backend plugin directory (or the root if using the integrated layout) and start it up:
+#### 1. **Terminal 1 (Start the Backend):**
 
-   ```bash
-   cd plugins/my-custom-plugin-backend
-   yarn start
-   ```
+Navigate to your custom backend plugin directory (or the root if using the integrated layout) and start it up:
 
-   This launches your endpoint listener on port `7007`.
+```bash
+cd plugins/my-custom-plugin-backend
+yarn start
+```
 
-   
+This launches your endpoint listener on port `7007`.
 
-2. **Terminal 2 (Start the Frontend Sandbox):**
-   Navigate to your frontend plugin directory and spin up your dev app:
+#### 2. **Terminal 2 (Start the Frontend Sandbox)**
 
-   ```bash
-   cd plugins/my-custom-plugin
-   yarn start
-   ```
+Navigate to your frontend plugin directory and spin up your dev app:
 
-   This launches your browser shell on port `3000`.
+```bash
+cd plugins/my-custom-plugin
+yarn start
+```
 
-   
+This launches your browser shell on port `3000`.
 
 Why this is the Standard Approach
 

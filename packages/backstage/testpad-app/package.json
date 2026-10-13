@@ -9,7 +9,8 @@
     "start": "backstage-dev-app"
   },
   "dependencies": {
-    "@ai-crew-suite/workbench-app": "workspace:*"
+    "@ai-crew-suite/workbench-app": "workspace:*",
+    "@backstage/frontend-plugin-api": "backstage:^"
   },
   "devDependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev"
