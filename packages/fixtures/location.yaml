@@ -10,6 +10,12 @@ metadata:
   description: Automatically crawls and indexes all loose mock catalog entities across the workspace.
 spec:
   type: file
+  # Optional presence: glob targets that match zero files (e.g. no *.yml
+  # fixtures exist yet) must not fail processing, which would discard every
+  # entity emitted by the matching globs.
+  presence: optional
   targets:
     - ./catalog/**/*.yaml
     - ./catalog/**/*.yml
+    - ./scaffolder/**/*.yaml
+    - ./scaffolder/**/*.yml

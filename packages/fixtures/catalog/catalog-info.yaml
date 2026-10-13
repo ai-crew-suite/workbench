@@ -149,6 +149,9 @@ spec:
   # The ingestion driver mechanism. For your air-gapped setup, this is locked
   # to file (local disk). For cloud tracking, this shifts to url. Required.
   type: file
+  # Optional presence: the additional-fixtures file is staged in sandbox runs
+  # only; a missing target must not fail the whole entity-processing run.
+  presence: optional
   # A collection of relative string file paths or remote repo paths to scan for additional entities. Required.
   targets:
     - ./additional-fixtures.yaml

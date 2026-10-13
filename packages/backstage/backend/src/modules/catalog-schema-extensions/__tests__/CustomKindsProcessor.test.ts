@@ -67,6 +67,22 @@ describe('CustomKindsProcessor', () => {
   });
 
   describe('postProcessEntity', () => {
+    it('passes non-custom kinds through untouched even without spec.owner', async () => {
+      // Regression guard: Location entities have no spec.owner, and the
+      // pipeline calls postProcessEntity for every kind. Throwing here used
+      // to fail processing of the generated catalog locations and blocked
+      // all catalog ingestion.
+      const entity: Entity = {
+        apiVersion: 'backstage.io/v1alpha1',
+        kind: 'Location',
+        metadata: { name: 'generated-location' },
+        spec: { type: 'file', target: '/abs/path/location.yaml' },
+      };
+
+      const result = await processor.postProcessEntity(entity, mockLocation, mockEmit);
+      expect(result).toEqual(entity);
+    });
+
     it('throws an error if spec is missing or spec.owner is missing', async () => {
       const entity: Entity = {
         apiVersion: 'ai-crew-suite.dev/v1alpha1',

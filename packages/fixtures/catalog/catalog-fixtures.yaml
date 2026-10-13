@@ -36,10 +36,10 @@ metadata:
     temporal.io/namespace: ai-crew-suite-prod
     # 🎯 THE PAGERDUTY CORRELATION BINDING:
     # Tells the plugin exactly what integration service key to filter by when querying incidents
-    ://pagerduty.com: SRV-PLATFORM
+    pagerduty.com/service-id: SRV-PLATFORM
     # 🎯 THE DATADOG CORRELATION BINDING:
     # Instructs the telemetry plugin exactly which dashboard matrix block to query and render
-    ://datadoghq.com: https://datadoghq.com
+    datadoghq.com/dashboard-url: https://datadoghq.com
 spec:
   type: service
   lifecycle: production

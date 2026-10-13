@@ -39,6 +39,7 @@ import {
   ThemeProvider as LegacyThemeProvider,
   StylesProvider,
 } from '@material-ui/core/styles';
+import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import { customNavModule } from './plugins/nav/plugin';
 
@@ -121,7 +122,9 @@ export function buildDevApp({ TargetPlugin }: BuildAppOptions) {
                 <LegacyThemeProvider theme={backstageLightTheme}>
                   <StylesProvider injectFirst>
                     <CssBaseline />
-                    {children}
+                      <Box sx={{ display: 'flex', flexDirection: 'row', width: '100vw', height: '100vh', overflow: 'hidden' }}>
+                        {children}
+                      </Box>
                   </StylesProvider>
                 </LegacyThemeProvider>
               </UnifiedThemeProvider>
@@ -141,7 +144,9 @@ export function buildDevApp({ TargetPlugin }: BuildAppOptions) {
                 <LegacyThemeProvider theme={backstageDarkTheme}>
                   <StylesProvider injectFirst>
                     <CssBaseline />
-                    {children}
+                      <Box sx={{ display: 'flex', flexDirection: 'row', width: '100vw', height: '100vh', overflow: 'hidden' }}>
+                        {children}
+                      </Box>
                   </StylesProvider>
                 </LegacyThemeProvider>
               </UnifiedThemeProvider>

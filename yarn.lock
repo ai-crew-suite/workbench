@@ -249,10 +249,12 @@ __metadata:
     "@backstage/plugin-auth-backend": "backstage:^"
     "@backstage/plugin-auth-backend-module-github-provider": "backstage:^"
     "@backstage/plugin-catalog-backend": "backstage:^"
+    "@backstage/plugin-catalog-backend-module-scaffolder-entity-model": "backstage:^"
     "@backstage/plugin-events-backend": "backstage:^"
     "@backstage/plugin-notifications-backend": "backstage:^"
     "@backstage/plugin-permission-backend": "backstage:^"
     "@backstage/plugin-permission-backend-module-allow-all-policy": "backstage:^"
+    "@backstage/plugin-permission-node": "backstage:^"
     "@backstage/plugin-proxy-backend": "backstage:^"
     "@backstage/plugin-scaffolder-backend": "backstage:^"
     "@backstage/plugin-search-backend": "backstage:^"
@@ -3070,6 +3072,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@backstage/plugin-catalog-backend-module-scaffolder-entity-model@backstage:^::backstage=1.55.3&npm=0.2.24, @backstage/plugin-catalog-backend-module-scaffolder-entity-model@npm:^0.2.24":
+  version: 0.2.24
+  resolution: "@backstage/plugin-catalog-backend-module-scaffolder-entity-model@npm:0.2.24"
+  dependencies:
+    "@backstage/backend-plugin-api": "npm:^1.10.1"
+    "@backstage/catalog-model": "npm:^1.10.1"
+    "@backstage/plugin-catalog-common": "npm:^1.2.0"
+    "@backstage/plugin-catalog-node": "npm:^2.2.5"
+    "@backstage/plugin-scaffolder-common": "npm:^2.3.0"
+  checksum: 10c0/6c878f6c7cc38e86c5f2d1a35ad644592d3683a260e77a531c9ef7fdac750b00f20c35054791fa23a099b97671571299ccb302ff61bd5ae21586f46837118a1f
+  languageName: node
+  linkType: hard
+
 "@backstage/plugin-catalog-backend@backstage:^::backstage=1.55.3&npm=4.0.0, @backstage/plugin-catalog-backend@npm:^4.0.0":
   version: 4.0.0
   resolution: "@backstage/plugin-catalog-backend@npm:4.0.0"
@@ -3602,7 +3617,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@backstage/plugin-permission-node@npm:^0.11.4":
+"@backstage/plugin-permission-node@backstage:^::backstage=1.55.3&npm=0.11.4, @backstage/plugin-permission-node@npm:^0.11.4":
   version: 0.11.4
   resolution: "@backstage/plugin-permission-node@npm:0.11.4"
   dependencies:

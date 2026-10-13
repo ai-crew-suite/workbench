@@ -45,6 +45,8 @@
   },
   "yaml.validate": true,
   "cSpell.words": [
+    "qdrant",
+    "uncompiled",
     "vercel"
   ]
 }

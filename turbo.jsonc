@@ -44,11 +44,12 @@
       "inputs": [],
       "outputs": []
     },
+    // Long-running dev server task: must never be cached, or turbo replays a
+    // previous run's logs and never boots the server on subsequent starts.
     "start": {
-      "cache": true,
-      "dependsOn": ["^build"],
-      "inputs": [],
-      "outputs": []
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
     },
     /** Synchronizes TypeScript Project References alphabetically and heals roots */
     "sync": {

@@ -56,6 +56,7 @@
     "@backstage/plugin-auth-backend": "backstage:^",
     "@backstage/plugin-auth-backend-module-github-provider": "backstage:^",
     "@backstage/plugin-catalog-backend": "backstage:^",
+    "@backstage/plugin-catalog-backend-module-scaffolder-entity-model": "backstage:^",
     "@backstage/plugin-events-backend": "backstage:^",
     "@backstage/plugin-notifications-backend": "backstage:^",
     "@backstage/plugin-permission-backend": "backstage:^",

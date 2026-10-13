@@ -21,6 +21,7 @@ import { createServiceFactory, coreServices } from '@backstage/backend-plugin-ap
 import authGithubModule from '@backstage/plugin-auth-backend-module-github-provider';
 import authPlugin from '@backstage/plugin-auth-backend';
 import catalogPlugin from '@backstage/plugin-catalog-backend';
+import catalogModuleScaffolderEntityModel from '@backstage/plugin-catalog-backend-module-scaffolder-entity-model';
 import eventsPlugin from '@backstage/plugin-events-backend';
 import notificationsPlugin from '@backstage/plugin-notifications-backend';
 import permissionsPlugin from '@backstage/plugin-permission-backend';
@@ -220,6 +221,10 @@ export async function startDevBackend() {
   // Standard core system plugins (Guaranteed to boot safely)
   backend.add(proxyPlugin);
   backend.add(catalogPlugin);
+  // Teaches the catalog to ingest scaffolder Template entities
+  // (apiVersion scaffolder.backstage.io/v1beta3). Without it, no Template
+  // entity can ever be processed, leaving the scaffolder with no templates.
+  backend.add(catalogModuleScaffolderEntityModel);
   backend.add(techdocsPluginAlpha);
   backend.add(scaffolderPlugin);
 

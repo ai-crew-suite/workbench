@@ -19,6 +19,11 @@ import { CatalogProcessor, CatalogProcessorEmit } from '@backstage/plugin-catalo
 import { LocationSpec } from '@backstage/plugin-catalog-common';
 import { Entity } from '@backstage/catalog-model';
 
+/**
+ * The custom enterprise kinds governed by this processor's validation contracts.
+ */
+const CUSTOM_KINDS = ['DataProduct', 'Model', 'Product', 'Vulnerability', 'ArchitectureDecision'];
+
 interface EnterpriseCustomSpec {
   owner?: string;
   dataGovernancePolicy?: string;
@@ -36,23 +41,37 @@ export class CustomKindsProcessor implements CatalogProcessor {
   }
 
   async validateEntityKind(entity: Entity): Promise<boolean> {
-    const validCustomKinds = ['DataProduct', 'Model', 'Product', 'Vulnerability', 'ArchitectureDecision'];
-
-    if (validCustomKinds.includes(entity.kind)) {
-      if (entity.apiVersion !== 'ai-crew-suite.dev/v1alpha1') {
-        throw new Error(`Invalid apiVersion for custom kind ${entity.kind}. Expected 'ai-crew-suite.dev/v1alpha1'`);
-      }
-      return true;
+    if (!CUSTOM_KINDS.includes(entity.kind)) {
+      return false;
     }
 
-    return false;
+    if (entity.apiVersion !== 'ai-crew-suite.dev/v1alpha1') {
+      throw new Error(`Invalid apiVersion for custom kind ${entity.kind}. Expected 'ai-crew-suite.dev/v1alpha1'`);
+    }
+
+    return true;
   }
 
+  /**
+   * Enforces the enterprise spec contracts for the custom kinds only.
+   *
+   * `postProcessEntity` is invoked by the catalog pipeline for every entity
+   * kind, not just the kinds this processor claims, so any non-custom kind
+   * (e.g. `Location`, which has no `spec.owner`) must pass through untouched.
+   * Throwing on foreign kinds fails the whole entity-processing run and
+   * blocks all catalog ingestion.
+   *
+   * @throws when a custom-kind entity violates its required spec contract.
+   */
   async postProcessEntity(
     entity: Entity,
     _location: LocationSpec,
     _emit: CatalogProcessorEmit,
   ): Promise<Entity> {
+    if (!CUSTOM_KINDS.includes(entity.kind)) {
+      return entity;
+    }
+
     const spec = entity.spec as EnterpriseCustomSpec | undefined;
 
     if (!spec || !spec.owner) {

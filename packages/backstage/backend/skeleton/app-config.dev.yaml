@@ -82,10 +82,10 @@ catalog:
       ]
   locations:
     - type: file
-      target: "${MOCK_FIXTURES_PATH:-../../../fixtures}/location.yaml"
+      target: "${MOCK_FIXTURES_PATH:-../../fixtures}/location.yaml"
 
     - type: "${CONSUMER_CATALOG_TYPE:-file}"
-      target: "./platform-scaffolds/empty-fallback.yaml"
+      target: "${CONSUMER_CATALOG_TARGET:-../backend/skeleton/empty-fallback.yaml}"
 
 techdocs:
   builder: 'local'
