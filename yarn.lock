@@ -19,9 +19,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ai-crew-suite/annotations-fixtures@workspace:packages/fixtures/annotations":
+"@ai-crew-suite/annotations-fixtures@workspace:^, @ai-crew-suite/annotations-fixtures@workspace:packages/fixtures/annotations":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/annotations-fixtures@workspace:packages/fixtures/annotations"
+  dependencies:
+    "@ai-crew-suite/crew-cli": "catalog:dev"
+    "@backstage/catalog-model": "backstage:^"
+    typescript: "catalog:dev"
+    vitest: "catalog:dev"
+    zod: "catalog:dev"
+  languageName: unknown
+  linkType: soft
+
+"@ai-crew-suite/catalog-entities-fixtures@workspace:packages/fixtures/catalog":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/catalog-entities-fixtures@workspace:packages/fixtures/catalog"
   dependencies:
     "@ai-crew-suite/crew-cli": "catalog:dev"
     "@backstage/catalog-model": "backstage:^"
@@ -249,6 +261,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/workbench-backend@workspace:packages/backstage/backend"
   dependencies:
+    "@ai-crew-suite/annotations-fixtures": "workspace:^"
     "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
     "@ai-crew-suite/utils-wiremock": "workspace:^"

@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 import { createBackendModule } from '@backstage/backend-plugin-api';
-import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node/alpha';
+import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node';
 import { CatalogProcessor, CatalogProcessorEmit } from '@backstage/plugin-catalog-node';
 import { Entity } from '@backstage/catalog-model';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
-
-// Import your custom fixtures package
-import { catalogFixtureRegistry } from '@ai-crew-suite/catalog-fixtures';
+import { catalogAnnotationRegistry } from '@ai-crew-suite/annotations-fixtures';
 
 class FixtureAnnotationProcessor implements CatalogProcessor {
   getProcessorName(): string {
@@ -34,32 +32,25 @@ class FixtureAnnotationProcessor implements CatalogProcessor {
   ): Promise<Entity> {
     const entityName = entity.metadata.name;
 
-    // Check if we have a registered TypeScript factory for this specific entity name
-    if (catalogFixtureRegistry[entityName]) {
+    if (catalogAnnotationRegistry[entityName]) {
       entity.metadata.annotations = entity.metadata.annotations || {};
+      const dynamicAnnotations = catalogAnnotationRegistry[entityName](entity);
 
-      // Execute the factory function to get the dynamic annotations
-      const dynamicAnnotations = catalogFixtureRegistry[entityName](entity);
-
-      // Merge them into the existing entity annotations
       entity.metadata.annotations = {
         ...entity.metadata.annotations,
         ...dynamicAnnotations,
       };
     }
-
     return entity;
   }
 }
 
-export const dynamicAnnotationProcessor = createBackendModule({
+export const catalogModuleFixtureAnnotations = createBackendModule({
   pluginId: 'catalog',
   moduleId: 'fixture-annotations',
   register(env) {
     env.registerInit({
-      deps: {
-        catalog: catalogProcessingExtensionPoint,
-      },
+      deps: { catalog: catalogProcessingExtensionPoint },
       async init({ catalog }) {
         catalog.addProcessor(new FixtureAnnotationProcessor());
       },
@@ -67,4 +58,4 @@ export const dynamicAnnotationProcessor = createBackendModule({
   },
 });
 
-export default dynamicAnnotationProcessor;
+export default catalogModuleFixtureAnnotations;

@@ -16,10 +16,8 @@
 import { Entity } from '@backstage/catalog-model';
 import { getPaymentServiceNotes } from './fixtures/paymentService';
 
-type AnnotationFactory = (entity: Entity) => Record<string, string>;
+export type AnnotationFactory = (entity: Entity) => Record<string, string>;
 
-// Map entity names to their respective factory functions
-export const annotationsFixtureRegistry: Record<string, AnnotationFactory> = {
+export const catalogAnnotationRegistry: Record<string, AnnotationFactory> = {
   'payment-service': getPaymentServiceNotes,
-  // Add future fixtures here
 };

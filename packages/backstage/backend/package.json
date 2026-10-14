@@ -47,6 +47,8 @@
     "typecheck": "crew typecheck"
   },
   "dependencies": {
+    "@ai-crew-suite/annotations-fixtures": "workspace:^",
+    "@ai-crew-suite/catalog-entities-fixtures": "workspace:^",
     "@ai-crew-suite/utils-wiremock": "workspace:^",
     "@backstage/backend-defaults": "backstage:^",
     "@backstage/backend-plugin-api": "backstage:^",

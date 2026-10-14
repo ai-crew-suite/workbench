@@ -1,3 +1,11 @@
+###
+# `catalog-info.yaml` files are hard-coded for use in consuming plugins of the
+# workbench backend dev server to add their own catalog entries. This file is
+# a collection of notes detailing the different types of catalog entities,
+# including custom entities added in the backend server, and their usage within
+# Backstage.
+###
+
 apiVersion: backstage.io/v1alpha1
 
 # Defines the architectural type (Component, System, Domain, API).
