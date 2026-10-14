@@ -78,8 +78,9 @@ export async function startDevBackend() {
   backend.add(wiremockBootstrapperModule);
 
   // 5. Ingest Central Programmatic Seeders (Entities and Annotations)
-  backend.add(catalogModuleFixtureAnnotations);
   backend.add(catalogModuleDynamicEntities);
+  // Add annotations after catalog entities are processed
+  backend.add(catalogModuleFixtureAnnotations);
 
   // 6. ISOLATED SANDBOX INJECTION: Dynamic Local Plugin Attachment
   const pluginRoot = process.cwd();

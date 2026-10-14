@@ -20,8 +20,9 @@ import {
 import express from 'express';
 
 /**
- * A minimal "Hello World" Backstage backend plugin to verify our local dev package orchestrator.
- * Following official standards, it is re-exported as the DEFAULT export.
+ * A minimal "Hello World" Backstage backend plugin to verify our local dev package
+ * orchestrator. Following official standards, it is re-exported as the DEFAULT export.
+ * Available at `/api/hello-world/health` for health checks.
  */
 export default createBackendPlugin({
   pluginId: 'hello-world',
@@ -44,7 +45,6 @@ export default createBackendPlugin({
           });
         });
 
-        // Register the endpoint route under /api/hello-world
         httpRouter.use(router);
 
         logger.info('Hello World testpad plugin successfully registered and listening!');

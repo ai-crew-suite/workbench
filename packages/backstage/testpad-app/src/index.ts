@@ -19,7 +19,7 @@ import { createFrontendPlugin, PageBlueprint, createRouteRef } from '@backstage/
 const CustomWorkspacePanel = () => {
   return React.createElement(
     'div',
-    { style: { padding: '3rem', backgroundColor: '#f0f4f8', borderRadius: '8px' } },
+    { style: { padding: '3rem', text: '#f0f4f8' } },
     React.createElement('h1', null, 'Hello from inside testpad-app!'),
     React.createElement('p', null, 'Your isolated frontend workbench wrapper is fully functional.')
   );
