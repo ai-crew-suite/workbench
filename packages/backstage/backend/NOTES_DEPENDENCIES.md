@@ -117,3 +117,39 @@ The `/api/user-settings/buckets` and `/api/catalog/health` 404s are **red herrin
 ## One thing on your side
 
 Your frontend dev server picked up the fixes via HMR, but do a **hard refresh** in your browser (Ctrl+Shift+R) to be sure you're off the old StrictMode bundle, and **restart your backend** (or wait for the catalog refresh cycle) so it ingests the new `guest` fixture. I killed my temporary backend instance; your frontend server on :3000 is still running untouched.
+
+## Root cause
+
+In this Backstage release's new frontend system, `AppNav` renders a __custom NavContent component raw__ — the framework's own `DefaultNavContent` wraps items in the legacy `<Sidebar>` (from `@backstage/core-components`, which provides `position: fixed` overlay behavior), but a custom NavContent is expected to render that wrapper itself. Your `CustomSidebarNav` rendered a plain `<Box>` instead, which caused exactly what you saw:
+
+1. The nav Box flowed __in-document__ instead of being a fixed overlay.
+2. This release's `SidebarPage` implementation pads the page left by the pinned-sidebar width (224px) — that was your __"vertical column to the left of the sidebar, the width of the expanded sidebar"__ (it's `padding-left`, meant to be occupied by the fixed sidebar).
+3. Sitting in-flow at x=224 with `height: 100vh`, the nav Box pushed __every page's content to y=720+ — below the viewport__ — where the app theme wrapper's `overflow: hidden` clipped it. The content was always in the DOM (your inspector showed it) but off-screen; the "solid color" was just the empty background.
+
+## Fix (`packages/backstage/app/src/plugins/nav/plugin.tsx`)
+
+- Wrapped the custom nav content in `<Sidebar>` from `@backstage/core-components` — it now renders as the fixed-position drawer overlay with the proper navigation background, occupying the page's reserved left padding.
+- Replaced the local `useState` expand toggle with the sidebar's own `useSidebarOpenState()` (hover/pin driven), so the item labels stay in sync with the drawer width; the header toggle button now calls `toggleSidebarPinState()` (pin = keep drawer open).
+- Removed the Box's self-managed width/height/background/border — the `<Sidebar>` drawer owns those (72px collapsed → 224px expanded/pinned); the Box just fills the drawer.
+
+## Verified (against your running dev server via HMR)
+
+- `typecheck` ✓, `test:unit` ✓ (1/1), `lint` ✓ (0 errors, 2 pre-existing warnings)
+
+- Headless-browser sweep of every route — `/` (→ `/catalog`), `/catalog`, `/search`, `/settings/general`, `/create`, `/custom-feature`:
+
+  - sidebar drawer: `x=0, w=224` (fixed overlay, pinned-open by default)
+  - __page content: `x=224, y=0` — visible in the viewport__ on every page
+  - SPA click navigation via sidebar links works (`/create` → templates page with the offline template)
+  - __zero JS errors__ on every route
+
+No restart needed — your dev servers picked this up via HMR; just hard-refresh the browser tab if it's holding a stale bundle. The sidebar now behaves like native Backstage: hover to expand, and the header toggle button pins/unpins it.
+
+```bash
+curl -v "http://localhost:7007/api/user-settings/buckets"
+curl -v "http://localhost:7007/api/catalog/health"
+curl -v "http://localhost:7007/api/catalog/entities"
+curl -v "http://localhost:7007/api/scaffolder/v2/templates"
+curl -v "http://localhost:7007/api/search/query?term=&types%5B0%5D=software-catalog&pageLimit=1"
+```
+

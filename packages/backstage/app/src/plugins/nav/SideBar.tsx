@@ -27,7 +27,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Tooltip from '@mui/material/Tooltip';
 import { Search as SearchIcon, Help as HelpIcon, Settings as SettingsIcon, ChevronLeft, Menu as MenuIcon } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
-import { SidebarLogo } from './SidebarLogo';
+import { SidebarLogo } from './SideBarLogo';
 
 /**
  * Collapsible custom sidebar rendered as the app's nav content. It takes and

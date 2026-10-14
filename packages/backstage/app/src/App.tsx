@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { ErrorInfo, ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { createApp } from '@backstage/frontend-defaults';
 import {
   AppRootWrapperBlueprint,
@@ -26,13 +26,10 @@ import {
   PageBlueprint,
 } from '@backstage/frontend-plugin-api';
 import { Navigate } from 'react-router-dom';
-import {
-  UnifiedThemeProvider,
-  createUnifiedTheme,
-  palettes,
-} from '@backstage/theme';
+import { UnifiedThemeProvider } from '@backstage/theme';
 import appVisualizerPlugin from '@backstage/plugin-app-visualizer';
 import catalogPlugin from '@backstage/plugin-catalog/alpha';
+import kubernetesPlugin from '@backstage/plugin-kubernetes/alpha';
 import notificationsPlugin from '@backstage/plugin-notifications/alpha';
 import scaffolderPlugin from '@backstage/plugin-scaffolder/alpha';
 import searchPlugin from '@backstage/plugin-search/alpha';
@@ -43,61 +40,22 @@ import {
 } from '@material-ui/core/styles';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
-import { customNavModule } from './plugins/nav/plugin';
+import { DevErrorBoundary } from './errorBoundary';
+import { backstageLightTheme, backstageDarkTheme } from './themes';
+import { customNavModule } from './plugins/nav';
 
 console.log('[Dev-Workbench] Shared wrapper bundle evaluated completely.');
-
-export class DevErrorBoundary extends React.Component<
-  { children: ReactNode },
-  { hasError: boolean; error: Error | null }
-> {
-  override state = { hasError: false, error: null };
-  static getDerivedStateFromError(error: Error) { return { hasError: true, error }; }
-  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('[Dev-Workbench] DevErrorBoundary caught a crash:', error, errorInfo);
-  }
-  override render() {
-    if (this.state.hasError) {
-      return (
-        <div style={{ padding: 20, background: '#fff0f0', border: '5px solid red', color: '#a00' }}>
-          <h2>🚨 Frontend Render Crash</h2>
-          <pre>{this.state.error ? String(this.state.error) : 'Unknown Error'}</pre>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
 
 interface BuildAppOptions {
   TargetPlugin: FrontendFeature;
 }
-
-const backstageLightTheme = createUnifiedTheme({
-  palette: {
-    ...palettes.light, // Provides all mandatory tokens (status, navigation, borders) safely
-    primary: {
-      ...palettes.light.primary,
-      main: '#1976d2',
-    },
-  },
-});
-
-const backstageDarkTheme = createUnifiedTheme({
-  palette: {
-    ...palettes.dark, // Provides all mandatory tokens (status, navigation, borders) safely
-    primary: {
-      ...palettes.dark.primary,
-      main: '#90caf9',
-    },
-  },
-});
 
 export function buildDevApp({ TargetPlugin }: BuildAppOptions) {
   const features: FrontendFeature[] = [
     appVisualizerPlugin,
     catalogPlugin,
     customNavModule,
+    kubernetesPlugin,
     notificationsPlugin,
     scaffolderPlugin,
     searchPlugin,
