@@ -23,7 +23,9 @@ import {
 import {
   createFrontendModule,
   FrontendFeature,
+  PageBlueprint,
 } from '@backstage/frontend-plugin-api';
+import { Navigate } from 'react-router-dom';
 import {
   UnifiedThemeProvider,
   createUnifiedTheme,
@@ -106,6 +108,15 @@ export function buildDevApp({ TargetPlugin }: BuildAppOptions) {
   const orchestratorCoreDefaultsModule = createFrontendModule({
     pluginId: 'app',
     extensions: [
+      // Binds the otherwise route-less root URL (the browser's default entry
+      // point and the sidebar logo link) to the catalog landing page.
+      PageBlueprint.make({
+        name: 'home-redirect',
+        params: {
+          path: '/',
+          loader: async () => <Navigate to="/catalog" replace />,
+        },
+      }),
       AppRootWrapperBlueprint.make({
         name: 'dev-error-overlay',
         params: { component: ({ children }: { children: ReactNode }) => <DevErrorBoundary>{children}</DevErrorBoundary> },

@@ -93,7 +93,6 @@ spec:
     - resource:postgres-vector-db
 
 ---
-
 apiVersion: backstage.io/v1alpha1
 # System kind groups multiple backend servers, libraries, and
 # user interfaces into a single high-level business capability.
@@ -106,7 +105,6 @@ spec:
   domain: agentic-capabilities
 
 ---
-
 apiVersion: backstage.io/v1alpha1
 # The highest tier of classification. Used to organize massive operational divisions
 # across an organization (e.g., data-analytics, core-infrastructure, agentic-capabilities).
@@ -117,7 +115,6 @@ spec:
   owner: platform-team
 
 ---
-
 apiVersion: backstage.io/v1alpha1
 # Exposes machine-readable service contracts so engineers can inspect endpoint properties seamlessly.
 kind: API
@@ -146,7 +143,6 @@ spec:
               description: Semantic memory embedded successfully
 
 ---
-
 apiVersion: backstage.io/v1alpha1
 # The background configuration poller hook. Tells Backstage to
 # fetch catalog files from external paths automatically.
@@ -165,7 +161,6 @@ spec:
     - ./additional-fixtures.yaml
 
 ---
-
 apiVersion: backstage.io/v1alpha1
 # Represents organizational hierarchies, product verticals, or engineering squads.
 kind: Group
@@ -178,7 +173,6 @@ spec:
   children: []
 
 ---
-
 apiVersion: backstage.io/v1alpha1
 # Represents an individual person inside the engineering organization.
 # It maps their name, email, and structural corporate settings.
@@ -189,12 +183,24 @@ metadata:
 spec:
   profile:
     email: kevin@ai-crew-suite.dev
-  memberOf: [
-    platform-team
-  ]
+  memberOf: [platform-team]
 
 ---
+apiVersion: backstage.io/v1alpha1
+# Sandbox guest identity minted by the dev sign-in bypass (user:default/guest).
+# Without this entity, the settings profile card and ownership lookups 404.
+kind: User
+metadata:
+  name: guest
+  title: Dev Sandbox Guest
+  description: Default sandbox identity used by the unauthenticated dev workbench.
+spec:
+  profile:
+    email: developer@ai-crew-suite.local
+    displayName: Dev Guest User
+  memberOf: [platform-team]
 
+---
 apiVersion: backstage.io/v1alpha1
 # Represents physical or cloud infrastructure dependencies managed by software.
 kind: Resource
@@ -207,7 +213,6 @@ spec:
   owner: platform-team
 
 ---
-
 # yaml-language-server: $schema=node_modules/@ai-crew-suite/custom-catalog-kinds/catalog.schema.json
 apiVersion: ai-crew-suite.dev/v1alpha1
 # Custom type for data mesh & analytics modeling
@@ -226,7 +231,6 @@ spec:
     - pipeline:temporal-memory-flusher
 
 ---
-
 # yaml-language-server: $schema=node_modules/@ai-crew-suite/custom-catalog-kinds/catalog.schema.json
 apiVersion: ai-crew-suite.dev/v1alpha1
 # Custom type for inventory raw weights, neural networks, and trained algorithms.
@@ -237,11 +241,10 @@ metadata:
 spec:
   owner: platform-team
   trainingDataset: dataproduct:corporate-episodic-memory-warehouse # Custom parameter: Snapshot data lineage link
-  accuracyThreshold: 0.94                     # Custom parameter: Minimal validation score limit
-  baseFramework: pytorch-v2.5                 # Custom parameter: Underlying execution machine format
+  accuracyThreshold: 0.94 # Custom parameter: Minimal validation score limit
+  baseFramework: pytorch-v2.5 # Custom parameter: Underlying execution machine format
 
 ---
-
 # yaml-language-server: $schema=node_modules/@ai-crew-suite/custom-catalog-kinds/catalog.schema.json
 apiVersion: ai-crew-suite.dev/v1alpha1
 # Custom type to map technical microservices onto commercial product definitions
@@ -259,7 +262,6 @@ spec:
   billingTier: enterprise-premium
 
 ---
-
 # yaml-language-server: $schema=node_modules/@ai-crew-suite/custom-catalog-kinds/catalog.schema.json
 apiVersion: ai-crew-suite.dev/v1alpha1
 # Custom type to track long-term risks
@@ -277,7 +279,6 @@ spec:
   remediationStatus: in-progress
 
 ---
-
 # yaml-language-server: $schema=node_modules/@ai-crew-suite/custom-catalog-kinds/catalog.schema.json
 apiVersion: ai-crew-suite.dev/v1alpha1
 # Custom type for Architectural Decision Records (ADRs)

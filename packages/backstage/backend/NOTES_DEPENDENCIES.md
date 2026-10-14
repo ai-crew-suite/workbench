@@ -79,3 +79,41 @@ Here is the exact cleaned specification to apply straight to **`packages/backsta
   }
 }
 ```
+
+## Troubleshooting Notes
+
+All fixed and verified. Here's the full diagnosis and what changed:
+
+## What was actually wrong (3 distinct frontend issues)
+
+I drove your live dev frontend (`:3000`) with a headless browser, dumped the DOM/console/network per route, and found:
+
+1. **No route was bound at `/`** — the URL your browser opens (and the sidebar logo link) fell through to Backstage's NotFound error page: the "sidebar + solid color area" you saw. (Catalog/search/settings actually worked at their direct URLs — you just never got a working entry point to them.)
+2. **The scaffolder Create page (`/create`) crashed** with `TypeError: Cannot read properties of undefined (reading 'refs')` inside `@material-ui/styles makeStyles detach` — React 18 **StrictMode double-mounting** is incompatible with the legacy v4 JSS engine that Backstage's core-components/scaffolder pages use. The attach/detach sheet bookkeeping collapses on unmount and the page dies. Your `index.tsx` wrapped the app root in `<React.StrictMode>` — standard Backstage apps never do this (and your repo was already silencing StrictMode-induced MUI warnings right next to it).
+3. **`user:default/guest` 404s** — your dev sign-in mints a `user:default/guest` identity, but no such catalog entity existed, so the settings profile card and ownership facet lookups 404'd repeatedly.
+
+The `/api/user-settings/buckets` and `/api/catalog/health` 404s are **red herrings** — no package in this tree emits either URL, and neither appears in any live probe of the current bundle (stale browser session artifacts). And `/api/scaffolder/v2/templates` remains 404 by design — the scaffolder frontend lives at `/create`.
+
+## Changes
+
+| File                                              | Change                                                       |
+| :------------------------------------------------ | :----------------------------------------------------------- |
+| `packages/backstage/app/src/index.tsx`            | Removed the `<React.StrictMode>` wrapper (fixes the `/create` crash), with an explanatory comment |
+| `packages/backstage/app/src/App.tsx`              | Added a `home-redirect` `PageBlueprint` binding `/` → `/catalog` (fixes the blank landing area/logo link) |
+| `packages/fixtures/catalog/catalog-info.yaml`     | Added the `guest` User entity matching the sandbox identity (fixes the repeated 404s) |
+| `packages/fixtures/catalog/catalog-fixtures.yaml` | Prettier formatting fix                                      |
+
+## Verified (headless Chromium against your running dev server)
+
+- `/` → redirects to `/catalog`, full catalog table renders ("All Components (1)")
+- `/catalog` → renders, all `entity-facets`/`by-query` calls 200
+- `/search` → 19 results
+- `/settings/general` → renders, `user/default/guest` now 200
+- **`/create` → scaffolder templates page renders and lists the "Offline Hello World" template** — no more crash
+- `/custom-feature` → testpad landing renders
+- **Zero JS errors on every route**
+- `yarn workspace @ai-crew-suite/workbench-app run typecheck` / `test:unit` pass; fixture lint formatted
+
+## One thing on your side
+
+Your frontend dev server picked up the fixes via HMR, but do a **hard refresh** in your browser (Ctrl+Shift+R) to be sure you're off the old StrictMode bundle, and **restart your backend** (or wait for the catalog refresh cycle) so it ingests the new `guest` fixture. I killed my temporary backend instance; your frontend server on :3000 is still running untouched.

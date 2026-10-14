@@ -15,7 +15,6 @@
  */
 import '@backstage/ui/css/styles.css'; // must be first import
 
-import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { FrontendFeature } from '@backstage/frontend-plugin-api';
 import { buildDevApp } from './App';
@@ -60,11 +59,11 @@ export function bootstrapFrontendWorkbench(TargetPlugin: FrontendFeature) {
     console.log('[Dev-Workbench] Backstage App Next factory constructed successfully:', app);
 
     const rootElement = app.createRoot();
-    ReactDOM.createRoot(rootDomNode).render(
-      <React.StrictMode>
-        {rootElement}
-      </React.StrictMode>
-    );
+    // No React.StrictMode: its development double-mount is incompatible with
+    // the legacy @material-ui/styles JSS engine used across Backstage's v4
+    // components. The attach/detach bookkeeping imbalance crashes pages with
+    // "Cannot read properties of undefined (reading 'refs')" (e.g. /create).
+    ReactDOM.createRoot(rootDomNode).render(rootElement);
     console.log('[Dev-Workbench] Mount process completed successfully!');
   } catch (error) {
     console.error('[Dev-Workbench] Framework initialization crashed during factory bootstrap:', error);
