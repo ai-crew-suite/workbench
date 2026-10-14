@@ -26,7 +26,7 @@ import {
   PageBlueprint,
 } from '@backstage/frontend-plugin-api';
 import { Navigate } from 'react-router-dom';
-import { UnifiedThemeProvider } from '@backstage/theme';
+import { UnifiedThemeProvider, type UnifiedTheme } from '@backstage/theme';
 import appVisualizerPlugin from '@backstage/plugin-app-visualizer';
 import catalogPlugin from '@backstage/plugin-catalog/alpha';
 import kubernetesPlugin from '@backstage/plugin-kubernetes/alpha';
@@ -38,8 +38,8 @@ import {
   ThemeProvider as LegacyThemeProvider,
   StylesProvider,
 } from '@material-ui/core/styles';
-import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
+import GlobalStyles from '@mui/material/GlobalStyles';
 import { DevErrorBoundary } from './errorBoundary';
 import { backstageLightTheme, backstageDarkTheme } from './themes';
 import { customNavModule } from './plugins/nav';
@@ -49,6 +49,46 @@ console.log('[Dev-Workbench] Shared wrapper bundle evaluated completely.');
 interface BuildAppOptions {
   TargetPlugin: FrontendFeature;
 }
+
+interface WorkbenchThemeProvidersProps {
+  /** Unified theme applied to both the MUI v5 and legacy MUI v4 providers. */
+  theme: UnifiedTheme;
+  children: ReactNode;
+}
+
+/**
+ * Shared theme provider stack for the dev workbench. Pairs the unified
+ * (MUI v5) theme with a legacy (MUI v4) theme provider so both component
+ * generations resolve styles from the same palette, and pins the legacy
+ * SidebarPage layout gutter to the width of the fixed custom sidebar rail.
+ */
+const WorkbenchThemeProviders = ({
+  theme,
+  children,
+}: WorkbenchThemeProvidersProps) => (
+  <UnifiedThemeProvider theme={theme}>
+    <LegacyThemeProvider theme={theme}>
+      <StylesProvider injectFirst>
+        <CssBaseline />
+        <GlobalStyles
+          styles={{
+            // The new-framework app layout wraps nav and page content in the
+            // legacy `SidebarPage` (MUI v4), which reserves layout space with a
+            // `padding-left` driven by its internal "pin" state (224px when
+            // pinned, and it defaults to pinned). Our custom sidebar is a
+            // fixed 72px rail, so force the reserved space to match it. The
+            // attribute selector survives the JSS-generated class suffixes.
+            '[class*="BackstageSidebarPage-root"]': {
+              paddingLeft: '72px !important',
+            },
+          }}
+        />
+        {children}
+      </StylesProvider>
+    </LegacyThemeProvider>
+  </UnifiedThemeProvider>
+);
+
 
 export function buildDevApp({ TargetPlugin }: BuildAppOptions) {
   const features: FrontendFeature[] = [
@@ -87,16 +127,9 @@ export function buildDevApp({ TargetPlugin }: BuildAppOptions) {
             title: 'AI Crew Light Theme',
             variant: 'light',
             Provider: ({ children }: { children: ReactNode }) => (
-              <UnifiedThemeProvider theme={backstageLightTheme}>
-                <LegacyThemeProvider theme={backstageLightTheme}>
-                  <StylesProvider injectFirst>
-                    <CssBaseline />
-                      <Box sx={{ display: 'flex', flexDirection: 'row', width: '100vw', height: '100vh', overflow: 'hidden' }}>
-                        {children}
-                      </Box>
-                  </StylesProvider>
-                </LegacyThemeProvider>
-              </UnifiedThemeProvider>
+              <WorkbenchThemeProviders theme={backstageLightTheme}>
+                {children}
+              </WorkbenchThemeProviders>
             )
           }
         }
@@ -109,16 +142,9 @@ export function buildDevApp({ TargetPlugin }: BuildAppOptions) {
             title: 'AI Crew Dark Theme',
             variant: 'dark',
             Provider: ({ children }: { children: ReactNode }) => (
-              <UnifiedThemeProvider theme={backstageDarkTheme}>
-                <LegacyThemeProvider theme={backstageDarkTheme}>
-                  <StylesProvider injectFirst>
-                    <CssBaseline />
-                      <Box sx={{ display: 'flex', flexDirection: 'row', width: '100vw', height: '100vh', overflow: 'hidden' }}>
-                        {children}
-                      </Box>
-                  </StylesProvider>
-                </LegacyThemeProvider>
-              </UnifiedThemeProvider>
+              <WorkbenchThemeProviders theme={backstageDarkTheme}>
+                {children}
+              </WorkbenchThemeProviders>
             )
           }
         }

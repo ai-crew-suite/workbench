@@ -22,6 +22,7 @@ import authGithubModule from '@backstage/plugin-auth-backend-module-github-provi
 import catalogPlugin from '@backstage/plugin-catalog-backend';
 import catalogModuleScaffolderEntityModel from '@backstage/plugin-catalog-backend-module-scaffolder-entity-model';
 import eventsPlugin from '@backstage/plugin-events-backend';
+import kubernetesPlugin from '@backstage/plugin-kubernetes-backend';
 import notificationsPlugin from '@backstage/plugin-notifications-backend';
 import permissionsPlugin from '@backstage/plugin-permission-backend';
 import proxyPlugin from '@backstage/plugin-proxy-backend';
@@ -56,6 +57,7 @@ export async function startDevBackend() {
   backend.add(proxyPlugin);
   backend.add(catalogPlugin);
   backend.add(catalogModuleScaffolderEntityModel);
+  backend.add(kubernetesPlugin);
   backend.add(techdocsPluginAlpha);
   backend.add(scaffolderPlugin);
   backend.add(searchPlugin);
