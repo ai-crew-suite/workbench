@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Entity } from '@backstage/catalog-model';
-import { getPaymentServiceNotes } from './fixtures/paymentService';
+import { paymentServiceAnnotations } from './fixtures/paymentService';
+import type { EntityAnnotationFixture } from './types';
 
-export type AnnotationFactory = (entity: Entity) => Record<string, string>;
+export type { EntityAnnotationFixture } from './types';
 
-export const catalogAnnotationRegistry: Record<string, AnnotationFactory> = {
-  'payment-service': getPaymentServiceNotes,
-};
+// Consolidate all independent files into a single scalable array registry
+export const catalogAnnotationFixtures: EntityAnnotationFixture[] = [
+  paymentServiceAnnotations,
+  // otherServiceAnnotations
+];

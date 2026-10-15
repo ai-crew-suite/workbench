@@ -20,6 +20,7 @@ import { createBackend } from '@backstage/backend-defaults';
 import authPlugin from '@backstage/plugin-auth-backend';
 import authGithubModule from '@backstage/plugin-auth-backend-module-github-provider';
 import catalogPlugin from '@backstage/plugin-catalog-backend';
+import catalogModuleLogs from '@backstage/plugin-catalog-backend-module-logs';
 import catalogModuleScaffolderEntityModel from '@backstage/plugin-catalog-backend-module-scaffolder-entity-model';
 import eventsPlugin from '@backstage/plugin-events-backend';
 import kubernetesPlugin from '@backstage/plugin-kubernetes-backend';
@@ -33,12 +34,12 @@ import signalsPlugin from '@backstage/plugin-signals-backend';
 import techdocsPluginAlpha from '@backstage/plugin-techdocs-backend';
 
 // Local Custom Extension Modules
-import { CustomKindsModule } from './modules/catalog-schema-extensions';
-import { testPermissionModule } from './modules/test-permission-policy';
-import { globalWiremockInterceptorModule } from './modules/wiremock-interceptor';
-import { wiremockBootstrapperModule } from './modules/wiremock-bootstrapper';
-import { catalogModuleFixtureAnnotations } from './modules/dynamic-annotation-processor';
 import { catalogModuleDynamicEntities } from './modules/dynamic-catalog-entity-processor';
+import { catalogModuleFixtureAnnotations } from './modules/dynamic-annotation-processor';
+import { CustomKindsModule } from './modules/catalog-schema-extensions';
+import { globalWiremockInterceptorModule } from './modules/wiremock-interceptor';
+import { testPermissionModule } from './modules/test-permission-policy';
+import { wiremockBootstrapperModule } from './modules/wiremock-bootstrapper';
 
 // Clean Service Factory Extracts
 import { customDatabaseServiceFactory } from './services/database';
@@ -56,6 +57,7 @@ export async function startDevBackend() {
   // 2. Standard Core System Plugins
   backend.add(proxyPlugin);
   backend.add(catalogPlugin);
+  backend.add(catalogModuleLogs);
   backend.add(catalogModuleScaffolderEntityModel);
   backend.add(kubernetesPlugin);
   backend.add(techdocsPluginAlpha);
@@ -79,7 +81,6 @@ export async function startDevBackend() {
 
   // 5. Ingest Central Programmatic Seeders (Entities and Annotations)
   backend.add(catalogModuleDynamicEntities);
-  // Add annotations after catalog entities are processed
   backend.add(catalogModuleFixtureAnnotations);
 
   // 6. ISOLATED SANDBOX INJECTION: Dynamic Local Plugin Attachment

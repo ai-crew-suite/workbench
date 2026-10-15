@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 import { Entity } from '@backstage/catalog-model';
+import type { EntityAnnotationFixture } from '../types';
 
-export function getPaymentServiceNotes(entity: Entity): Record<string, string> {
-  return {
-    '://ai-crew.com': JSON.stringify({
+export const paymentServiceAnnotations: EntityAnnotationFixture = {
+  targetEntityRef: 'component:default/platform',
+  factory: (entity: Entity) => ({
+    'ai-crew.com/fixtures': JSON.stringify({
       generatedAt: new Date().toISOString(),
       fixtureStatus: 'active',
       notes: `Automated workspace fixture targeting entity: ${entity.metadata.name}.`
     })
-  };
-}
+  })
+};

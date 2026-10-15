@@ -16,11 +16,26 @@
 import { createBackendModule } from '@backstage/backend-plugin-api';
 import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node';
 import { CatalogProcessor, CatalogProcessorEmit } from '@backstage/plugin-catalog-node';
-import { Entity } from '@backstage/catalog-model';
+import { Entity, stringifyEntityRef, parseEntityRef } from '@backstage/catalog-model';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
-import { catalogAnnotationRegistry } from '@ai-crew-suite/annotations-fixtures';
+import { catalogAnnotationFixtures, EntityAnnotationFixture } from '@ai-crew-suite/annotations-fixtures';
 
 class FixtureAnnotationProcessor implements CatalogProcessor {
+  // Use a compiled Map for fast, O(1) compound key lookups
+  private fixturesMap = new Map<string, EntityAnnotationFixture['factory']>();
+
+  constructor(fixtures: EntityAnnotationFixture[]) {
+    for (const fixture of fixtures) {
+      try {
+        // Normalize the entity ref format (e.g. 'Component:default/platform')
+        const normalizedRef = stringifyEntityRef(parseEntityRef(fixture.targetEntityRef));
+        this.fixturesMap.set(normalizedRef, fixture.factory);
+      } catch (err) {
+        console.error(`[FixtureAnnotationProcessor] Invalid target reference: ${fixture.targetEntityRef}`, err);
+      }
+    }
+  }
+
   getProcessorName(): string {
     return 'FixtureAnnotationProcessor';
   }
@@ -30,17 +45,18 @@ class FixtureAnnotationProcessor implements CatalogProcessor {
     _location: LocationSpec,
     _emit: CatalogProcessorEmit,
   ): Promise<Entity> {
-    const entityName = entity.metadata.name;
+    // Generate the standard reference string for the active entity in flight
+    const currentEntityRef = stringifyEntityRef(entity);
 
-    if (catalogAnnotationRegistry[entityName]) {
-      entity.metadata.annotations = entity.metadata.annotations || {};
-      const dynamicAnnotations = catalogAnnotationRegistry[entityName](entity);
-
+    // If a fixture matches this entity, execute the factory string builder
+    const factory = this.fixturesMap.get(currentEntityRef);
+    if (factory) {
       entity.metadata.annotations = {
         ...entity.metadata.annotations,
-        ...dynamicAnnotations,
+        ...factory(entity),
       };
     }
+
     return entity;
   }
 }
@@ -52,7 +68,8 @@ export const catalogModuleFixtureAnnotations = createBackendModule({
     env.registerInit({
       deps: { catalog: catalogProcessingExtensionPoint },
       async init({ catalog }) {
-        catalog.addProcessor(new FixtureAnnotationProcessor());
+        // Pass the static array registry compilation directly into the instance loop constructor
+        catalog.addProcessor(new FixtureAnnotationProcessor(catalogAnnotationFixtures));
       },
     });
   },

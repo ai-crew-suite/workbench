@@ -86,8 +86,6 @@ const CustomSidebarNav: NavContentComponent = ({ navItems }) => {
           </Tooltip>
         </ListItem>
 
-        <Divider sx={{ my: 1, mx: 1 }} />
-
         {/* Catalog Item Button */}
         {coreCatalog && (
           <ListItem disablePadding>

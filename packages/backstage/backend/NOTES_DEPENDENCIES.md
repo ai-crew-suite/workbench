@@ -151,5 +151,9 @@ curl -v "http://localhost:7007/api/catalog/health"
 curl -v "http://localhost:7007/api/catalog/entities"
 curl -v "http://localhost:7007/api/scaffolder/v2/templates"
 curl -v "http://localhost:7007/api/search/query?term=&types%5B0%5D=software-catalog&pageLimit=1"
+
+LOG_LEVEL=debug yarn turbo run start --filter=@ai-crew-suite/testpad-backend > boot.log 2>&1
+cat boot.log | grep -i "DynamicFixtureEntityProvider\|catalog"
+curl -s http://localhost:7007/api/catalog/locations
 ```
 

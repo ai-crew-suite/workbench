@@ -16,13 +16,8 @@
 import {
   Entity,
   ComponentEntity,
-  LocationEntity
 } from '@backstage/catalog-model';
-
-// Helper interface to construct standard Backstage Core Domain/System structures
-interface GenericEntity extends Entity {
-  spec: Record<string, unknown>;
-}
+import { GenericEntity } from '../types';
 
 /**
  * Generates the central runtime topology fixtures for the dev workspace environment.
@@ -118,26 +113,11 @@ export function getWorkbenchTopologyEntities(): Entity[] {
     },
   };
 
-  // 6. LOCATION: Automated Ingestion Discovery Reference
-  const discoveryLocation: LocationEntity = {
-    apiVersion: 'backstage.io/v1alpha1',
-    kind: 'Location',
-    metadata: {
-      name: 'local-workspace-discovery',
-      description: 'Automated local path index scanning for sandbox testing routines.',
-    },
-    spec: {
-      type: 'file',
-      targets: ['./catalog-fixtures.yaml'],
-    },
-  };
-
   return [
     domainEntity,
     systemEntity,
     platformComponent,
     driversComponent,
     agentsComponent,
-    discoveryLocation,
   ];
 }

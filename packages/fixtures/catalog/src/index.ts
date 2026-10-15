@@ -13,9 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Entity } from '@backstage/catalog-model';
+import type { Entity } from '@backstage/catalog-model';
 import { getWorkbenchTopologyEntities } from './fixtures/workbenchService';
 
+export type { GenericEntity } from './types';
+
 export const getProgrammaticEntities = (): Entity[] => {
-  return getWorkbenchTopologyEntities();
+  const allFixtures: Entity[][] = [
+    getWorkbenchTopologyEntities(),
+  ];
+
+  // Flatten the array of arrays down to a single Entity[] array
+  return allFixtures.flat();
 };

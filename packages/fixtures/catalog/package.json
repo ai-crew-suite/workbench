@@ -11,7 +11,8 @@
     "typecheck": "crew typecheck"
   },
   "dependencies": {
-    "@backstage/catalog-model": "backstage:^"
+    "@backstage/catalog-model": "backstage:^",
+    "@backstage/types": "backstage:^"
   },
   "devDependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",

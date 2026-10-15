@@ -275,6 +275,7 @@ __metadata:
     "@backstage/plugin-auth-backend": "backstage:^"
     "@backstage/plugin-auth-backend-module-github-provider": "backstage:^"
     "@backstage/plugin-catalog-backend": "backstage:^"
+    "@backstage/plugin-catalog-backend-module-logs": "backstage:^"
     "@backstage/plugin-catalog-backend-module-scaffolder-entity-model": "backstage:^"
     "@backstage/plugin-events-backend": "backstage:^"
     "@backstage/plugin-kubernetes-backend": "backstage:^"
@@ -3118,6 +3119,17 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 10c0/2f134813831a9600a8fd1ed4eb6f3657ac815cd91b96b5aa4d4dacfdc6760e1e4ac5c01fc456573151c7593d379c3cf2dc184bd37ff87c0f3ccca55a97747116
+  languageName: node
+  linkType: hard
+
+"@backstage/plugin-catalog-backend-module-logs@backstage:^::backstage=1.55.3&npm=0.1.26, @backstage/plugin-catalog-backend-module-logs@npm:^0.1.26":
+  version: 0.1.26
+  resolution: "@backstage/plugin-catalog-backend-module-logs@npm:0.1.26"
+  dependencies:
+    "@backstage/backend-plugin-api": "npm:^1.10.1"
+    "@backstage/plugin-catalog-backend": "npm:^4.0.0"
+    "@backstage/plugin-events-node": "npm:^0.4.26"
+  checksum: 10c0/4276f62b34f806d4cc0a37100c1451c89a2553d2ab14a6ca1112087f38ffc15e983706f7bdec3ad60ba564b1a687a2a3cb7a2315ccd81221f723cdaa1f6b68f1
   languageName: node
   linkType: hard
 

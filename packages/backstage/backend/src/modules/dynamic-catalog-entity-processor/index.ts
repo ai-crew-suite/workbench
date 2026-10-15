@@ -34,10 +34,27 @@ export class DynamicFixtureEntityProvider implements EntityProvider {
     if (!this.connection) return;
 
     const programmaticEntities = getProgrammaticEntities();
-    const mutations = programmaticEntities.map(entity => ({
-      entity,
-      locationKey: `dynamic-fixture-provider:${entity.metadata.name}`,
-    }));
+    const providerName = this.getProviderName(); // 'DynamicFixtureEntityProvider'
+
+    const mutations = programmaticEntities.map(entity => {
+      // Dynamically inject the correct structural location tracking annotations required by Backstage
+      const annotations = {
+        ...entity.metadata.annotations,
+        'backstage.io/managed-by-location': `external:${providerName}`,
+        'backstage.io/managed-by-origin-location': `external:${providerName}`, // <-- FIXED KEY NAME HERE
+      };
+
+      return {
+        entity: {
+          ...entity,
+          metadata: {
+            ...entity.metadata,
+            annotations,
+          },
+        },
+        locationKey: `dynamic-fixture-provider:${entity.metadata.name}`,
+      };
+    });
 
     await this.connection.applyMutation({
       type: 'full',
