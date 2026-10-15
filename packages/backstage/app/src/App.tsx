@@ -29,6 +29,7 @@ import { Navigate } from 'react-router-dom';
 import { UnifiedThemeProvider, type UnifiedTheme } from '@backstage/theme';
 import appVisualizerPlugin from '@backstage/plugin-app-visualizer';
 import catalogPlugin from '@backstage/plugin-catalog/alpha';
+import catalogGraphPlugin from '@backstage/plugin-catalog-graph/alpha';
 import kubernetesPlugin from '@backstage/plugin-kubernetes/alpha';
 import notificationsPlugin from '@backstage/plugin-notifications/alpha';
 import scaffolderPlugin from '@backstage/plugin-scaffolder/alpha';
@@ -94,6 +95,7 @@ export function buildDevApp({ TargetPlugin }: BuildAppOptions) {
   const features: FrontendFeature[] = [
     appVisualizerPlugin,
     catalogPlugin,
+    catalogGraphPlugin,
     customNavModule,
     kubernetesPlugin,
     notificationsPlugin,

@@ -37,6 +37,7 @@ __metadata:
   dependencies:
     "@ai-crew-suite/crew-cli": "catalog:dev"
     "@backstage/catalog-model": "backstage:^"
+    "@backstage/types": "backstage:^"
     typescript: "catalog:dev"
     vitest: "catalog:dev"
     zod: "catalog:dev"
@@ -300,6 +301,7 @@ __metadata:
     react-router-dom: "catalog:prod"
     typescript: "catalog:dev"
     vitest: "catalog:dev"
+    yaml: "catalog:prod"
   bin:
     backstage-dev-server: ./launcher.js
   languageName: unknown
@@ -4475,7 +4477,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@backstage/types@npm:^1.2.2":
+"@backstage/types@backstage:^::backstage=1.55.3&npm=1.2.2, @backstage/types@npm:^1.2.2":
   version: 1.2.2
   resolution: "@backstage/types@npm:1.2.2"
   checksum: 10c0/3c947cf83c058a56b0cfd90d91483e9a5c1c913f7978a0d5a3c0fd9b502d08e9bdf279afba626826eee84159e698ee4cdaa70040789ac47fc8a25df9f1925612
@@ -34123,7 +34125,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yaml@npm:*, yaml@npm:^2.0.0, yaml@npm:^2.2.1, yaml@npm:^2.2.2, yaml@npm:^2.9.0":
+"yaml@npm:*, yaml@npm:^2.0.0, yaml@npm:^2.2.1, yaml@npm:^2.2.2, yaml@npm:^2.3.1, yaml@npm:^2.9.0":
   version: 2.9.1
   resolution: "yaml@npm:2.9.1"
   bin:

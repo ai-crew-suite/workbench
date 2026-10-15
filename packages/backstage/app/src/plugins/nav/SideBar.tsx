@@ -23,19 +23,13 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Tooltip from '@mui/material/Tooltip';
 import { Search as SearchIcon, Help as HelpIcon, Settings as SettingsIcon } from '@mui/icons-material';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { Link as RouterLink } from 'react-router-dom';
 import { SidebarLogo } from './SideBarLogo';
 
-/**
- * Fixed 72px custom sidebar rail. Mirrors the positioning strategy of
- * Backstage's legacy `Sidebar` (a fixed-position permanent drawer): being
- * out of flow lets the page content start at the top of the viewport
- * instead of stacking below the rail, while the layout's `SidebarPage`
- * reserves a matching 72px gutter (see the GlobalStyles override in
- * App.tsx). It never collapses to a wide drawer variant.
- */
 const CustomSidebarNav: NavContentComponent = ({ navItems }) => {
-  // Remove layout-managed entries we render (or hide) ourselves.
+  console.log('NAVITEMS:', navItems);
+  // 1. Remove layout-managed entries we render (or hide) ourselves.
   navItems.take('page:search');
   navItems.take('page:notifications');
   navItems.take('plugin:notifications');
@@ -43,9 +37,11 @@ const CustomSidebarNav: NavContentComponent = ({ navItems }) => {
   navItems.take('page:user-settings');
 
   const coreCatalog = navItems.take('page:catalog');
+  const coreCatalogGraph = navItems.take('page:catalog-graph/page');
   const coreScaffolder = navItems.take('page:scaffolder');
-  const runtimeExtensions = navItems.rest();
+  const coreAppVisualizer = navItems.take('page:app-visualizer');
 
+  const runtimeExtensions = navItems.rest();
   const isOpen = false;
 
   return (
@@ -90,7 +86,6 @@ const CustomSidebarNav: NavContentComponent = ({ navItems }) => {
         {coreCatalog && (
           <ListItem disablePadding>
             <Tooltip title={coreCatalog.title} placement="right">
-              {/* Force the real browser routing path */}
               <ListItemButton component={RouterLink} to="/catalog" sx={{ borderRadius: 1, minHeight: 48, px: 0, justifyContent: 'center', width: '100%' }}>
                 <ListItemIcon sx={{ minWidth: 0, justifyContent: 'center', color: 'text.secondary' }}>
                   {coreCatalog.icon ? (
@@ -104,15 +99,44 @@ const CustomSidebarNav: NavContentComponent = ({ navItems }) => {
           </ListItem>
         )}
 
+        {/* Catalog Graph Button */}
+        {coreCatalogGraph && (
+          <ListItem disablePadding>
+            <Tooltip title={coreCatalogGraph.title || "Catalog Graph"} placement="right">
+              <ListItemButton component={RouterLink} to="/catalog-graph" sx={{ borderRadius: 1, minHeight: 48, px: 0, justifyContent: 'center', width: '100%' }}>
+                <ListItemIcon sx={{ minWidth: 0, justifyContent: 'center', color: 'primary.main' }}>
+                  <AccountTreeIcon sx={{ fontSize: 32 }} />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        )}
+
         {/* Scaffolder Item Button */}
         {coreScaffolder && (
           <ListItem disablePadding>
             <Tooltip title={coreScaffolder.title} placement="right">
-              {/* Backstage Alpha Scaffolder mounts dynamically onto /create instead of /scaffolder */}
               <ListItemButton component={RouterLink} to="/create" sx={{ borderRadius: 1, minHeight: 48, px: 0, justifyContent: 'center', width: '100%' }}>
                 <ListItemIcon sx={{ minWidth: 0, justifyContent: 'center', color: 'text.secondary' }}>
                   {coreScaffolder.icon ? (
                     <Box sx={{ display: 'flex', '& svg': { fontSize: 32 } }}>{coreScaffolder.icon}</Box>
+                  ) : (
+                    <HelpIcon sx={{ fontSize: 32 }} />
+                  )}
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        )}
+
+        {/* App Visualizer Button */}
+        {coreAppVisualizer && (
+          <ListItem disablePadding>
+            <Tooltip title={coreAppVisualizer.title} placement="right">
+              <ListItemButton component={RouterLink} to="/visualizer" sx={{ borderRadius: 1, minHeight: 48, px: 0, justifyContent: 'center', width: '100%' }}>
+                <ListItemIcon sx={{ minWidth: 0, justifyContent: 'center', color: 'text.secondary' }}>
+                  {coreAppVisualizer.icon ? (
+                    <Box sx={{ display: 'flex', '& svg': { fontSize: 32 } }}>{coreAppVisualizer.icon}</Box>
                   ) : (
                     <HelpIcon sx={{ fontSize: 32 }} />
                   )}
