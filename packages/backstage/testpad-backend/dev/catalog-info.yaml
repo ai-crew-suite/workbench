@@ -1,0 +1,18 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: notification-service
+  description: 'Generic alert dispatcher engine pushing real-time signals.'
+  # Clean inline annotation tracking that external developers define themselves!
+  annotations:
+    'ai-crew.com/local': |
+      {
+        "generatedAt": "2026-10-15T05:00:00Z",
+        "fixtureStatus": "active",
+        "notes": "Inline team annotation defined locally inside testpad context."
+      }
+spec:
+  type: service
+  lifecycle: experimental
+  owner: tools-crew-team
+  system: crew-suite

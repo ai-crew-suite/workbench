@@ -77,7 +77,8 @@
     "react": "catalog:prod",
     "react-dom": "catalog:prod",
     "react-router": "catalog:prod",
-    "react-router-dom": "catalog:prod"
+    "react-router-dom": "catalog:prod",
+    "yaml": "catalog:prod"
   },
   "devDependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",

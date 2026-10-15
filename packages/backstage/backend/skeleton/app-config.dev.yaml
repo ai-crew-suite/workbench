@@ -80,9 +80,16 @@ catalog:
         User,
         Vulnerability,
       ]
+
+  # FIXED: Added the missing 'locations:' grouping block header here
   locations:
-    - type: file
-      target: "${MOCK_FIXTURES_PATH:-../../fixtures}/location.yaml"
+    # Looks for 'location.yaml' inside the local executing plugin folder context
+    - type: crew-suite-optional-fixtures
+      target: "${MOCK_FIXTURES_PATH:-./dev}/location.yaml"
+
+    # Looks for 'catalog-info.yaml' inside the local executing plugin folder context
+    - type: crew-suite-optional-fixtures
+      target: "${MOCK_FIXTURES_PATH:-./dev}/catalog-info.yaml"
 
 #kubernetes:
 #  serviceLocatorMethod:

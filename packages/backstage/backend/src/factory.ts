@@ -37,6 +37,7 @@ import techdocsPluginAlpha from '@backstage/plugin-techdocs-backend';
 import { catalogModuleDynamicEntities } from './modules/dynamic-catalog-entity-processor';
 import { catalogModuleFixtureAnnotations } from './modules/dynamic-annotation-processor';
 import { CustomKindsModule } from './modules/catalog-schema-extensions';
+import { catalogOptionalLocalFixturesModule } from './modules/catalog-optional-fixtures-processor';
 import { globalWiremockInterceptorModule } from './modules/wiremock-interceptor';
 import { testPermissionModule } from './modules/test-permission-policy';
 import { wiremockBootstrapperModule } from './modules/wiremock-bootstrapper';
@@ -82,6 +83,7 @@ export async function startDevBackend() {
   // 5. Ingest Central Programmatic Seeders (Entities and Annotations)
   backend.add(catalogModuleDynamicEntities);
   backend.add(catalogModuleFixtureAnnotations);
+  backend.add(catalogOptionalLocalFixturesModule);
 
   // 6. ISOLATED SANDBOX INJECTION: Dynamic Local Plugin Attachment
   const pluginRoot = process.cwd();
