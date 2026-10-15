@@ -45,13 +45,13 @@ import { wiremockBootstrapperModule } from './modules/wiremock-bootstrapper';
 // Clean Service Factory Extracts
 import { customDatabaseServiceFactory } from './services/database';
 import { devSandboxAuthServices } from './services/auth';
-//import { mockConfigServiceFactory } from './services/config';
+import { mockConfigServiceFactory } from './services/config';
 
 export async function startDevBackend() {
   const backend = createBackend();
 
   // 1. Add Configuration Infrastructure and Core Service Overrides
-  //backend.add(mockConfigServiceFactory);
+  backend.add(mockConfigServiceFactory);
   backend.add(customDatabaseServiceFactory);
   devSandboxAuthServices.forEach(service => backend.add(service));
 

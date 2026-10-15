@@ -13,8 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { existsSync, readFileSync } from 'fs';
+import { resolve } from 'path';
+import { parse } from 'yaml';
 import { createServiceFactory, coreServices } from '@backstage/backend-plugin-api';
 import { ConfigReader } from '@backstage/config';
+import { JsonObject } from '@backstage/types';
 
 /**
  * Programmatic Configuration Factory for Sandbox Environments.
@@ -29,8 +33,7 @@ export const mockConfigServiceFactory = createServiceFactory({
     const backendHost = process.env['BACKEND_HOST'] || 'localhost';
     const backendPort = process.env['BACKEND_PORT'] || '7007';
 
-    // Directly instantiates a full type-safe configuration layer in-memory
-    return new ConfigReader({
+    const programmaticConfig: JsonObject = {
       app: {
         title: 'AI Crew Suite Platform',
         baseUrl: `http://${appHost}:${appPort}`,
@@ -143,6 +146,36 @@ export const mockConfigServiceFactory = createServiceFactory({
       drivers: {
         mockProxyUrl: process.env['MOCK_PROXY_URL'] || 'http://localhost:8080',
       },
-    });
+    };
+
+    const pluginConfigPath = resolve(process.cwd(), 'dev/app-config.dev.yaml');
+    let fileConfigData: JsonObject = {};
+
+    try {
+      if (existsSync(pluginConfigPath)) {
+        const fileContents = readFileSync(pluginConfigPath, 'utf8');
+        fileConfigData = parse(fileContents) as JsonObject;
+        console.log(`[Config-Factory] Loaded local plugin config from: ${pluginConfigPath}`);
+      }
+    } catch (error) {
+      // Gracefully log or throw if the file exists but has broken formatting
+      console.error(`[Config-Factory] Failed to read or parse YAML config at ${pluginConfigPath}:`, error);
+    }
+
+    // Assemble the priority array inside fromConfigs
+    return ConfigReader.fromConfigs([
+      // Priority 1 (Lowest/Baseline): Hardcoded programmatic options
+      {
+        context: 'workbench-backend-programmatic-config',
+        data: programmaticConfig,
+      },
+      // Priority 2 (Medium): Values parsed directly from your dev/app-config.dev.yaml file
+      {
+        context: `file:${pluginConfigPath}`,
+        data: fileConfigData || {},
+      },
+      // Priority 3 (Highest): Overrides injected into the environment by the CLI process launcher
+      ...JSON.parse(process.env['APP_CONFIG'] || '[]'),
+    ]);
   },
 });

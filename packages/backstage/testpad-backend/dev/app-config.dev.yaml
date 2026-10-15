@@ -1,0 +1,3 @@
+app:
+  # This overrides "AI Crew Suite Platform" from backend server programmatic configuration
+  title: "AI Crew Suite [Local Override Active]"

@@ -19,11 +19,13 @@ const os = require('os');
 
 const currentPluginRoot = process.cwd();
 const skeletonPath = path.resolve(__dirname, './skeleton');
-const configPath = path.resolve(skeletonPath, 'app-config.dev.yaml');
+//const configPath = path.resolve(skeletonPath, 'app-config.dev.yaml');
+const configPath = path.resolve(skeletonPath, 'empty-fallback.yaml');
 const absoluteEntrypointPath = path.resolve(__dirname, 'src/index.ts');
 
 console.log(`[Dev-Backend] Booting with full Backstage CLI orchestration...`);
 console.log(`[Dev-Backend] Enforcing entrypoint: ${absoluteEntrypointPath}`);
+console.log(`[Dev-Backend] Plugin entrypoint: ${currentPluginRoot}`);
 
 const backstageCliBinary = require.resolve('@backstage/cli/bin/backstage-cli');
 
