@@ -12,6 +12,7 @@
     "@ai-crew-suite/server-dependencies-app": "workspace:^"
   },
   "devDependencies": {
-    "@ai-crew-suite/crew-cli": "catalog:dev"
+    "@ai-crew-suite/crew-cli": "catalog:dev",
+    "@ai-crew-suite/workbench-app": "workspace:*"
   }
 }

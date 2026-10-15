@@ -208,6 +208,7 @@ __metadata:
   dependencies:
     "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/server-dependencies-app": "workspace:^"
+    "@ai-crew-suite/workbench-app": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -243,7 +244,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ai-crew-suite/workbench-app@workspace:packages/backstage/app":
+"@ai-crew-suite/workbench-app@workspace:*, @ai-crew-suite/workbench-app@workspace:packages/backstage/app":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/workbench-app@workspace:packages/backstage/app"
   dependencies:
