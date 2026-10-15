@@ -113,9 +113,16 @@ export const mockConfigServiceFactory = createServiceFactory({
             type: 'file',
             target: process.env['MOCK_FIXTURES_PATH'] || '../../fixtures/location.yaml',
           },
+          // Optional local fixture files resolved relative to the executing
+          // plugin's working directory. The OptionalLocalFixturesProcessor
+          // skips these silently when the files do not exist.
           {
-            type: process.env['CONSUMER_CATALOG_TYPE'] || 'file',
-            target: process.env['CONSUMER_CATALOG_TARGET'] || '../backend/skeleton/empty-fallback.yaml',
+            type: 'crew-suite-optional-fixtures',
+            target: './dev/location.yaml',
+          },
+          {
+            type: 'crew-suite-optional-fixtures',
+            target: './dev/catalog-info.yaml',
           },
         ],
       },

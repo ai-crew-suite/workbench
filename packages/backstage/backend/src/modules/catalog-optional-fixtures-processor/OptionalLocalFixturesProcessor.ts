@@ -44,6 +44,7 @@ export class OptionalLocalFixturesProcessor implements CatalogProcessor {
 
     // 2. Exit cleanly without noise if the file is missing
     if (!existsSync(filePath)) {
+      console.log(`[OptionalLocalFixturesProcessor] No optional local fixtures found at ${filePath}.`);
       return true; // Returning true signals: "I handled this type successfully, nothing to do."
     }
 
@@ -62,6 +63,7 @@ export class OptionalLocalFixturesProcessor implements CatalogProcessor {
             location,
             entity,
           });
+          console.log(`[OptionalLocalFixturesProcessor] Successfully emitted entity from optional local fixture at ${filePath}.`);
         }
       }
     } catch (error) {
