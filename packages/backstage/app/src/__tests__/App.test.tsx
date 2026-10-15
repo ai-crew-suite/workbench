@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React from 'react';
+import { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createExtension, createFrontendModule } from '@backstage/frontend-plugin-api';
 
@@ -79,7 +79,7 @@ vi.mock('@backstage/theme', () => ({
     light: { id: 'light' },
     dark: { id: 'dark' },
   },
-  UnifiedThemeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  UnifiedThemeProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
 }));
 
 describe('App Layout Suite', () => {

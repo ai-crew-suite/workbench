@@ -57,8 +57,6 @@
     "yaml": "catalog:prod"
   },
   "devDependencies": {
-    "@ai-crew-suite/crew-cli": "catalog:dev",
-    "jsdom": "catalog:dev",
-    "vitest": "catalog:dev"
+    "@ai-crew-suite/crew-cli": "catalog:dev"
   }
 }

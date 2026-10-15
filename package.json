@@ -32,6 +32,7 @@
     "@backstage/cli": "backstage:^",
     "@backstage/cli-defaults": "backstage:^",
     "@changesets/cli": "catalog:dev",
+    "@types/react": "catalog:dev",
     "turbo": "catalog:dev"
   },
   "resolutions": {
