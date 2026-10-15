@@ -15,7 +15,7 @@ You are working in AI Crew Suite, a Backstage monorepo (Yarn Berry PnP + turbo) 
 - Every new TypeScript/JavaScript source file (`*.ts`, `*.tsx`, `*.js`) must start with the Apache license header, before any imports:
 
 ```ts
-/*
+/**
  * Copyright 2026 The AI Crew Suite Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
