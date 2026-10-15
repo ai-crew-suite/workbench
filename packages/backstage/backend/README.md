@@ -56,6 +56,22 @@ yarn turbo run test:unit --filter=@ai-crew-suite/workbench-backend
 yarn turbo run test:unit:coverage --filter=@ai-crew-suite/workbench-backend
 ```
 
+### Debugging
+
+These may be helpful in debugging the backend server, using the default api server port:
+
+```bash
+curl -v "http://localhost:7007/api/user-settings/buckets"
+curl -v "http://localhost:7007/api/catalog/health"
+curl -v "http://localhost:7007/api/catalog/entities"
+curl -s "http://localhost:7007/api/catalog/locations"
+curl -v "http://localhost:7007/api/scaffolder/v2/templates"
+curl -v "http://localhost:7007/api/search/query?term=&types%5B0%5D=software-catalog&pageLimit=1"
+
+LOG_LEVEL=debug yarn turbo run start --filter=@ai-crew-suite/testpad-backend > boot.log 2>&1
+cat boot.log | grep -i "DynamicFixtureEntityProvider\|catalog"
+```
+
 ## 🔌 Consumer Integration Guide (How Plugins Use This)
 
 Follow this checklist to enable standalone, zero-config local boot loops inside an isolated backend plugin workspace.

@@ -31,15 +31,12 @@ const CustomSidebarNav: NavContentComponent = ({ navItems }) => {
   console.log('NAVITEMS:', navItems);
   // 1. Remove layout-managed entries we render (or hide) ourselves.
   navItems.take('page:search');
-  navItems.take('page:notifications');
-  navItems.take('plugin:notifications');
-  navItems.take('page:app-visualizer');
   navItems.take('page:user-settings');
 
+  const coreAppVisualizer = navItems.take('page:app-visualizer');
   const coreCatalog = navItems.take('page:catalog');
   const coreCatalogGraph = navItems.take('page:catalog-graph/page');
   const coreScaffolder = navItems.take('page:scaffolder');
-  const coreAppVisualizer = navItems.take('page:app-visualizer');
 
   const runtimeExtensions = navItems.rest();
   const isOpen = false;

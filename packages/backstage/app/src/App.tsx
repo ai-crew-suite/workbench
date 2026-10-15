@@ -27,11 +27,13 @@ import {
 } from '@backstage/frontend-plugin-api';
 import { Navigate } from 'react-router-dom';
 import { UnifiedThemeProvider, type UnifiedTheme } from '@backstage/theme';
+import apiDocsPlugin from '@backstage/plugin-api-docs/alpha';
 import appVisualizerPlugin from '@backstage/plugin-app-visualizer';
 import catalogPlugin from '@backstage/plugin-catalog/alpha';
 import catalogGraphPlugin from '@backstage/plugin-catalog-graph/alpha';
 import kubernetesPlugin from '@backstage/plugin-kubernetes/alpha';
 import notificationsPlugin from '@backstage/plugin-notifications/alpha';
+import orgPlugin from '@backstage/plugin-org/alpha';
 import scaffolderPlugin from '@backstage/plugin-scaffolder/alpha';
 import searchPlugin from '@backstage/plugin-search/alpha';
 import userSettingsPlugin from '@backstage/plugin-user-settings/alpha';
@@ -93,16 +95,18 @@ const WorkbenchThemeProviders = ({
 
 export function buildDevApp({ TargetPlugin }: BuildAppOptions) {
   const features: FrontendFeature[] = [
+    apiDocsPlugin,
     appVisualizerPlugin,
-    catalogPlugin,
     catalogGraphPlugin,
+    catalogPlugin,
     customNavModule,
     kubernetesPlugin,
     notificationsPlugin,
+    orgPlugin,
     scaffolderPlugin,
     searchPlugin,
-    userSettingsPlugin,
     TargetPlugin,
+    userSettingsPlugin,
   ];
 
   const orchestratorCoreDefaultsModule = createFrontendModule({

@@ -18,7 +18,6 @@ import { createBackend } from '@backstage/backend-defaults';
 
 // Core Plugins
 import authPlugin from '@backstage/plugin-auth-backend';
-import authGithubModule from '@backstage/plugin-auth-backend-module-github-provider';
 import catalogPlugin from '@backstage/plugin-catalog-backend';
 import catalogModuleLogs from '@backstage/plugin-catalog-backend-module-logs';
 import catalogModuleScaffolderEntityModel from '@backstage/plugin-catalog-backend-module-scaffolder-entity-model';
@@ -30,6 +29,7 @@ import proxyPlugin from '@backstage/plugin-proxy-backend';
 import scaffolderPlugin from '@backstage/plugin-scaffolder-backend';
 import searchPlugin from '@backstage/plugin-search-backend';
 import searchCatalogCollatorPlugin from '@backstage/plugin-search-backend-module-catalog';
+import searchTechDocsCollatorPlugin from '@backstage/plugin-search-backend-module-techdocs';
 import signalsPlugin from '@backstage/plugin-signals-backend';
 import techdocsPluginAlpha from '@backstage/plugin-techdocs-backend';
 
@@ -65,10 +65,10 @@ export async function startDevBackend() {
   backend.add(scaffolderPlugin);
   backend.add(searchPlugin);
   backend.add(searchCatalogCollatorPlugin);
+  backend.add(searchTechDocsCollatorPlugin);
 
   // 3. Telemetry, Auth, and Notification Ingestion Systems
   backend.add(authPlugin);
-  backend.add(authGithubModule);
   backend.add(signalsPlugin);
   backend.add(notificationsPlugin);
   backend.add(eventsPlugin);

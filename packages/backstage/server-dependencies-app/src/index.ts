@@ -13,3 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// Intentionally empty, necessary for clients to avoid "Module not found" errors

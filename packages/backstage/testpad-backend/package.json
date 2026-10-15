@@ -8,7 +8,7 @@
     "start": "backstage-dev-server"
   },
   "dependencies": {
-    "@backstage/backend-plugin-api": "backstage:^"
+    "@ai-crew-suite/server-dependencies-backend": "workspace:^"
   },
   "devDependencies": {
     "@ai-crew-suite/workbench-backend": "workspace:*"
