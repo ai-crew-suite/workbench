@@ -15,16 +15,30 @@
  */
 const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs'); // Added to check for optional local file existence
 
 const currentPluginRoot = process.cwd();
 const skeletonPath = path.resolve(__dirname, './skeleton');
 const configPath = path.resolve(skeletonPath, 'app-config.dev.yaml');
 
 console.log(`[Dev-Frontend] Booting isolated UI workspace via Backstage CLI...`);
-console.log(`[Dev-Frontend] Configuration target: ${configPath}`);
+console.log(`[Dev-Frontend] Baseline configuration target: ${configPath}`);
+
+// 1. Establish your base run arguments targeting your primary skeleton config
+const runArgs = ['package', 'start', '--config', configPath];
+
+// 2. Resolve the path to the optional user local dev file
+const optionalLocalConfigPath = path.resolve(currentPluginRoot, 'dev/app-config.dev.yaml');
+
+// 3. If the file exists, append it as an extra --config flag so it takes precedence
+if (fs.existsSync(optionalLocalConfigPath)) {
+  console.log(`[Dev-Frontend] Loading local plugin config override: ${optionalLocalConfigPath}`);
+  runArgs.push('--config', optionalLocalConfigPath);
+} else {
+  console.log(`[Dev-Frontend] No optional local config override file found at ${optionalLocalConfigPath}. Proceeding with base configuration.`);
+}
 
 const backstageCliBinary = require.resolve('@backstage/cli/bin/backstage-cli');
-const runArgs = ['package', 'start', '--config', configPath];
 
 const child = spawn('node', [backstageCliBinary, ...runArgs], {
   cwd: currentPluginRoot,

@@ -1,0 +1,3 @@
+app:
+  # This visually confirms that the multi-config file layering works perfectly
+  title: "AI Crew Suite [Frontend Override Active]"
