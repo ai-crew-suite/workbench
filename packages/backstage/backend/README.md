@@ -47,15 +47,6 @@ To trigger a `tsc` typecheck run, execute:
 yarn turbo run typecheck --filter=@ai-crew-suite/workbench-backend
 ```
 
-### Running Unit Tests & Test Coverage
-
-To execute the complete Vitest suite (which mocks the filesystem paths and fetch traversal loops using strict, decoupled mock boundaries), run:
-
-```bash
-yarn turbo run test:unit --filter=@ai-crew-suite/workbench-backend
-yarn turbo run test:unit:coverage --filter=@ai-crew-suite/workbench-backend
-```
-
 ### Debugging
 
 These may be helpful in debugging the backend server, using the default api server port:
@@ -172,6 +163,88 @@ Our bundled `skeleton/app-config.dev.yaml` contains dedicated rules to support a
 - **Database Isolation**: Automatically swaps heavy PostgreSQL infrastructure out for an internal, thread-safe memory mapping pool using `better-sqlite3`.
 - **Global Traffic Interception**: Transparently patches global fetch loops; any outbound plugin calls to third-party dependencies are intercepted and automatically redirected to an isolated WireMock proxy mesh (`http://localhost:8080`).
 - **Strict VPC Sandboxing**: Implements an absolute dark-site reading block list to guarantee zero public cloud calling leaks.
+
+## ⚙️ Extension Modules Included in Backend Dev Server
+
+### Optional Local Fixtures Parsing (`modules/catalog-optional-fixtures-processor`)
+
+Mounts an automated `catalogOptionalLocalFixturesModule` backend processor that intercepts the custom `crew-suite-optional-fixtures` location type, providing zero-noise parsing of developers' untracked local sandbox YAML entities while cleanly bypassing boot-time exceptions if the files are physically absent.
+
+To disable loading predefined catalog entities during localized testing sessions, add the following to tye plugin's `dev/app-config.dev.yaml` file:
+
+```yaml
+aiCrewSuite:
+  modules:
+    optionalLocalFixtures:
+      enabled: false
+```
+
+### Custom Kinds Contract Validation (`modules/catalog-schema-extensions`)
+
+Plugs a strict `CustomKindsModule` parser into the ingestion framework that validates custom enterprise taxonomies (`DataProduct`, `Model`, `Product`, `Vulnerability`, and `ArchitectureDecision`) against mandatory internal schemas, enforcing explicit data policies, severity matrices, and operational ownership bounds before data commits to the catalog database.
+
+To disable predefined custom Kinds for catalog entities during localized testing sessions, add the following to tye plugin's `dev/app-config.dev.yaml` file:
+
+```yaml
+aiCrewSuite:
+  modules:
+    customKinds:
+      enabled: false
+```
+
+### Declarative Annotation Injection (`modules/dynamic-annotation-processor`)
+
+Hooks an automated `catalogModuleFixtureAnnotations` engine into the global entity ingestion pipeline, dynamically appending developer-defined telemetry tags and integration identifiers to targeted software catalog components during background processing intervals.
+
+To disable loading annotations to catalog entities during localized testing sessions, add the following to tye plugin's `dev/app-config.dev.yaml` file:
+
+```yaml
+aiCrewSuite:
+  modules:
+    fixtureAnnotations:
+      enabled: false
+```
+
+### Dynamic Catalog Entity Injection ()`modules/dynamic-catalog-entity-processor`)
+
+Integrates a programmatic `catalogModuleDynamicEntities` backend extension that leverages a custom `DynamicFixtureEntityProvider` to dynamically harvest, sign, and patch sandbox environments with a type-safe mock software catalog natively in-memory, bypassing static filesystem mutations.
+
+To disable loading the mock catalog during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
+
+```yaml
+aiCrewSuite:
+  modules:
+    dynamicEntities:
+      enabled: false
+```
+
+### `modules/test-permission-policy`
+
+### Automated WireMock Fixture Synchronization (`modules/wiremock-bootstrapper`)
+
+Provisions an automated `wiremockBootstrapperModule` API extension that crawls your monorepo workspaces on startup, auto-discovering localized plugin mock configurations and seamlessly syncing JSON endpoint stubs into active WireMock proxy containers to create zero-config offline developer environments.
+
+To disable loading the automatic background scanning and ingestion of WireMock mock stubs, add the following to the plugin's `dev/app-config.dev.yaml` file:
+
+```yaml
+aiCrewSuite:
+  modules:
+    wiremockBootstrapper:
+      enabled: false
+```
+
+### Global Network Traffic Redirection Interceptor ()`modules/wiremock-interceptor`)
+
+Configures a low-overhead `globalWiremockInterceptorModule` API runtime utility that overrides node's `global.fetch` scope, dynamically rerouting external HTTP/HTTPS API traffic outbound to third-party endpoints directly into local WireMock proxy meshes while safely ignoring database network protocols (PostgreSQL wire and Redis RESP over TCP).
+
+To disable the global fetch network hook loop for raw internet endpoints, add the following to the plugin's `dev/app-config.dev.yaml` file:
+
+```yaml
+aiCrewSuite:
+  modules:
+    globalWiremockInterceptor:
+      enabled: false
+```
 
 ## 📄 Compliance and Licensing
 

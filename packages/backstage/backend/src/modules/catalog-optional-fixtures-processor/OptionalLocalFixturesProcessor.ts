@@ -19,7 +19,7 @@ import {
   catalogProcessingExtensionPoint,
 } from '@backstage/plugin-catalog-node';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
-import { createBackendModule } from '@backstage/backend-plugin-api';
+import { createBackendModule, coreServices } from '@backstage/backend-plugin-api';
 import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 import { parseAllDocuments } from 'yaml';
@@ -80,8 +80,19 @@ export const catalogOptionalLocalFixturesModule = createBackendModule({
   moduleId: 'optional-local-fixtures',
   register(env) {
     env.registerInit({
-      deps: { catalog: catalogProcessingExtensionPoint },
-      async init({ catalog }) {
+      deps: {
+        catalog: catalogProcessingExtensionPoint,
+        config: coreServices.rootConfig,
+      },
+      async init({ catalog, config }) {
+        const isEnabled = config.getOptionalBoolean('aiCrewSuite.modules.optionalLocalFixtures.enabled') ?? true;
+
+        if (!isEnabled) {
+          console.log('[Catalog-Module] optional-local-fixtures is explicitly disabled via configuration. Skipping processor registration.');
+          return;
+        }
+
+        console.log('[Catalog-Module] optional-local-fixtures is active. Registering location-based YAML parser hooks.');
         catalog.addProcessor(new OptionalLocalFixturesProcessor());
       },
     });

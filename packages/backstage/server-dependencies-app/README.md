@@ -15,8 +15,6 @@ Managing framework version alignment across a distributed micro-frontend archite
 
 ## DEPENDENCY TODOs
 
-- `@backstage/plugin-org` needs wired into the dashboard
-- `@backstage/plugin-signals` needs setup on the frontend or removed as a dependency
 - `@backstage/plugin-techdocs` needs added to `App.tsx`
 
 ## Required Core Dependencies

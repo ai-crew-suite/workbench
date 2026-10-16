@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createBackendModule } from '@backstage/backend-plugin-api';
+import { createBackendModule, coreServices } from '@backstage/backend-plugin-api';
 import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node';
 import { CatalogProcessor, CatalogProcessorEmit } from '@backstage/plugin-catalog-node';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
@@ -105,14 +105,24 @@ export class CustomKindsProcessor implements CatalogProcessor {
   }
 }
 
-// Normalized: Define and export the backend module wrapper token directly from the source code file
 export const CustomKindsModule = createBackendModule({
   pluginId: 'catalog',
   moduleId: 'custom-kinds-processor',
   register(reg) {
     reg.registerInit({
-      deps: { catalog: catalogProcessingExtensionPoint },
-      async init({ catalog }) {
+      deps: {
+        catalog: catalogProcessingExtensionPoint,
+        config: coreServices.rootConfig,
+      },
+      async init({ catalog, config }) {
+        const isEnabled = config.getOptionalBoolean('aiCrewSuite.modules.customKinds.enabled') ?? true;
+
+        if (!isEnabled) {
+          console.log('[Catalog-Module] custom-kinds-processor is explicitly disabled via configuration. Skipping structural validation rules.');
+          return;
+        }
+
+        console.log('[Catalog-Module] custom-kinds-processor is active. Registering enterprise data contracts.');
         catalog.addProcessor(new CustomKindsProcessor());
       },
     });

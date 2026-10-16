@@ -34,13 +34,13 @@ import signalsPlugin from '@backstage/plugin-signals-backend';
 import techdocsPluginAlpha from '@backstage/plugin-techdocs-backend';
 
 // Local Custom Extension Modules
-import { catalogModuleDynamicEntities } from './modules/dynamic-catalog-entity-processor';
-import { catalogModuleFixtureAnnotations } from './modules/dynamic-annotation-processor';
 import { CustomKindsModule } from './modules/catalog-schema-extensions';
 import { catalogOptionalLocalFixturesModule } from './modules/catalog-optional-fixtures-processor';
-import { globalWiremockInterceptorModule } from './modules/wiremock-interceptor';
+import { catalogModuleDynamicEntities } from './modules/dynamic-catalog-entity-processor';
+import { catalogModuleFixtureAnnotations } from './modules/dynamic-annotation-processor';
 import { testPermissionModule } from './modules/test-permission-policy';
 import { wiremockBootstrapperModule } from './modules/wiremock-bootstrapper';
+import { globalWiremockInterceptorModule } from './modules/wiremock-interceptor';
 
 // Clean Service Factory Extracts
 import { customDatabaseServiceFactory } from './services/database';
@@ -50,12 +50,14 @@ import { mockConfigServiceFactory } from './services/config';
 export async function startDevBackend() {
   const backend = createBackend();
 
-  // 1. Add Configuration Infrastructure and Core Service Overrides
+  // 1. Configuration **Must Be Added First**
   backend.add(mockConfigServiceFactory);
+
+  // 2. Add Database and Authentication Service Overrides
   backend.add(customDatabaseServiceFactory);
   devSandboxAuthServices.forEach(service => backend.add(service));
 
-  // 2. Standard Core System Plugins
+  // 3. Standard Core System Plugins
   backend.add(proxyPlugin);
   backend.add(catalogPlugin);
   backend.add(catalogModuleLogs);
@@ -67,25 +69,25 @@ export async function startDevBackend() {
   backend.add(searchCatalogCollatorPlugin);
   backend.add(searchTechDocsCollatorPlugin);
 
-  // 3. Telemetry, Auth, and Notification Ingestion Systems
+  // 4. Telemetry, Auth, and Notification Ingestion Systems
   backend.add(authPlugin);
   backend.add(signalsPlugin);
   backend.add(notificationsPlugin);
   backend.add(eventsPlugin);
   backend.add(permissionsPlugin);
 
-  // 4. Custom Internal Enterprise Sandboxing Modules
+  // 5. Custom Internal Enterprise Sandboxing Modules
   backend.add(testPermissionModule);
   backend.add(CustomKindsModule);
   backend.add(globalWiremockInterceptorModule);
   backend.add(wiremockBootstrapperModule);
 
-  // 5. Ingest Central Programmatic Seeders (Entities and Annotations)
+  // 6. Ingest Central Programmatic Seeders (Entities and Annotations)
   backend.add(catalogModuleDynamicEntities);
   backend.add(catalogModuleFixtureAnnotations);
   backend.add(catalogOptionalLocalFixturesModule);
 
-  // 6. ISOLATED SANDBOX INJECTION: Dynamic Local Plugin Attachment
+  // 7. ISOLATED SANDBOX INJECTION: Dynamic Local Plugin Attachment
   const pluginRoot = process.cwd();
   const pluginSrcPath = path.resolve(pluginRoot, 'src/index.ts');
 

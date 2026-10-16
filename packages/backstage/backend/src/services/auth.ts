@@ -116,7 +116,6 @@ const devSandboxAuthServiceFactory = createServiceFactory({
   },
 });
 
-// Export the bundle as an array to keep installation clean
 export const devSandboxAuthServices = [
   devSandboxHttpAuthServiceFactory,
   devSandboxUserInfoServiceFactory,

@@ -43,6 +43,13 @@ export const globalWiremockInterceptorModule = createBackendModule({
         config: coreServices.rootConfig,
       },
       async init({ config }) {
+        const isEnabled = config.getOptionalBoolean('aiCrewSuite.modules.globalWiremockInterceptor.enabled') ?? true;
+
+        if (!isEnabled) {
+          console.log('[WireMock-Module] global-wiremock-interceptor is explicitly disabled via configuration. Skipping fetch hooks.');
+          return;
+        }
+
         const mockProxyUrl = config.getOptionalString('drivers.mockProxyUrl')
           || process.env['MOCK_PROXY_URL'];
         if (!mockProxyUrl) return;
@@ -81,9 +88,6 @@ export const globalWiremockInterceptorModule = createBackendModule({
             return originalFetch(input, init);
           }
 
-          // Rewrite external URLs into the WireMock proxy path, keeping the
-          // original scheme marker so the mock server can resolve the real
-          // target: https://pagerduty.com -> http://localhost:8080/://pagerduty.com
           const cleanUrl = targetUrl.href.replace(/^https?/, '');
           const interceptedUrl = `${proxyBase}/${cleanUrl}`;
           console.debug(`[WireMock Proxy] Routing ${targetUrl.href} to WireMock -> ${interceptedUrl}`);

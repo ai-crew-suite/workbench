@@ -36,6 +36,8 @@ import notificationsPlugin from '@backstage/plugin-notifications/alpha';
 import orgPlugin from '@backstage/plugin-org/alpha';
 import scaffolderPlugin from '@backstage/plugin-scaffolder/alpha';
 import searchPlugin from '@backstage/plugin-search/alpha';
+import signalsPlugin from '@backstage/plugin-signals/alpha';
+import techdocsPlugin from '@backstage/plugin-techdocs/alpha';
 import userSettingsPlugin from '@backstage/plugin-user-settings/alpha';
 import {
   ThemeProvider as LegacyThemeProvider,
@@ -105,7 +107,9 @@ export function buildDevApp({ TargetPlugin }: BuildAppOptions) {
     orgPlugin,
     scaffolderPlugin,
     searchPlugin,
+    signalsPlugin,
     TargetPlugin,
+    techdocsPlugin,
     userSettingsPlugin,
   ];
 

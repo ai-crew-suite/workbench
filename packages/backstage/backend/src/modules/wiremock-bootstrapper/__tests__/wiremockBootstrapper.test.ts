@@ -17,17 +17,8 @@ import { beforeEach, describe, it, expect, vi, afterEach, beforeAll } from 'vite
 import { WireMockClient } from '@ai-crew-suite/utils-wiremock';
 import fs from 'fs';
 
-/**
- * Extracts the async init function from a backend module feature.
- *
- * `createBackendModule` in current Backstage releases returns a feature object
- * that exposes its registrations via `getRegistrations()` instead of a callable
- * `register(env)` method; each registration carries the init function under
- * `registration.init.func`.
- */
 const getModuleInit = (module: any) => module.getRegistrations()[0].init.func;
 
-// Force complete system isolation for the filesystem
 vi.mock('fs', () => {
   const mockExistsSync = vi.fn().mockReturnValue(false);
   const mockReaddirSync = vi.fn().mockReturnValue([]);
@@ -39,8 +30,6 @@ vi.mock('fs', () => {
 });
 
 vi.mock('@ai-crew-suite/utils-wiremock', () => ({
-  // Must be a constructable function: the module under test invokes
-  // `new WireMockClient(...)` and arrow functions cannot be constructed.
   WireMockClient: vi.fn().mockImplementation(function WireMockClientImpl() {
     return {
       uploadDirectory: vi.fn().mockResolvedValue(undefined),
@@ -52,7 +41,6 @@ describe('wiremockBootstrapperModule Engine', () => {
   let wiremockBootstrapperModule: any;
 
   beforeAll(async () => {
-    // Dynamic import forces Vitest to resolve the token AFTER the mocks are hoisted cleanly
     const mod = await import('../wiremockBootstrapper');
     wiremockBootstrapperModule = mod.wiremockBootstrapperModule;
   });
@@ -60,14 +48,32 @@ describe('wiremockBootstrapperModule Engine', () => {
   beforeEach(() => {
     vi.stubEnv('MOCK_PROXY_URL', '');
     vi.spyOn(console, 'info').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
+  it('should exit early if the module is explicitly disabled in the configuration', async () => {
+    const mockConfig = {
+      getOptionalBoolean: vi.fn().mockReturnValue(false), // Explicitly disabled
+      getOptionalString: vi.fn().mockReturnValue('http://localhost:8080'),
+    };
+    const logSpy = vi.spyOn(console, 'log');
+
+    await getModuleInit(wiremockBootstrapperModule)({ config: mockConfig as any });
+
+    expect(mockConfig.getOptionalBoolean).toHaveBeenCalledWith('aiCrewSuite.modules.wiremockBootstrapper.enabled');
+    expect(WireMockClient).not.toHaveBeenCalled();
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('explicitly disabled via configuration'));
+  });
+
   it('should exit early if no mockProxyUrl is configured or found in env', async () => {
-    const mockConfig = { getOptionalString: vi.fn().mockReturnValue(undefined) };
+    const mockConfig = {
+      getOptionalBoolean: vi.fn().mockReturnValue(undefined), // Defaults to enabled (true)
+      getOptionalString: vi.fn().mockReturnValue(undefined)
+    };
     const infoSpy = vi.spyOn(console, 'info');
 
     await getModuleInit(wiremockBootstrapperModule)({ config: mockConfig as any });
@@ -79,14 +85,20 @@ describe('wiremockBootstrapperModule Engine', () => {
 
   it('should load mockProxyUrl from process.env if config is missing', async () => {
     vi.stubEnv('MOCK_PROXY_URL', 'http://env-proxy:8080');
-    const mockConfig = { getOptionalString: vi.fn().mockReturnValue(undefined) };
+    const mockConfig = {
+      getOptionalBoolean: vi.fn().mockReturnValue(undefined),
+      getOptionalString: vi.fn().mockReturnValue(undefined)
+    };
 
     await getModuleInit(wiremockBootstrapperModule)({ config: mockConfig as any });
     expect(WireMockClient).toHaveBeenCalledWith('http://env-proxy:8080');
   });
 
   it('should scan search roots and call uploadDirectory on valid mock paths', async () => {
-    const mockConfig = { getOptionalString: vi.fn().mockReturnValue('http://config-proxy:8080') };
+    const mockConfig = {
+      getOptionalBoolean: vi.fn().mockReturnValue(undefined),
+      getOptionalString: vi.fn().mockReturnValue('http://config-proxy:8080')
+    };
 
     vi.mocked(fs.existsSync).mockImplementation((p) => {
       if (typeof p === 'string' && (p.endsWith('plugins') || p.endsWith('packages'))) return true;

@@ -17,11 +17,6 @@ import { beforeEach, describe, it, expect, vi, afterEach, beforeAll } from 'vite
 
 /**
  * Extracts the async init function from a backend module feature.
- *
- * `createBackendModule` in current Backstage releases returns a feature object
- * that exposes its registrations via `getRegistrations()` instead of a callable
- * `register(env)` method; each registration carries the init function under
- * `registration.init.func`.
  */
 const getModuleInit = (module: any) => module.getRegistrations()[0].init.func;
 
@@ -40,6 +35,7 @@ describe('globalWiremockInterceptorModule (Robust Version)', () => {
     vi.stubEnv('MOCK_PROXY_URL', '');
     vi.spyOn(console, 'info').mockImplementation(() => {});
     vi.spyOn(console, 'debug').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -47,15 +43,32 @@ describe('globalWiremockInterceptorModule (Robust Version)', () => {
     vi.restoreAllMocks();
   });
 
+  it('should skip global fetch interception if explicitly disabled via configuration', async () => {
+    const mockConfig = {
+      getOptionalBoolean: vi.fn().mockReturnValue(false), // Explicitly disable
+      getOptionalString: vi.fn().mockReturnValue('http://localhost:8080'),
+    };
+
+    await getModuleInit(globalWiremockInterceptorModule)({ config: mockConfig as any });
+    expect(global.fetch).toBe(originalFetch);
+    expect(mockConfig.getOptionalBoolean).toHaveBeenCalledWith('aiCrewSuite.modules.globalWiremockInterceptor.enabled');
+  });
+
   it('should skip global fetch interception if mockProxyUrl configuration is missing', async () => {
-    const mockConfig = { getOptionalString: vi.fn().mockReturnValue(undefined) };
+    const mockConfig = {
+      getOptionalBoolean: vi.fn().mockReturnValue(undefined), // Defaults to true
+      getOptionalString: vi.fn().mockReturnValue(undefined),
+    };
 
     await getModuleInit(globalWiremockInterceptorModule)({ config: mockConfig as any });
     expect(global.fetch).toBe(originalFetch);
   });
 
-  it('should override global fetch when mockProxyUrl is configured', async () => {
-    const mockConfig = { getOptionalString: vi.fn().mockReturnValue('http://localhost:8080') };
+  it('should override global fetch when mockProxyUrl is configured and enabled', async () => {
+    const mockConfig = {
+      getOptionalBoolean: vi.fn().mockReturnValue(undefined), // Defaults to true
+      getOptionalString: vi.fn().mockReturnValue('http://localhost:8080'),
+    };
 
     await getModuleInit(globalWiremockInterceptorModule)({ config: mockConfig as any });
     expect(global.fetch).not.toBe(originalFetch);
@@ -68,7 +81,10 @@ describe('globalWiremockInterceptorModule (Robust Version)', () => {
       mockFetchSpy = vi.fn().mockResolvedValue({ ok: true } as Response);
       global.fetch = mockFetchSpy;
 
-      const mockConfig = { getOptionalString: vi.fn().mockReturnValue('http://localhost:8080') };
+      const mockConfig = {
+        getOptionalBoolean: vi.fn().mockReturnValue(undefined),
+        getOptionalString: vi.fn().mockReturnValue('http://localhost:8080'),
+      };
       await getModuleInit(globalWiremockInterceptorModule)({ config: mockConfig as any });
     });
 
@@ -118,7 +134,6 @@ describe('globalWiremockInterceptorModule (Robust Version)', () => {
       expect(mockFetchSpy).toHaveBeenCalledWith(
         expect.toSatisfy((req: Request) =>
           req instanceof Request &&
-          // The origin-only URL is normalized by the URL parser, adding a trailing slash.
           req.url === 'http://localhost:8080/://github.com/' &&
           req.method === 'POST' &&
           req.headers.get('Authorization') === 'Bearer token123'

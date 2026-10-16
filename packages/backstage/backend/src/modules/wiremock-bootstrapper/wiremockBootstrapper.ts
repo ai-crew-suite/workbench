@@ -18,7 +18,6 @@ import { WireMockClient } from '@ai-crew-suite/utils-wiremock';
 import path from 'path';
 import fs from 'fs';
 
-// Export the framework orchestration token matching what the unit tests expect
 export const wiremockBootstrapperModule = createBackendModule({
   pluginId: 'api',
   moduleId: 'wiremock-automatic-fixtures',
@@ -28,6 +27,13 @@ export const wiremockBootstrapperModule = createBackendModule({
         config: coreServices.rootConfig,
       },
       async init({ config }) {
+        const isEnabled = config.getOptionalBoolean('aiCrewSuite.modules.wiremockBootstrapper.enabled') ?? true;
+
+        if (!isEnabled) {
+          console.log('[WireMock-Module] wiremock-automatic-fixtures is explicitly disabled via configuration. Skipping workspace scans.');
+          return;
+        }
+
         const mockProxyUrl = config.getOptionalString('drivers.mockProxyUrl') || process.env['MOCK_PROXY_URL'];
         if (!mockProxyUrl) {
           console.info('[WireMock Ingestion] MOCK_PROXY_URL flag inactive. Skipping automatic directory scans.');
