@@ -41,22 +41,25 @@ describe('Catalog Fixture Registry Integration Tests', () => {
   };
 
   it('should verify all registered factories produce valid structures', () => {
-    const registryKeys = Object.keys(annotationsFixtureRegistry);
-
     // Ensure the registry isn't accidentally empty
-    expect(registryKeys.length).toBeGreaterThan(0);
+    expect(annotationsFixtureRegistry.length).toBeGreaterThan(0);
 
-    registryKeys.forEach(entityName => {
-      const factoryFn = annotationsFixtureRegistry[entityName];
+    // Iterating over the array elements directly fixes the TypeScript 7015 error
+    annotationsFixtureRegistry.forEach((fixture) => {
+      const targetRef = fixture.targetEntityRef;
 
       // Execute the factory function using our mock context
-      const result = factoryFn(mockEntity);
+      const result = fixture.factory(mockEntity);
 
-      // Verify the expected annotation wrapper key exists
-      expect(result).toHaveProperty('://ai-crew.com');
+      // Match the actual annotation key used in paymentService.ts
+      const expectedKey = 'ai-crew.com/fixtures';
+      expect(result).toHaveProperty(expectedKey);
 
-      const rawPayload = result['://ai-crew.com'];
+      const rawPayload = result[expectedKey];
+
+      // Type Guard: Ensures rawPayload is definitively a string for TS and Vitest
       expect(typeof rawPayload).toBe('string');
+      if (typeof rawPayload !== 'string') return;
 
       // Attempt to parse the stringified JSON payload
       let parsedPayload: unknown;
@@ -67,9 +70,9 @@ describe('Catalog Fixture Registry Integration Tests', () => {
       // Validate the parsed payload structure against our Zod schema
       const validationResult = fixturePayloadSchema.safeParse(parsedPayload);
 
-      // If validation fails, output a helpful error message indicating which entity failed
+      // If validation fails, output a helpful error message indicating which fixture failed
       if (!validationResult.success) {
-        console.error(`Validation failed for entity fixture: "${entityName}"`, validationResult.error.format());
+        console.error(`Validation failed for entity fixture targeting: "${targetRef}"`, validationResult.error.format());
       }
 
       expect(validationResult.success).toBe(true);

@@ -18,7 +18,7 @@ import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node'
 import { CatalogProcessor, CatalogProcessorEmit } from '@backstage/plugin-catalog-node';
 import { Entity, stringifyEntityRef, parseEntityRef } from '@backstage/catalog-model';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
-import { catalogAnnotationFixtures, EntityAnnotationFixture } from '@ai-crew-suite/annotations-fixtures';
+import { catalogAnnotationFixtures, EntityAnnotationFixture } from '@ai-crew-suite/fixtures-annotations';
 
 export class FixtureAnnotationProcessor implements CatalogProcessor {
   // Use a compiled Map for fast, O(1) compound key lookups

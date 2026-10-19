@@ -1,0 +1,10 @@
+{
+  "name": "@ai-crew-suite/deploy-terraform",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "tf:init": "terraform init",
+    "tf:validate": "terraform validate",
+    "tf:plan": "terraform plan"
+  }
+}

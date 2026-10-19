@@ -15,7 +15,7 @@ This workspace package serves as the centralized provider of programmatic metada
 ## Architectural Dependency Tree
 
 ```bash
-@ai-crew-suite/catalog-fixtures (This Package)
+@ai-crew-suite/fixtures-catalog (This Package)
 ├── @backstage/catalog-model (Core Entity types and interfaces)
 └── [Consuming Applications]
 └── packages/backstage/backend (Ingests registry via Custom Module Processors)
@@ -34,7 +34,7 @@ yarn install
 To check that your structure conforms to syntax rules and does not introduce duplicate object properties or structural regressions, execute:
 
 ```bash
-yarn turbo run lint --filter=@ai-crew-suite/catalog-fixtures
+yarn turbo run lint --filter=@ai-crew-suite/fixtures-catalog
 ```
 
 ### Automated Code Style Fixing
@@ -42,7 +42,7 @@ yarn turbo run lint --filter=@ai-crew-suite/catalog-fixtures
 To automatically fix formatting errors, trailing spaces, or indentation variations inside your mock assets instantly, run:
 
 ```bash
-yarn turbo run format --filter=@ai-crew-suite/catalog-fixtures
+yarn turbo run format --filter=@ai-crew-suite/fixtures-catalog
 ```
 
 ### Validating Fixture Integrity
@@ -50,7 +50,7 @@ yarn turbo run format --filter=@ai-crew-suite/catalog-fixtures
 To verify that all factory functions accurately produce valid entity fragments and that JSON payloads stringify without errors, run the test suites:
 
 ```bash
-yarn turbo run test:unit --filter=@ai-crew-suite/catalog-fixtures
+yarn turbo run test:unit --filter=@ai-crew-suite/fixtures-catalog
 ```
 
 ## Consumer Data Checklist
@@ -59,7 +59,7 @@ To extend the fixture registry or safely integrate these annotations into a new 
 
 - **Explicit Registry Binding**: The entity target name must match the key mapped inside the central `catalogFixtureRegistry` dictionary.
 - **Valid JSON Serialization**: Nested objects passed into factory templates must cleanly parse back out via standard browser/Node `JSON.parse` commands.
-- **Workspace Dependency Linking**: Ensure your consuming backend contains `"@ai-crew-suite/catalog-fixtures": "workspace:*"` inside its local `package.json` dependencies block.
+- **Workspace Dependency Linking**: Ensure your consuming backend contains `"@ai-crew-suite/fixtures-catalog": "workspace:*"` inside its local `package.json` dependencies block.
 
 ### Data Maintenance Operations
 

@@ -39,3 +39,10 @@ jobs:
           npm-auth-token: ${{ secrets.NPM_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Compile and Push Workbench Bases
+        run: yarn turbo run build --filter=@ai-crew-suite/containers
+        env:
+          REGISTRY: ghcr.io/your-org-name/ai-crew-suite
+          IMAGE_TAG: ${{ github.sha }}
+          CI: "true"

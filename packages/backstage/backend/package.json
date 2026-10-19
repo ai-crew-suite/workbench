@@ -40,6 +40,7 @@
     "launcher.js"
   ],
   "scripts": {
+    "build": "crew build",
     "lint": "crew lint",
     "test:e2e": "crew test:e2e",
     "test:unit": "crew test:unit",
@@ -47,7 +48,31 @@
     "typecheck": "crew typecheck"
   },
   "dependencies": {
-    "@ai-crew-suite/server-dependencies-backend": "workspace:^"
+    "@ai-crew-suite/fixtures-annotations": "workspace:^",
+    "@ai-crew-suite/fixtures-catalog": "workspace:^",
+    "@ai-crew-suite/utils-wiremock": "workspace:^",
+    "@backstage/backend-defaults": "backstage:^",
+    "@backstage/backend-plugin-api": "backstage:^",
+    "@backstage/config": "backstage:^",
+    "@backstage/plugin-auth-backend": "backstage:^",
+    "@backstage/plugin-auth-backend-module-github-provider": "backstage:^",
+    "@backstage/plugin-catalog-backend": "backstage:^",
+    "@backstage/plugin-catalog-backend-module-logs": "backstage:^",
+    "@backstage/plugin-catalog-backend-module-scaffolder-entity-model": "backstage:^",
+    "@backstage/plugin-events-backend": "backstage:^",
+    "@backstage/plugin-kubernetes-backend": "backstage:^",
+    "@backstage/plugin-notifications-backend": "backstage:^",
+    "@backstage/plugin-permission-backend": "backstage:^",
+    "@backstage/plugin-permission-backend-module-allow-all-policy": "backstage:^",
+    "@backstage/plugin-permission-node": "backstage:^",
+    "@backstage/plugin-proxy-backend": "backstage:^",
+    "@backstage/plugin-scaffolder-backend": "backstage:^",
+    "@backstage/plugin-search-backend": "backstage:^",
+    "@backstage/plugin-search-backend-module-catalog": "backstage:^",
+    "@backstage/plugin-signals-backend": "backstage:^",
+    "@backstage/plugin-techdocs-backend": "backstage:^",
+    "better-sqlite3": "catalog:prod",
+    "yaml": "catalog:prod"
   },
   "devDependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",

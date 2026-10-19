@@ -19,7 +19,7 @@ import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node'
 import { catalogModuleFixtureAnnotations } from '../DynamicAnnotationProcessor';
 import { Entity } from '@backstage/catalog-model';
 
-vi.mock('@ai-crew-suite/annotations-fixtures', () => ({
+vi.mock('@ai-crew-suite/fixtures-annotations', () => ({
   catalogAnnotationFixtures: [
     {
       targetEntityRef: 'component:default/platform',

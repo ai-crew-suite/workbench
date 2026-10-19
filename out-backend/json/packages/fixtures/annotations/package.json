@@ -1,0 +1,22 @@
+{
+  "name": "@ai-crew-suite/fixtures-annotations",
+  "version": "0.0.1",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "lint": "crew lint",
+    "test:e2e": "crew test:e2e",
+    "test:unit": "crew test:unit",
+    "test:unit:coverage": "crew test:unit:coverage",
+    "typecheck": "crew typecheck"
+  },
+  "dependencies": {
+    "@backstage/catalog-model": "backstage:^"
+  },
+  "devDependencies": {
+    "@ai-crew-suite/crew-cli": "catalog:dev",
+    "typescript": "catalog:dev",
+    "vitest": "catalog:dev",
+    "zod": "catalog:dev"
+  }
+}

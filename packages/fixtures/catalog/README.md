@@ -25,7 +25,7 @@ yarn install
 To check that
 
 ```bash
-yarn turbo run lint --filter=@ai-crew-suite/annotations-fixtures
+yarn turbo run lint --filter=@ai-crew-suite/fixtures-annotations
 ```
 
 ### Automated Code Style Fixing
@@ -33,7 +33,7 @@ yarn turbo run lint --filter=@ai-crew-suite/annotations-fixtures
 To automatically fix formatting errors, trailing spaces, or indentation variations inside your mock assets instantly, run:
 
 ```bash
-yarn turbo run format --filter=@ai-crew-suite/annotations-fixtures
+yarn turbo run format --filter=@ai-crew-suite/fixtures-annotations
 ```
 
 ### Executing Static Data Lint Sweeps
@@ -41,7 +41,7 @@ yarn turbo run format --filter=@ai-crew-suite/annotations-fixtures
 To
 
 ```bash
-yarn turbo run test:unit --filter=@ai-crew-suite/annotations-fixtures
+yarn turbo run test:unit --filter=@ai-crew-suite/fixtures-annotations
 ```
 
 ## Consumer Data Checklist

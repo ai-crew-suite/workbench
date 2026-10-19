@@ -16,7 +16,7 @@
 import { createBackendModule, coreServices } from '@backstage/backend-plugin-api';
 import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node';
 import { EntityProvider, EntityProviderConnection } from '@backstage/plugin-catalog-node';
-import { getProgrammaticEntities } from '@ai-crew-suite/catalog-entities-fixtures';
+import { getProgrammaticEntities } from '@ai-crew-suite/fixtures-catalog';
 
 export class DynamicFixtureEntityProvider implements EntityProvider {
   private connection?: EntityProviderConnection;

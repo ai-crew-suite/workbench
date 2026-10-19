@@ -1,0 +1,84 @@
+{
+  "name": "@ai-crew-suite/workbench-backend",
+  "description": "A published Backstage backend server for use in Dockerfiles",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "bin": {
+    "backstage-dev-server": "./launcher.js"
+  },
+  "engines": {
+    "node": "22 || 24"
+  },
+  "packageManager": "yarn@4.18.0",
+  "keywords": [
+    "agentic workflow",
+    "ai-crew-suite",
+    "app",
+    "backstage"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "backstage": {
+    "role": "backend"
+  },
+  "bugs": {
+    "url": "https://github.com/ai-crew-suite/workbench/issues",
+    "email": "support@ai-crew-suite.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai-crew-suite/workbench",
+    "directory": "packages/backstage/backend"
+  },
+  "files": [
+    "dist",
+    "skeleton",
+    "launcher.js"
+  ],
+  "scripts": {
+    "build": "crew build",
+    "lint": "crew lint",
+    "test:e2e": "crew test:e2e",
+    "test:unit": "crew test:unit",
+    "test:unit:coverage": "crew test:unit:coverage",
+    "typecheck": "crew typecheck"
+  },
+  "dependencies": {
+    "@ai-crew-suite/fixtures-annotations": "workspace:^",
+    "@ai-crew-suite/fixtures-catalog": "workspace:^",
+    "@ai-crew-suite/utils-wiremock": "workspace:^",
+    "@backstage/backend-defaults": "backstage:^",
+    "@backstage/backend-plugin-api": "backstage:^",
+    "@backstage/config": "backstage:^",
+    "@backstage/plugin-auth-backend": "backstage:^",
+    "@backstage/plugin-auth-backend-module-github-provider": "backstage:^",
+    "@backstage/plugin-catalog-backend": "backstage:^",
+    "@backstage/plugin-catalog-backend-module-logs": "backstage:^",
+    "@backstage/plugin-catalog-backend-module-scaffolder-entity-model": "backstage:^",
+    "@backstage/plugin-events-backend": "backstage:^",
+    "@backstage/plugin-kubernetes-backend": "backstage:^",
+    "@backstage/plugin-notifications-backend": "backstage:^",
+    "@backstage/plugin-permission-backend": "backstage:^",
+    "@backstage/plugin-permission-backend-module-allow-all-policy": "backstage:^",
+    "@backstage/plugin-permission-node": "backstage:^",
+    "@backstage/plugin-proxy-backend": "backstage:^",
+    "@backstage/plugin-scaffolder-backend": "backstage:^",
+    "@backstage/plugin-search-backend": "backstage:^",
+    "@backstage/plugin-search-backend-module-catalog": "backstage:^",
+    "@backstage/plugin-signals-backend": "backstage:^",
+    "@backstage/plugin-techdocs-backend": "backstage:^",
+    "better-sqlite3": "catalog:prod",
+    "yaml": "catalog:prod"
+  },
+  "devDependencies": {
+    "@ai-crew-suite/crew-cli": "catalog:dev",
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev",
+    "@backstage/backend-test-utils": "backstage:^",
+    "typescript": "catalog:dev",
+    "vitest": "catalog:dev"
+  }
+}

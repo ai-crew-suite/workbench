@@ -10,19 +10,10 @@
       "path": "./packages/backstage/backend"
     },
     {
-      "path": "./packages/backstage/server-dependencies-app"
+      "path": "./packages/cli"
     },
     {
-      "path": "./packages/backstage/server-dependencies-backend"
-    },
-    {
-      "path": "./packages/backstage/testpad-app"
-    },
-    {
-      "path": "./packages/backstage/testpad-backend"
-    },
-    {
-      "path": "./packages/deploy/docker-compose"
+      "path": "./packages/deploy/compose"
     },
     {
       "path": "./packages/deploy/kubernetes"
@@ -34,7 +25,28 @@
       "path": "./packages/dockerfiles"
     },
     {
-      "path": "./packages/fixtures"
+      "path": "./packages/fixtures/annotations"
+    },
+    {
+      "path": "./packages/fixtures/catalog"
+    },
+    {
+      "path": "./packages/fixtures/external"
+    },
+    {
+      "path": "./packages/fixtures/kubernetes"
+    },
+    {
+      "path": "./packages/fixtures/scaffolder"
+    },
+    {
+      "path": "./packages/fixtures/techdocs"
+    },
+    {
+      "path": "./packages/testpad/app"
+    },
+    {
+      "path": "./packages/testpad/backend"
     },
     {
       "path": "./packages/wiremock"

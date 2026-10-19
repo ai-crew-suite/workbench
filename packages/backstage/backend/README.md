@@ -170,7 +170,7 @@ Our bundled `skeleton/app-config.dev.yaml` contains dedicated rules to support a
 
 Mounts an automated `catalogOptionalLocalFixturesModule` backend processor that intercepts the custom `crew-suite-optional-fixtures` location type, providing zero-noise parsing of developers' untracked local sandbox YAML entities while cleanly bypassing boot-time exceptions if the files are physically absent.
 
-To disable loading predefined catalog entities during localized testing sessions, add the following to tye plugin's `dev/app-config.dev.yaml` file:
+To disable loading predefined catalog entities during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
 
 ```yaml
 aiCrewSuite:
@@ -183,7 +183,7 @@ aiCrewSuite:
 
 Plugs a strict `CustomKindsModule` parser into the ingestion framework that validates custom enterprise taxonomies (`DataProduct`, `Model`, `Product`, `Vulnerability`, and `ArchitectureDecision`) against mandatory internal schemas, enforcing explicit data policies, severity matrices, and operational ownership bounds before data commits to the catalog database.
 
-To disable predefined custom Kinds for catalog entities during localized testing sessions, add the following to tye plugin's `dev/app-config.dev.yaml` file:
+To disable predefined custom Kinds for catalog entities during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
 
 ```yaml
 aiCrewSuite:
@@ -196,7 +196,7 @@ aiCrewSuite:
 
 Hooks an automated `catalogModuleFixtureAnnotations` engine into the global entity ingestion pipeline, dynamically appending developer-defined telemetry tags and integration identifiers to targeted software catalog components during background processing intervals.
 
-To disable loading annotations to catalog entities during localized testing sessions, add the following to tye plugin's `dev/app-config.dev.yaml` file:
+To disable loading annotations to catalog entities during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
 
 ```yaml
 aiCrewSuite:

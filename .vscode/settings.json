@@ -45,6 +45,7 @@
   },
   "yaml.validate": true,
   "cSpell.words": [
+    "jsons",
     "qdrant",
     "Qube",
     "uncompiled",

@@ -1,0 +1,14 @@
+{
+  "name": "@ai-crew-suite/testpad-backend",
+  "version": "0.0.1",
+  "private": true,
+  "backstage": {
+    "role": "backend-plugin"
+  },
+  "scripts": {
+    "start": "backstage-dev-server"
+  },
+  "devDependencies": {
+    "@ai-crew-suite/workbench-backend": "workspace:*"
+  }
+}

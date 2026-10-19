@@ -1,0 +1,34 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "format": {
+      "cache": true,
+      "dependsOn": [],
+      "inputs": [],
+      "outputs": []
+    },
+    "lint": {
+      "cache": true,
+      "dependsOn": [],
+      "inputs": [],
+      "outputs": []
+    },
+    "test": {
+      "cache": true,
+      "dependsOn": [],
+      "inputs": ["src/**"]
+    },
+    "test:unit": {
+      "cache": true,
+      "dependsOn": [],
+      "inputs": ["src/**"],
+      "outputs": []
+    },
+    "typecheck": {
+      "cache": true,
+      "dependsOn": [],
+      "inputs": ["src/**", "tsconfig.json"],
+      "outputs": []
+    }
+  }
+}

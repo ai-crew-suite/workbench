@@ -31,13 +31,39 @@
     "directory": "packages/app"
   },
   "scripts": {
+    "build": "crew build",
     "format": "crew format",
     "lint": "crew lint",
     "test:unit": "crew test:unit",
     "typecheck": "crew typecheck"
   },
   "dependencies": {
-    "@ai-crew-suite/server-dependencies-app": "workspace:^"
+    "@backstage/frontend-defaults": "backstage:^",
+    "@backstage/frontend-plugin-api": "backstage:^",
+    "@backstage/plugin-api-docs": "backstage:^",
+    "@backstage/plugin-app-react": "backstage:^",
+    "@backstage/plugin-app-visualizer": "backstage:^",
+    "@backstage/plugin-catalog": "backstage:^",
+    "@backstage/plugin-catalog-graph": "backstage:^",
+    "@backstage/plugin-kubernetes": "backstage:^",
+    "@backstage/plugin-notifications": "backstage:^",
+    "@backstage/plugin-org": "backstage:^",
+    "@backstage/plugin-scaffolder": "backstage:^",
+    "@backstage/plugin-search": "backstage:^",
+    "@backstage/plugin-search-backend-module-techdocs": "backstage:^",
+    "@backstage/plugin-signals": "backstage:^",
+    "@backstage/plugin-techdocs": "1.18.2",
+    "@backstage/plugin-user-settings": "backstage:^",
+    "@backstage/theme": "backstage:^",
+    "@backstage/ui": "backstage:^",
+    "@material-ui/core": "catalog:prod",
+    "@mui/icons-material": "catalog:prod",
+    "@mui/material": "catalog:prod",
+    "react": "catalog:prod",
+    "react-dom": "catalog:prod",
+    "react-router": "catalog:prod",
+    "react-router-dom": "catalog:prod",
+    "yaml": "catalog:prod"
   },
   "devDependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",
