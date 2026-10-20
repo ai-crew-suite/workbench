@@ -22,12 +22,25 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE}")" && pwd)"
 MONOREPO_ROOT="$(cd "$SCRIPT_DIR/../../../../" && pwd)"
 
+# Define the isolated temporary directories
+SKELETON_DIR=".build-skeleton-${TARGET}"
+PRUNED_DIR="out-${TARGET}"
+
+# Define the cleanup function at the top so the script knows what to do on exit
+cleanup() {
+  echo -e "\n🧹 Sweeping up temporary build directories..."
+  cd "$MONOREPO_ROOT"
+  rm -rf "$SKELETON_DIR" "$PRUNED_DIR"
+}
+
+# Register the trap. This catches normal completion AND unexpected build errors.
+trap cleanup EXIT
+
 echo "🚀 Pre-formatting Monorepo Structural Graph for: $TARGET"
 
 cd "$MONOREPO_ROOT"
 
 # 5. Scope the skeleton folder uniquely to the target to avoid parallel race conditions
-SKELETON_DIR=".build-skeleton-${TARGET}"
 rm -rf "$SKELETON_DIR"
 mkdir -p "$SKELETON_DIR"
 
@@ -53,8 +66,5 @@ docker buildx build $BUILD_ACTION \
   --build-arg SKELETON_DIR="$SKELETON_DIR" \
   -t "${REGISTRY}/workbench-${TARGET}-base:${IMAGE_TAG}" \
   -f "packages/deploy/dockerfiles/${TARGET}/Dockerfile" .
-
-# Clean up the localized metadata directory
-rm -rf "$SKELETON_DIR"
 
 echo -e "\n✅ $TARGET base image compiled successfully!"
