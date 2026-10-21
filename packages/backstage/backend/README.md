@@ -1,50 +1,55 @@
 # Backstage Backend Server for Dev and CI
 
-🚀 **Modern Dependency-Injection Backend integration test bench and validation engine for the AI Crew Suite platform.**
-
-This workspace package provides a zero-config, isolated execution profile for the modern Backstage backend system. It serves as our primary verification layer for independent plugin architectures, leveraging declarative module assembly and type-safe dependency injection (DI). It ensures all platform features, workflow agents, and custom modules align perfectly with modern Backstage system constraints before hitting public cloud staging.
+This workspace package provides a zero-config, isolated setup for a modern Backstage backend system. It serves as the primary development and verification layer for independent plugin architectures, leveraging declarative module assembly and type-safe dependency injection (DI).
 
 ## 🛠️ Overview & Architecture
 
-Unlike traditional production backends that statically compile internal plugin arrays, this tool acts as a **dynamic orchestrator**. It is distributed via our registry to let individual plugin repositories boot a pre-configured Backstage server instantly without maintaining framework boilerplate.
+Unlike traditional production backends that statically compile internal plugin arrays, this tool acts as a **dynamic orchestrator**. It is distributed as a package to let individual plugin repositories boot a pre-configured Backstage server instantly without maintaining framework boilerplate.
 
-### Why the `skeleton/` Directory Exists
+### Why the `skeleton/` Directory Exists in this Package
 
 The Backstage CLI (`@backstage/cli package start`) requires structural config files (`backstage.json`, `tsconfig.json`) to determine the compilation target matrix, locate package roles, and manage hot-reloading file watchers.
 
 To keep individual plugin workspaces clean, this orchestrator package ships a **centralized `skeleton/` directory** containing an isolated configuration baseline (`app-config.dev.yaml`), TypeScript path inheritance rules, and version trackers. When a developer runs the startup command, our launcher leverages these files to trick the Backstage CLI into treating the calling plugin as part of its native compilation graph—restoring **full Hot Module Replacement (HMR)** and source-mapping.
 
-### Why the `dev/` Directory Exists in Calling Plugins
+### Why the `dev/` Directory is Necessary in Calling Plugins
 
-The Backstage CLI enforces strict execution patterns based on package roles. For packages labeled with `"role": "backend-plugin"`, the framework mandates that local testing loops occur inside a isolated **`dev/` directory** rather than polluting the distribution-ready `src/` directory.
+The Backstage CLI enforces strict execution patterns based on package roles. For packages labeled with `"role": "backend-plugin"`, the framework mandates that local testing loops occur inside a isolated `dev/` directory rather than polluting the distribution-ready `src/` directory.
 
-To hook a plugin into our server, calling sites add a simple `dev/index.ts` file. This script initializes a Backstage instance, links into our pre-compiled workbench code layer, and uses a clean **static relative import** to register the plugin's local code context into the dependency injection matrix.
+To hook a plugin into our server, calling sites add a simple `dev/index.ts` file. This script initializes a Backstage instance, links into this workbench code layer, and uses a clean **static relative import** to register the plugin's local code context into the dependency injection matrix.
 
 ## 🏗️ Core Responsibilities
 
 - **Declarative System Assembly**: Leverages `createBackend` alongside our `launcher.js` to orchestrate runtime initialization automatically through modular extension frameworks.
 - **Modern Dependency Injection**: Utilizes type-safe container registration via extension points, removing traditional imperative wiring code.
 - **Zero-Config Developer Experience**: Spawns an internal compilation layer that watches local source directories, automatically handling transpilation on the fly.
-- **Compliance Sandboxing**: Houses custom governance policies—such as our blanket authorization bypass rules—to isolate and protect automated testing streams.
+- **Compliance Sandboxing**: Houses custom governance policies—such as our blanket authorization bypass rules—to enable automated testing streams.
 
 ## 📈 Local Engine Maintenance (This Package)
 
-These commands are for maintaining, testing, and linting the orchestrator utility package itself within our core platform repository.
+These commands are for linting, typechecking, and testing the backend workbench backend dev server package itself within this repo.
 
 ### Running Lint
 
-To trigger the Crew CLI provided ESLint configuration, execute:
+To lint the backstage dev server package:
 
 ```bash
 yarn turbo run lint --filter=@ai-crew-suite/workbench-backend
 ```
 
-### Running Unit Test Suites
+### Running Typecheck
 
-To trigger a `tsc` typecheck run, execute:
+To typecheck the backstage dev server package:
 
 ```bash
 yarn turbo run typecheck --filter=@ai-crew-suite/workbench-backend
+```
+### Running Unit Tests
+
+To run unit tests:
+
+```bash
+yarn turbo run test:unit --filter=@ai-crew-suite/workbench-backend
 ```
 
 ### Debugging
@@ -92,22 +97,22 @@ Add the orchestrator package to your `devDependencies` and configure the `start`
 Create a new file at `dev/index.ts` to hook your local plugin code directly into Backstage's core registry:
 
 ```typescript
-// dev/index.ts
+// plugins/your-plugin-backend/dev/index.ts
 import { createBackend } from '@backstage/backend-defaults';
 import helloWorldPlugin from '../src/index';
 
 async function main() {
   const backend = createBackend();
 
-  // 🎯 Statically inject your local plugin features into the test bench thread
+  // Statically inject your local plugin features into the test bench thread
   backend.add(helloWorldPlugin);
 
-  // 🚀 Start the isolated backend server safely
+  // Start the isolated backend server safely
   await backend.start();
 }
 
 main().catch(err => {
-  console.error('Standalone testpad container collapsed:', err);
+  console.error('❌ Standalone testpad container failed:', err);
   process.exit(1);
 });
 ```
@@ -117,8 +122,11 @@ main().catch(err => {
 Ensure your plugin's main code path (`src/index.ts`) exposes your initialized backend feature as a **default export**, matching official Backstage architectural specifications:
 
 ```typescript
-// src/index.ts
-import { createBackendPlugin, coreServices } from '@backstage/backend-plugin-api';
+// plugins/your-plugin-backend/src/index.ts
+import {
+    createBackendPlugin,
+    coreServices,
+} from '@backstage/backend-plugin-api';
 import express from 'express';
 
 export default createBackendPlugin({
@@ -136,41 +144,96 @@ export default createBackendPlugin({
 });
 ```
 
-### 4. Running the Dev Server
+### 4. Add Catalog Fixtures (Optional)
+
+This backend dev server is configured to automatically load an example service catalog to test or develop against. That behavior can be disabled ([see below](#catalog-optional-fixtures-processor)), and catalog entries and annotations can be added or modified from your plugin. To add a catalog entity:
+
+```yaml
+# plugins/your-plugin-backend/dev/catalog-info.yaml
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: payment-service
+  description: Manages credit card transactions
+  annotations:
+    'example.com/local': |
+      {
+        "generatedAt": "2026-10-15T05:00:00Z",
+        "fixtureStatus": "active",
+        "notes": "Inline team annotation defined locally inside testpad context."
+      }
+spec:
+  type: service
+  lifecycle: production
+  owner: billing-team
+```
+
+You can also add a `kind: Location` file to organize multiple catalog entity files:
+```yaml
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: organizational-services
+  description: Main index of all active team repositories
+spec:
+  type: url
+  targets:
+    - ./mocks/**/catalog-info.yaml
+```
+
+### 5. Add Client Backend Plugins or Modules (Optional)
+
+Clients can cleanly pass a single reference or array of references to any additional plugins, modules, or custom service overwrites to the backend dev server:
+
+```typescript
+import { catalogPlugin } from '@backstage/plugin-catalog-backend';
+import { catalogModuleTemplateKind } from './my-custom-module';
+
+await startDevBackend({
+  features: [
+    catalogPlugin,               // Standard Backend Plugin
+    catalogModuleTemplateKind,   // Extension Module
+  ]
+});
+```
+
+### 6. Running the Dev Server
 
 To fire up the server inside the plugin directory and activate hot-reloading, execute:
 
 ```bash
-LOG_LEVEL=debug yarn turbo run start --filter=@ai-crew-suite/testpad-backend
+LOG_LEVEL=debug yarn turbo run start --filter=@your-org/your-plugin-backend
 ```
 
-To override the default dev configuration with a custom local profile, pass the configuration flag directly through the execution args:
+To override the default dev configuration with a custom local profile, add a local configuration file in your plugin:
 
-```bash
-yarn start --config ./custom-local-config.yaml
+```yaml
+# plugins/your-plugin-backend/dev/app-config.dev.yaml
+app:
+  # This overrides "AI Crew Suite Platform" from
+  # backend server programmatic configuration
+  title: "Your Backend Plugin"
+
+# Custom Configuration for your backend plugin
+myCustomPlugin:
+  featureX: true
 ```
 
-### 5. Verify Dev Server is Running Correctly
+### 7. Verify Dev Server is Running Correctly
 
 ```bash
 curl -i -H "Authorization: Bearer dev-secret-token-placeholder" http://localhost:7007/api/hello-world/health
 ```
 
-## 🛡️ Architectural Configuration Invariants
+## ⚙️ Custom Modules Included in Backend Dev Server
 
-Our bundled `skeleton/app-config.dev.yaml` contains dedicated rules to support air-gapped CI and local developer workstations:
+The pre-configured workbench backend dev server includes the following bundled plugins.
 
-- **Database Isolation**: Automatically swaps heavy PostgreSQL infrastructure out for an internal, thread-safe memory mapping pool using `better-sqlite3`.
-- **Global Traffic Interception**: Transparently patches global fetch loops; any outbound plugin calls to third-party dependencies are intercepted and automatically redirected to an isolated WireMock proxy mesh (`http://localhost:8080`).
-- **Strict VPC Sandboxing**: Implements an absolute dark-site reading block list to guarantee zero public cloud calling leaks.
+### Catalog Optional Fixtures Processor
 
-## ⚙️ Extension Modules Included in Backend Dev Server
+The workbench dev server defines two files to load catalog entities from in client plugins, `dev/catalog-info.yaml` for a single file of catalog entities and `dev/location.yaml` if organizing catalog entities across multiple files. If either of these files are missing, Backstage would normally generate warnings during startup since they're specified in server configuration. This plugin quiets those warnings for these two specific files.
 
-### Optional Local Fixtures Parsing (`modules/catalog-optional-fixtures-processor`)
-
-Mounts an automated `catalogOptionalLocalFixturesModule` backend processor that intercepts the custom `crew-suite-optional-fixtures` location type, providing zero-noise parsing of developers' untracked local sandbox YAML entities while cleanly bypassing boot-time exceptions if the files are physically absent.
-
-To disable loading predefined catalog entities during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
+To disable this behavior, add the following to the plugin's `dev/app-config.dev.yaml` file:
 
 ```yaml
 aiCrewSuite:
@@ -179,11 +242,11 @@ aiCrewSuite:
       enabled: false
 ```
 
-### Custom Kinds Contract Validation (`modules/catalog-schema-extensions`)
+### Catalog Schema Extensions
 
-Plugs a strict `CustomKindsModule` parser into the ingestion framework that validates custom enterprise taxonomies (`DataProduct`, `Model`, `Product`, `Vulnerability`, and `ArchitectureDecision`) against mandatory internal schemas, enforcing explicit data policies, severity matrices, and operational ownership bounds before data commits to the catalog database.
+Backstage provides the following `Kinds` of catalog entities by default: `Component`, `Api`, `Resource`, `System`, `Domain`, `User`, and `Group`. This plugin adds the kinds `DataProduct`, `Model`, `Product`, `Vulnerability`, and `ArchitectureDecision` to validate custom enterprise taxonomies against mandatory internal schemas, and to enforce explicit data policies, severity matrices, and operational ownership bounds before data commits to the catalog database.
 
-To disable predefined custom Kinds for catalog entities during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
+To disable the predefined custom kinds for catalog entities, add the following to your plugin's `dev/app-config.dev.yaml` file:
 
 ```yaml
 aiCrewSuite:
@@ -192,9 +255,9 @@ aiCrewSuite:
       enabled: false
 ```
 
-### Declarative Annotation Injection (`modules/dynamic-annotation-processor`)
+### Dynamic Annotation Processor
 
-Hooks an automated `catalogModuleFixtureAnnotations` engine into the global entity ingestion pipeline, dynamically appending developer-defined telemetry tags and integration identifiers to targeted software catalog components during background processing intervals.
+The Workbench includes the `@ai-crew-suite/fixtures-annotations` package which provides a comprehensive set of annotations for catalog entities defined in the `@ai-crew-suite/fixtures-catalog` package, for development and testing. This package is consumed by the dynamic annotation entity injector, and loaded during startup of the backend dev server.
 
 To disable loading annotations to catalog entities during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
 
@@ -205,9 +268,9 @@ aiCrewSuite:
       enabled: false
 ```
 
-### Dynamic Catalog Entity Injection ()`modules/dynamic-catalog-entity-processor`)
+### Dynamic Catalog Entity Injection
 
-Integrates a programmatic `catalogModuleDynamicEntities` backend extension that leverages a custom `DynamicFixtureEntityProvider` to dynamically harvest, sign, and patch sandbox environments with a type-safe mock software catalog natively in-memory, bypassing static filesystem mutations.
+The Workbench includes the `@ai-crew-suite/fixtures-catalog` package which provides a comprehensive software catalog of entities for development and testing. This package is consumed by the dynamic catalog entity injector, and loaded during startup of the backend dev server.
 
 To disable loading the mock catalog during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
 
@@ -218,7 +281,9 @@ aiCrewSuite:
       enabled: false
 ```
 
-### `modules/test-permission-policy`
+### Test Permission Policy
+
+
 
 ### Automated WireMock Fixture Synchronization (`modules/wiremock-bootstrapper`)
 

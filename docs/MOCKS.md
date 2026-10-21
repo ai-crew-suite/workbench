@@ -17,6 +17,7 @@ Backend server module that hooks an automated `catalogModuleFixtureAnnotations` 
 
 - Disabling currently blocks all mock functionality
 - No current path to extend in calling code. ***How do you extend that to client call sites?* *Maybe programmatic in the core, and directory in call sites?***
+- Mocks are `*.ts` files. The fixtures package is consumed by importing `@ai-crew-suite/fixtures-annotations`.
 
 ## Catalog Mocks
 
@@ -49,7 +50,7 @@ There are two approaches to adding Kubernetes mocks:
 
 ## Techdocs Mocks
 
-**There is no programmatic API for TechDocs** that functions like the Catalog's in-memory entity providers. While you can programmatically seed the Catalog with the metadata *about* a documentation site (by injecting a `Component` entity with a `backstage.io/techdocs-ref` annotation), **the actual documentation content itself cannot be stored in-memory or streamed via a database mutation.**
+**There is no programmatic API for TechDocs** that functions like the Catalog's in-memory entity providers because the HTML docs themselves are served from a bucket. While you can programmatically seed the Catalog with the metadata *about* a documentation site (by injecting a `Component` entity with a `backstage.io/techdocs-ref` annotation), **the actual documentation content itself cannot be stored in-memory or streamed via a database mutation.**
 
 These are also wired in using `packages/backend/app-config.yaml` and must follow a specific directory structure.
 

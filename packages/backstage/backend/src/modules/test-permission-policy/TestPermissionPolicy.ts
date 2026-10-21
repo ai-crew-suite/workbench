@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createBackendModule } from '@backstage/backend-plugin-api';
-import { policyExtensionPoint } from '@backstage/plugin-permission-node/alpha';
 import { PermissionPolicy, PolicyQuery, PolicyQueryUser } from '@backstage/plugin-permission-node';
 import { AuthorizeResult, PolicyDecision } from '@backstage/plugin-permission-common';
 
@@ -30,18 +28,3 @@ export class TestPermissionPolicy implements PermissionPolicy {
     return { result: AuthorizeResult.ALLOW };
   }
 }
-
-export const testPermissionModule = createBackendModule({
-  pluginId: 'permission',
-  moduleId: 'custom-policy',
-  register(reg) {
-    reg.registerInit({
-      deps: {
-        policy: policyExtensionPoint
-      },
-      async init({ policy }) {
-        policy.setPolicy(new TestPermissionPolicy());
-      },
-    });
-  },
-});

@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 import { describe, it, expect } from 'vitest';
-import { testPermissionModule, TestPermissionPolicy } from '../TestPermissionPolicy';
+import { TestPermissionPolicy } from '../TestPermissionPolicy';
 import { AuthorizeResult } from '@backstage/plugin-permission-common';
 import { PolicyQuery } from '@backstage/plugin-permission-node';
 
-describe('testPermissionModule Stack', () => {
-  it('should export a valid backend feature token wrapper', () => {
-    expect(testPermissionModule).toBeDefined();
-    // Verifies it conforms to the standard Backstage feature structure safely
-    expect(typeof testPermissionModule).toBe('object');
-  });
-
+describe('TestPermissionPolicy', () => {
   it('should apply a blanket approval ALLOW verdict for incoming requests', async () => {
-    // Instantiate the policy directly now that it's exported
     const policy = new TestPermissionPolicy();
 
     const mockRequest: PolicyQuery = {
@@ -35,6 +28,22 @@ describe('testPermissionModule Stack', () => {
         type: 'resource',
         resourceType: 'catalog-entity',
         attributes: { action: 'read' },
+      },
+    };
+
+    const decision = await policy.handle(mockRequest);
+    expect(decision).toEqual({ result: AuthorizeResult.ALLOW });
+  });
+
+  it('should explicitly allow scaffolding template execution actions', async () => {
+    const policy = new TestPermissionPolicy();
+
+    const mockRequest: PolicyQuery = {
+      permission: {
+        name: 'scaffolder.template.execute',
+        type: 'resource',
+        resourceType: 'scaffolder-template',
+        attributes: { action: 'update' },
       },
     };
 

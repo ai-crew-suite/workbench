@@ -109,10 +109,6 @@ export const mockConfigServiceFactory = createServiceFactory({
           },
         ],
         locations: [
-          {
-            type: 'file',
-            target: process.env['MOCK_FIXTURES_PATH'] || '../../fixtures/location.yaml',
-          },
           // Optional local fixture files resolved relative to the executing
           // plugin's working directory. The OptionalLocalFixturesProcessor
           // skips these silently when the files do not exist.

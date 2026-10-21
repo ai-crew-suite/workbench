@@ -31,6 +31,8 @@ cleanup() {
   echo -e "\n🧹 Sweeping up temporary build directories..."
   cd "$MONOREPO_ROOT"
   rm -rf "$SKELETON_DIR" "$PRUNED_DIR"
+  echo -e "\n✂️ Pruning dangling Docker images..."
+  docker image prune -f
 }
 
 # Register the trap. This catches normal completion AND unexpected build errors.
