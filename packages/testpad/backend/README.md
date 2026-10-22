@@ -22,6 +22,22 @@ To trigger the Crew CLI provided ESLint configuration across the testpad files, 
 yarn turbo run lint --filter=@ai-crew-suite/testpad-backend
 ```
 
+### Automated Code Style Fixing
+
+To automatically fix formatting errors, trailing spaces, or indentation variations inside your mock assets instantly, run:
+
+```bash
+yarn turbo run format --filter=@ai-crew-suite/testpad-backend
+```
+
+### Typecheck
+
+To typecheck code, run:
+
+```bash
+yarn turbo run typecheck --filter=@ai-crew-suite/testpad-backend
+```
+
 ### Running Local Code-Coverage Metric Scans
 
 To trigger the underlying Vitest engine and execute live automated code-coverage sweeps against the CLI package framework, run:

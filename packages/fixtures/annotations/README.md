@@ -1,25 +1,11 @@
 # Mock Annotations for AI Crew Suite Dev Server Catalog Entities
 
-High-fidelity static data fixtures
-
-## Overview
-
-This workspace package serves as the centralized provider of programmatic metadata, schemas, and runtime fixtures for the AI Crew Suite software catalog. Rather than maintaining brittle, high-maintenance duplicates of YAML configurations, this package allows engineers to use strongly typed TypeScript factory functions to safely enrich existing Backstage catalog entities with complex mock annotations, payload strings, and simulated environment states.
+This workspace package serves as the centralized provider of programmatic metadata, schemas, and runtime fixtures for the default AI Crew Suite mock software catalog.
 
 ## Core Responsibilities
 
 - **Ecosystem Simulation**: Provisions high-fidelity mock annotations and structural parameters to mirror real production environments during local exploration and testing.
-- **Documentation Isolation**: Hosts pre-compiled HTML documentation, telemetry specs, and dynamic schema attachments decoupled from core application logic.
 - **Hermetic Test Grounding**: Serves as the single source of truth for test fixtures, establishing deterministic runtime responses for sandbox components and UI validations.
-
-## Architectural Dependency Tree
-
-```bash
-@ai-crew-suite/fixtures-catalog (This Package)
-├── @backstage/catalog-model (Core Entity types and interfaces)
-└── [Consuming Applications]
-└── packages/backstage/backend (Ingests registry via Custom Module Processors)
-```
 
 ## Local Development Workflow
 
@@ -45,6 +31,14 @@ To automatically fix formatting errors, trailing spaces, or indentation variatio
 yarn turbo run format --filter=@ai-crew-suite/fixtures-catalog
 ```
 
+### Typecheck
+
+To typecheck code, run:
+
+```bash
+yarn turbo run typecheck --filter=@ai-crew-suite/fixtures-catalog
+```
+
 ### Validating Fixture Integrity
 
 To verify that all factory functions accurately produce valid entity fragments and that JSON payloads stringify without errors, run the test suites:
@@ -61,10 +55,6 @@ To extend the fixture registry or safely integrate these annotations into a new 
 - **Valid JSON Serialization**: Nested objects passed into factory templates must cleanly parse back out via standard browser/Node `JSON.parse` commands.
 - **Workspace Dependency Linking**: Ensure your consuming backend contains `"@ai-crew-suite/fixtures-catalog": "workspace:*"` inside its local `package.json` dependencies block.
 
-### Data Maintenance Operations
-
-When updating mock attributes (such as rotated telemetry tokens, changed ownership mappings, or new API routes), update the specific file inside `src/fixtures/` directly. Running the centralized build pipeline will automatically propagate those updates to all localized dev instances upon the next catalog refresh cycle.
-
 ## Static Data Component Matrix
 
 | Fixture Module | Intended Entity Target | Output Format | Common Use Cases |
@@ -74,5 +64,5 @@ When updating mock attributes (such as rotated telemetry tokens, changed ownersh
 
 ## Compliance and Licensing
 
-Copyright © 2026 The AI Crew Suite Authors.  
+Copyright © 2026 The AI Crew Suite Authors. 
 Licensed under the **Apache License, Version 2.0**.

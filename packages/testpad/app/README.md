@@ -22,6 +22,22 @@ To trigger the Crew CLI provided ESLint configurations across the frontend appli
 yarn turbo run lint --filter=@ai-crew-suite/testpad-app
 ```
 
+### Typecheck
+
+To typecheck code, run:
+
+```bash
+yarn turbo run typecheck --filter=@ai-crew-suite/testpad-app
+```
+
+### Automated Code Style Fixing
+
+To automatically fix formatting errors, trailing spaces, or indentation variations inside your mock assets instantly, run:
+
+```bash
+yarn turbo run format --filter=@ai-crew-suite/testpad-app
+```
+
 ### Running Typechecks
 
 To trigger a standard TypeScript compiler validation sweep across all application code definitions, execute:

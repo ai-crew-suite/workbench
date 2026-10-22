@@ -124,6 +124,10 @@ __metadata:
 "@ai-crew-suite/fixtures-external@workspace:packages/fixtures/external":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/fixtures-external@workspace:packages/fixtures/external"
+  dependencies:
+    "@ai-crew-suite/crew-cli": "catalog:dev"
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    vitest: "catalog:dev"
   languageName: unknown
   linkType: soft
 
@@ -142,6 +146,7 @@ __metadata:
   resolution: "@ai-crew-suite/fixtures-scaffolder@workspace:packages/fixtures/scaffolder"
   dependencies:
     "@ai-crew-suite/crew-cli": "catalog:dev"
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
     "@backstage/catalog-model": "backstage:^"
     "@backstage/plugin-scaffolder-common": "backstage:^"
     typescript: "catalog:dev"
@@ -165,6 +170,7 @@ __metadata:
   resolution: "@ai-crew-suite/testpad-app@workspace:packages/testpad/app"
   dependencies:
     "@ai-crew-suite/crew-cli": "catalog:dev"
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
     "@ai-crew-suite/workbench-app": "workspace:*"
   languageName: unknown
   linkType: soft
@@ -173,7 +179,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/testpad-backend@workspace:packages/testpad/backend"
   dependencies:
-    "@ai-crew-suite/workbench-backend": "workspace:*"
+    "@ai-crew-suite/crew-cli": "catalog:dev"
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    "@ai-crew-suite/workbench-app": "workspace:*"
+    "@backstage/catalog-model": "backstage:^"
   languageName: unknown
   linkType: soft
 
@@ -183,22 +192,6 @@ __metadata:
   checksum: 10c0/24cd5ee953f803eecfd2e0cbbfaceb4749e1e77697e1653b1476031809b03c91e8e75c31f38bd83b0b0b9c551e5e21e7f800ef318660df02b4d10e8558ef84ba
   languageName: node
   linkType: hard
-
-"@ai-crew-suite/utils-wiremock@workspace:^, @ai-crew-suite/utils-wiremock@workspace:packages/wiremock":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/utils-wiremock@workspace:packages/wiremock"
-  dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
-    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
-    "@tsconfig/node22": "catalog:dev"
-    "@types/node": "catalog:dev"
-    "@vercel/ncc": "catalog:dev"
-    typescript: "catalog:dev"
-    vitest: "catalog:dev"
-  bin:
-    backstage-dev-server: ./launcher.js
-  languageName: unknown
-  linkType: soft
 
 "@ai-crew-suite/workbench-app@workspace:*, @ai-crew-suite/workbench-app@workspace:packages/backstage/app":
   version: 0.0.0-use.local
@@ -243,7 +236,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ai-crew-suite/workbench-backend@workspace:*, @ai-crew-suite/workbench-backend@workspace:packages/backstage/backend":
+"@ai-crew-suite/workbench-backend@workspace:packages/backstage/backend":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/workbench-backend@workspace:packages/backstage/backend"
   dependencies:
@@ -252,7 +245,6 @@ __metadata:
     "@ai-crew-suite/fixtures-catalog": "workspace:^"
     "@ai-crew-suite/fixtures-scaffolder": "workspace:^"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
-    "@ai-crew-suite/utils-wiremock": "workspace:^"
     "@backstage/backend-defaults": "backstage:^"
     "@backstage/backend-plugin-api": "backstage:^"
     "@backstage/backend-test-utils": "backstage:^"
@@ -287,6 +279,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/workbench-cli@workspace:packages/workbench-cli"
   dependencies:
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
     "@rollup/plugin-node-resolve": "catalog:dev"
     "@types/node": "catalog:dev"
     chalk: "catalog:prod"
@@ -11551,13 +11544,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tsconfig/node22@npm:^22.0.6":
-  version: 22.0.6
-  resolution: "@tsconfig/node22@npm:22.0.6"
-  checksum: 10c0/595f70f90820a16b34db5e192ac47f66567b694c14a2249e24009df27214fab665f6634c6346ad1b6aa2d222aee7377edfeba7821f0076cba075bc79a0be728c
-  languageName: node
-  linkType: hard
-
 "@tufjs/canonical-json@npm:2.0.0":
   version: 2.0.0
   resolution: "@tufjs/canonical-json@npm:2.0.0"
@@ -13011,17 +12997,6 @@ __metadata:
   version: 1.12.2
   resolution: "@unrs/resolver-binding-win32-x64-msvc@npm:1.12.2"
   conditions: os=win32 & cpu=x64
-  languageName: node
-  linkType: hard
-
-"@vercel/ncc@npm:^0.45.0":
-  version: 0.45.0
-  resolution: "@vercel/ncc@npm:0.45.0"
-  dependencies:
-    node-gyp: "npm:latest"
-  bin:
-    ncc: dist/ncc/cli.js
-  checksum: 10c0/e6b931654c47b0af3b53feebf53760efdc97a0dc6689fbc4b6c37f674150f0396047d0c96d1b02513fe1d43d4ff038050f8752adf58efc849219c9e2775b5f68
   languageName: node
   linkType: hard
 

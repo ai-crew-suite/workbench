@@ -133,3 +133,16 @@ Because a node package cannot safely invoke its own uncompiled workspace binary 
 
 Copyright © 2026 The AI Crew Suite Authors.
 Licensed under the **Apache License, Version 2.0**.
+
+
+## 🔌 Consumer Integration Guide (How the CLI Uses External Fixtures)
+
+Downstream CLI orchestrators can pull these configurations cleanly out of memory fields:
+
+```typescript
+import { getAllProgrammaticMappings, getAllProgrammaticVendorPayloads } from '@ai-crew-suite/fixtures-external';
+
+// Programmatically feed interceptor networks
+const mappings = getAllProgrammaticMappings();
+console.log(`Successfully hydrated ${mappings.length} structural mock routes.`);
+```

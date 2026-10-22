@@ -2,35 +2,10 @@
 
 Programmatic catalog topology seed entities (Groups, Users, Components, Systems, and Domains) providing baseline infrastructure blueprints for the AI Crew Suite dev workspace server sandbox.
 
-## Overview
-
-This workspace package provides high-fidelity programmatic data fixtures to populate the Backstage Software Catalog during local machine prototyping and sandboxed continuous integration. Instead of making risky, live network connections to external production identity providers or Git repositories, this library supplies a predictable corporate structural map out-of-the-box so backend plugins and frontend interfaces can be verified in a completely hermetic local environment.
-
 ## Core Responsibilities
 
 - **Ecosystem Simulation**: Provisions high-fidelity mock organizational models matching realistic workspace team topologies.
-- **Documentation Isolation**: Hosts local techdocs and infrastructure layouts to test catalog rendering engines in sandbox environments.
 - **Hermetic Test Grounding**: Serves as the stable data baseline ensuring unit, integration, and end-to-end tests run deterministically.
-
-## Architectural Dependency Tree
-
-The programmatic entities are wired together to mimic a complete enterprise architecture. They are structured according to the core Backstage relational topology guidelines:
-
-```text
-       [ Domain: fintech ]
-                │
-        [ System: billing ]
-                │
-   [ Component: payment-service ] ──(Exposes)──> [ API: payment-api ]
-                │
-            (Owned By)
-                │
-      [ Group: platform-team ] ──(Parent)──> [ Group: engineering ]
-                │
-            (Member)
-                │
-       [ User: kevin ]
-```
 
 ## Local Development Workflow
 
@@ -54,6 +29,14 @@ To automatically fix formatting errors, trailing spaces, or indentation variatio
 
 ```bash
 yarn turbo run format --filter=@ai-crew-suite/fixtures-catalog
+```
+
+### Typecheck
+
+To typecheck code, run:
+
+```bash
+yarn turbo run typecheck --filter=@ai-crew-suite/fixtures-catalog
 ```
 
 ### Running the Test Suite

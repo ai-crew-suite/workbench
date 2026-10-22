@@ -1,10 +1,35 @@
 {
   "name": "@ai-crew-suite/fixtures-annotations",
+  "description": "Static annotation data fixtures for default mock catalog entities.",
   "version": "0.0.1",
+  "keywords": [
+    "agentic workflow",
+    "ai-crew-suite",
+    "backstage",
+    "backstage-catalog",
+    "metadata",
+    "annotations",
+    "catalog-fixtures",
+    "json-schema",
+    "entity-validation",
+    "catalog-processing",
+    "data-blueprints"
+  ],
+  "license": "Apache-2.0",
   "main": "src/index.ts",
   "types": "src/index.ts",
+  "bugs": {
+    "url": "https://github.com/ai-crew-suite/workbench/issues",
+    "email": "support@ai-crew-suite.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai-crew-suite/workbench",
+    "directory": "packages/fixtures/annotations"
+  },
   "scripts": {
     "build": "echo 'No-op build step completed for annotations fixtures.'",
+    "format": "crew format",
     "lint": "crew lint",
     "test:e2e": "crew test:e2e",
     "test:unit": "crew test:unit",

@@ -10,19 +10,16 @@
       "path": "./packages/backstage/backend"
     },
     {
-      "path": "./packages/cli"
+      "path": "./packages/deploy/compose"
     },
     {
-      "path": "./packages/deploy/compose"
+      "path": "./packages/deploy/dockerfiles"
     },
     {
       "path": "./packages/deploy/kubernetes"
     },
     {
       "path": "./packages/deploy/terraform"
-    },
-    {
-      "path": "./packages/deploy/dockerfiles"
     },
     {
       "path": "./packages/fixtures/annotations"

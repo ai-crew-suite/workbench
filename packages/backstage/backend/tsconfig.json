@@ -6,11 +6,17 @@
     "rootDir": "src"
   },
   "include": [
-    "src/**/*"
+    "src*"
   ],
   "references": [
     {
-      "path": "../../wiremock"
+      "path": "../../fixtures/annotations"
+    },
+    {
+      "path": "../../fixtures/catalog"
+    },
+    {
+      "path": "../../fixtures/scaffolder"
     }
   ]
 }

@@ -51,7 +51,7 @@
     "commander": "catalog:prod"
   },
   "devDependencies": {
-    "@ai-crew-suite/typescript-shared-config/node": "catalog:dev",
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev",
     "@rollup/plugin-node-resolve": "catalog:dev",
     "@types/node": "catalog:dev",
     "glob": "catalog:dev",

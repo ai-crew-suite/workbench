@@ -13,3 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { getDatadogFixtures } from './fixtures/datadog';
+import { getPagerDutyFixtures } from './fixtures/pagerduty';
+import { WiremockMapping } from './types';
+
+export type { WiremockMapping, ExternalFixtureContainer } from './types';
+
+/**
+ * Aggregates all programmatic Wiremock structural mapping templates across vendors.
+ */
+export const getAllProgrammaticMappings = (): WiremockMapping[] => {
+  return [
+    ...getDatadogFixtures().wiremockMappings,
+    ...getPagerDutyFixtures().wiremockMappings
+  ];
+};
+
+/**
+ * Aggregates all standalone vendor telemetry/incident json payloads across vendors.
+ */
+export const getAllProgrammaticVendorPayloads = (): Record<string, any> => {
+  return {
+    ...getDatadogFixtures().vendorPayloads,
+    ...getPagerDutyFixtures().vendorPayloads
+  };
+};
