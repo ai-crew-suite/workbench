@@ -13,3 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import type { Entity } from '@backstage/catalog-model';
+import { getWorkbenchScaffolderTemplates } from './fixtures/workbenchTemplates';
+
+export const getProgrammaticTemplates = (): Entity[] => {
+  const allTemplates: Entity[][] = [
+    getWorkbenchScaffolderTemplates(),
+  ];
+
+  return allTemplates.flat();
+};

@@ -1,5 +1,6 @@
 {
   "name": "@ai-crew-suite/fixtures-catalog",
+  "description": "Catalog seed entities (Groups, Users, Components, Systems, and Domains) providing baseline infrastructure blueprints for the AI Crew Suite dev workspace server sandbox.",
   "version": "0.0.1",
   "main": "src/index.ts",
   "types": "src/index.ts",

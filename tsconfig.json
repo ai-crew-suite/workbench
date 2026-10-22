@@ -22,7 +22,7 @@
       "path": "./packages/deploy/terraform"
     },
     {
-      "path": "./packages/dockerfiles"
+      "path": "./packages/deploy/dockerfiles"
     },
     {
       "path": "./packages/fixtures/annotations"

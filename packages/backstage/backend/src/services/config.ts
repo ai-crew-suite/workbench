@@ -122,18 +122,10 @@ export const mockConfigServiceFactory = createServiceFactory({
           },
         ],
       },
-      techdocs: {
-        builder: 'local',
-        generator: { runIn: 'local' },
-        publisher: {
-          type: 'local',
-          local: {
-            publishFolder: process.env['CONSUMER_TECHDOCS_ROOT'] || '../../mock-fixtures/techdocs',
-          },
-        },
-      },
       scaffolder: {
         concurrentTasks: 5,
+        // Disables background catalog worker polling for templates to allow instant local reloads
+        experimentalNotLoadingTemplatesFromCatalog: true,
       },
       search: {
         collators: {
@@ -143,6 +135,16 @@ export const mockConfigServiceFactory = createServiceFactory({
               timeout: { minutes: 3 },
               initialDelay: { seconds: 15 },
             },
+          },
+        },
+      },
+      techdocs: {
+        builder: 'local',
+        generator: { runIn: 'local' },
+        publisher: {
+          type: 'local',
+          local: {
+            publishFolder: process.env['CONSUMER_TECHDOCS_ROOT'] || '../../mock-fixtures/techdocs',
           },
         },
       },

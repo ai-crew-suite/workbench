@@ -44,6 +44,7 @@ To typecheck the backstage dev server package:
 ```bash
 yarn turbo run typecheck --filter=@ai-crew-suite/workbench-backend
 ```
+
 ### Running Unit Tests
 
 To run unit tests:
@@ -283,9 +284,47 @@ aiCrewSuite:
 
 ### Test Permission Policy
 
+The Workbench backend dev server includes a very open default permission policy. It issues unconditional blanket approvals (`AuthorizeResult.ALLOW`) for all incoming permission requests. Its primary purpose is to act as an unrestrictive pass-through layer that eliminates permission bottlenecks during local workspace sandboxing, prototyping, and testing.
 
+Clients can replace the default policy with their own custom permission policy like this:
 
-### Automated WireMock Fixture Synchronization (`modules/wiremock-bootstrapper`)
+```typescript
+import { startDevBackend } from '@ai-crew-suite/workbench-backend';
+import {
+    PermissionPolicy,
+    PolicyQuery,
+    PolicyQueryUser,
+} from '@backstage/plugin-permission-node';
+import {
+    AuthorizeResult,
+    PolicyDecision,
+} from '@backstage/plugin-permission-common';
+
+/**
+ * Implement a local security matrix
+ */
+class EnterpriseRBACPolicy implements PermissionPolicy {
+  async handle(
+    request: PolicyQuery,
+    user?: PolicyQueryUser
+   ): Promise<PolicyDecision> {
+    // Lock down critical catalog deletion workflows locally
+    if (request.permission.name === 'catalog.entity.delete') {
+      return { result: AuthorizeResult.DENY };
+    }
+
+    // Fall back to allowing other workspace prototyping behaviors
+    return { result: AuthorizeResult.ALLOW };
+  }
+}
+
+/**
+ * Launch the environment with your policy attached
+ */
+await startDevBackend({ customPolicy: new EnterpriseRBACPolicy() });
+```
+
+### WireMock Bootstrapper
 
 Provisions an automated `wiremockBootstrapperModule` API extension that crawls your monorepo workspaces on startup, auto-discovering localized plugin mock configurations and seamlessly syncing JSON endpoint stubs into active WireMock proxy containers to create zero-config offline developer environments.
 
@@ -298,7 +337,7 @@ aiCrewSuite:
       enabled: false
 ```
 
-### Global Network Traffic Redirection Interceptor ()`modules/wiremock-interceptor`)
+### Wiremock Interceptor
 
 Configures a low-overhead `globalWiremockInterceptorModule` API runtime utility that overrides node's `global.fetch` scope, dynamically rerouting external HTTP/HTTPS API traffic outbound to third-party endpoints directly into local WireMock proxy meshes while safely ignoring database network protocols (PostgreSQL wire and Redis RESP over TCP).
 

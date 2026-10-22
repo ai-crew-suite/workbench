@@ -17,6 +17,7 @@ import { createBackendModule, coreServices } from '@backstage/backend-plugin-api
 import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node';
 import { EntityProvider, EntityProviderConnection } from '@backstage/plugin-catalog-node';
 import { getProgrammaticEntities } from '@ai-crew-suite/fixtures-catalog';
+import { getProgrammaticTemplates } from '@ai-crew-suite/fixtures-scaffolder';
 
 export class DynamicFixtureEntityProvider implements EntityProvider {
   private connection?: EntityProviderConnection;
@@ -33,15 +34,17 @@ export class DynamicFixtureEntityProvider implements EntityProvider {
   async refreshEntities(): Promise<void> {
     if (!this.connection) return;
 
-    const programmaticEntities = getProgrammaticEntities();
-    const providerName = this.getProviderName(); // 'DynamicFixtureEntityProvider'
+    const catalogEntities = getProgrammaticEntities();
+    const scaffolderTemplates = getProgrammaticTemplates();
 
-    const mutations = programmaticEntities.map(entity => {
-      // Dynamically inject the correct structural location tracking annotations required by Backstage
+    const allProgrammaticEntities = [...catalogEntities, ...scaffolderTemplates];
+    const providerName = this.getProviderName();
+
+    const mutations = allProgrammaticEntities.map(entity => {
       const annotations = {
         ...entity.metadata.annotations,
         'backstage.io/managed-by-location': `external:${providerName}`,
-        'backstage.io/managed-by-origin-location': `external:${providerName}`, // <-- FIXED KEY NAME HERE
+        'backstage.io/managed-by-origin-location': `external:${providerName}`,
       };
 
       return {
@@ -52,7 +55,8 @@ export class DynamicFixtureEntityProvider implements EntityProvider {
             annotations,
           },
         },
-        locationKey: `dynamic-fixture-provider:${entity.metadata.name}`,
+        // Handles namespace collisions across types cleanly using kind/name variations
+        locationKey: `dynamic-fixture-provider:${entity.kind.toLowerCase()}:${entity.metadata.name}`,
       };
     });
 
@@ -80,7 +84,7 @@ export const catalogModuleDynamicEntities = createBackendModule({
           return;
         }
 
-        console.log('[Catalog-Module] dynamic-entities is active. Connecting dynamic fixture provider.');
+        console.log('[Catalog-Module] dynamic-entities is active. Connecting dynamic fixture provider with Scaffolder Templates.');
         catalog.addEntityProvider(new DynamicFixtureEntityProvider());
       },
     });

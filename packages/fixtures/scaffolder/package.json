@@ -1,16 +1,25 @@
 {
   "name": "@ai-crew-suite/fixtures-scaffolder",
+  "description": "Programmatic Software Templates for the AI Crew Suite dev backend.",
   "version": "0.0.1",
-  "private": true,
-  "description": "Centralized, high-fidelity static ecosystem data fixtures for the AI Crew Suite platform.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "scripts": {
-    "build": "echo 'No-op build step completed for scaffolder fixtures.'",
-    "lint": "prettier --check \"**/*.{yaml,yml,html,json}\"",
-    "lint:fix": "prettier --write \"**/*.{yaml,yml,html,json}\""
+    "build": "echo 'No-op build step completed for catalog fixtures.'",
+    "lint": "crew lint",
+    "test:e2e": "crew test:e2e",
+    "test:unit": "crew test:unit",
+    "test:unit:coverage": "crew test:unit:coverage",
+    "typecheck": "crew typecheck"
+  },
+  "dependencies": {
+    "@backstage/catalog-model": "backstage:^",
+    "@backstage/plugin-scaffolder-common": "backstage:^"
   },
   "devDependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",
-    "@ai-crew-suite/typescript-shared-config": "catalog:dev",
-    "prettier": "catalog:dev"
+    "typescript": "catalog:dev",
+    "vitest": "catalog:dev",
+    "zod": "catalog:dev"
   }
 }
