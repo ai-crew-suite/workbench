@@ -1,42 +1,9 @@
 {
   "extends": ["//"],
   "tasks": {
-    "build": {
+    "image:build": {
+      "dependsOn": ["build"],
       "cache": true,
-      "dependsOn": ["build:frontend", "build:backend"],
-      "outputs": []
-    },
-    "build:frontend": {
-      "cache": true,
-      "dependsOn": [],
-      "inputs": [
-        "frontend/Dockerfile",
-        "package.json",
-        "../../../packages/backstage/app/**"
-      ],
-      "outputs": []
-    },
-    "build:backend": {
-      "cache": true,
-      "dependsOn": [],
-      "inputs": [
-        "backend/Dockerfile",
-        "package.json",
-        "../../../packages/backstage/backend/**",
-        "../../../packages/cli/**",
-        "../../../packages/fixtures/**",
-        "../../../packages/wiremock/**"
-      ],
-      "outputs": []
-    },
-    "lint": {
-      "cache": true,
-      "dependsOn": [],
-      "inputs": [
-        "backend/Dockerfile",
-        "frontend/Dockerfile",
-        "package.json"
-      ],
       "outputs": []
     }
   }

@@ -1,9 +1,5 @@
 # Mock Scaffolder Templates for AI Crew Suite Dev Server
 
-Hermetic and offline-safe programmatic Software Templates used to validate the task execution engine and simulate workspace orchestration pipelines on the AI Crew Suite dev backend.
-
-## Overview
-
 This workspace package provides high-fidelity, programmatic Scaffolder Template fixtures designed to populate the Backstage Software Templates ecosystem during local developer sandbox runs. By providing pre-configured templates that run natively without hitting production remote Git endpoints or external cloud platform providers, this library gives platform engineers an instant way to debug task pipeline lifecycles, validate schema steps, and verify downstream execution workflows locally.
 
 ## Core Responsibilities
@@ -11,19 +7,6 @@ This workspace package provides high-fidelity, programmatic Scaffolder Template 
 - **Ecosystem Simulation**: Provisions interactive multi-step wizard blueprints to mimic real-world container bootstrapping and developer workflows.
 - **Workflow Automation Validation**: Exercises the core Scaffolder step-runner engine locally by supplying complex parameter parameters, validation blocks, and structural markdown responses.
 - **Hermetic Test Grounding**: Eliminates network dependencies during automated pipeline sweeps by relying completely on offline-safe built-in actions (`debug:log`).
-
-## Architectural Dependency Tree
-
-These programmatic template configurations interface with your dev environment orchestration layer. When loaded into the backend catalog, their execution structure flows as follows:
-
-```text
-[ User Interface ] ──(Submits Parameters)──> [ Scaffolder Engine /api/scaffolder/v2 ]
-                                                      │
-                                                      ├──> [ Step 1: Input Validation ]
-                                                      ├──> [ Step 2: Context Token Seeding ]
-                                                      │
-                                           [ Formatted Markdown Output ]
-```
 
 ## Local Development Workflow
 
@@ -47,6 +30,14 @@ To automatically fix formatting errors, trailing spaces, or indentation variatio
 
 ```bash
 yarn turbo run format --filter=@ai-crew-suite/fixtures-scaffolder
+```
+
+### Static Typechecking
+
+To verify that k8s fixture parameters align with the mapping schemas, execute:
+
+```bash
+yarn turbo run typecheck --filter=@ai-crew-suite/fixtures-scaffolder
 ```
 
 ### Running the Test Suite

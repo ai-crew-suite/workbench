@@ -1,9 +1,27 @@
 {
   "name": "@ai-crew-suite/deploy-kubernetes",
+  "description": "",
   "version": "0.0.1",
+  "license": "Apache-2.0",
   "private": true,
+  "bugs": {
+    "url": "https://github.com/ai-crew-suite/workbench/issues",
+    "email": "support@ai-crew-suite.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai-crew-suite/workbench",
+    "directory": "packages/deploy/kubernetes"
+  },
   "scripts": {
     "helm:lint": "helm lint helm/backstage && helm lint helm/platform",
     "helm:template": "helm template backstage helm/backstage --values helm/values-prod.yaml"
+  },
+  "dependencies": {
+    "@ai-crew-suite/crew-cli": "catalog:dev",
+    "@ai-crew-suite/workbench-app": "workspace:*"
+  },
+  "devDependencies": {
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
   }
 }

@@ -1,5 +1,44 @@
 {
   "name": "@ai-crew-suite/compose",
+  "description": "Centralized multi-container orchestration blueprints, Docker Compose environment layouts, and local cluster networking profiles for spinning up isolated workbench components and Wiremock virtualization services.",
   "version": "0.0.1",
-  "private": true
+  "license": "Apache-2.0",
+  "keywords": [
+    "agentic workflow",
+    "ai-crew-suite",
+    "app",
+    "backstage",
+    "docker-compose",
+    "multi-container",
+    "orchestration",
+    "local-cluster",
+    "service-virtualization",
+    "wiremock-container"
+  ],
+  "private": true,
+  "main": "src/index.js",
+  "bugs": {
+    "url": "https://github.com/ai-crew-suite/workbench/issues",
+    "email": "support@ai-crew-suite.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai-crew-suite/workbench",
+    "directory": "packages/deploy/compose"
+  },
+  "scripts": {
+    "check": "docker info >/dev/null 2>&1 || (echo -e \"\\n\\x1b[31m[Error] Docker is missing or not running! Please start the Docker Desktop daemon on your host machine before continuing.\\x1b[0m\\n\" && exit 1)",
+    "lint": "yarn turbo run check && echo '[Compose] Validating syntax across compose configurations...' && docker compose config",
+    "compose:up": "yarn check:docker && docker compose up -d",
+    "compose:down": "yarn check:docker && docker compose down --volumes --remove-orphans",
+    "compose:logs": "docker compose logs -f",
+    "compose:ps": "docker compose ps"
+  },
+  "dependencies": {
+    "@ai-crew-suite/crew-cli": "catalog:dev",
+    "@ai-crew-suite/workbench-app": "workspace:*"
+  },
+  "devDependencies": {
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+  }
 }

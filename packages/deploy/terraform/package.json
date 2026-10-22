@@ -1,10 +1,28 @@
 {
   "name": "@ai-crew-suite/deploy-terraform",
+  "description": "",
   "version": "0.0.1",
+  "license": "Apache-2.0",
   "private": true,
+  "bugs": {
+    "url": "https://github.com/ai-crew-suite/workbench/issues",
+    "email": "support@ai-crew-suite.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai-crew-suite/workbench",
+    "directory": "packages/deploy/terraform"
+  },
   "scripts": {
     "tf:init": "terraform init",
     "tf:validate": "terraform validate",
     "tf:plan": "terraform plan"
+  },
+  "dependencies": {
+    "@ai-crew-suite/crew-cli": "catalog:dev",
+    "@ai-crew-suite/workbench-app": "workspace:*"
+  },
+  "devDependencies": {
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
   }
 }

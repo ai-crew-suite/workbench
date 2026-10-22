@@ -1,14 +1,15 @@
 {
   "name": "@ai-crew-suite/containers",
+  "description": "",
   "version": "0.0.1",
   "license": "Apache-2.0",
+  "private": true,
   "keywords": [
     "agentic workflow",
     "ai-crew-suite",
     "docker",
     "containers"
   ],
-  "private": true,
   "bugs": {
     "url": "https://github.com/ai-crew-suite/workbench/issues",
     "email": "support@ai-crew-suite.dev"

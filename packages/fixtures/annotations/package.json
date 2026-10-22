@@ -28,7 +28,7 @@
     "directory": "packages/fixtures/annotations"
   },
   "scripts": {
-    "build": "echo 'No-op build step completed for annotations fixtures.'",
+    "build": "crew build",
     "format": "crew format",
     "lint": "crew lint",
     "test:e2e": "crew test:e2e",

@@ -1,12 +1,21 @@
 {
   "extends": ["//"],
   "tasks": {
-    // Long-running dev server task: must never be cached, or turbo replays a
-    // previous run's logs and never boots the server on subsequent starts.
-    "start": {
+    "check": {
+      "cache": false
+    },
+    "compose:up": {
       "cache": false,
-      "persistent": true,
-      "dependsOn": []
+      "persistent": true
+    },
+    "compose:down": {
+      "cache": false
+    },
+    "compose:logs": {
+      "cache": false
+    },
+    "compose:ps": {
+      "cache": false
     }
   }
 }

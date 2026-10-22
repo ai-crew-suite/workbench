@@ -1,12 +1,25 @@
 {
   "extends": ["//"],
   "tasks": {
-    // Long-running dev server task: must never be cached, or turbo replays a
-    // previous run's logs and never boots the server on subsequent starts.
-    "start": {
+    "tf:init": {
+      "cache": true,
+      "outputs": [".terraform/**", ".terraform.lock.hcl"]
+    },
+    "tf:validate": {
+      "dependsOn": ["tf:init"],
+      "cache": true,
+      "outputs": []
+    },
+    "tf:plan": {
+      "dependsOn": ["tf:validate"],
       "cache": false,
-      "persistent": true,
-      "dependsOn": []
+      "passThroughEnv": [
+        "TF_VAR_database_secure_password",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_SESSION_TOKEN",
+        "AWS_DEFAULT_REGION"
+      ]
     }
   }
 }
