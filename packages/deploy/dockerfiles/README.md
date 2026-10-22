@@ -1,12 +1,6 @@
 # @ai-crew-suite/dockerfiles
 
-🐳 CI base harness images, deterministic testing infrastructure stacks, and mock control plane configurations for the AI Crew Suite platform.
-
-## Overview
-
 This workspace package manages the Docker infrastructure blueprints used to spin up deterministic, zero-trust container environments for **automated Playwright E2E tracks** and CI pipelines.
-
-Instead of forcing slow on-the-fly monorepo builds in CI, this package compiles high-performance **Base Harness Images** for our Backstage Frontend (Nginx) and Backend (Node 22). External repositories (`platform`, `drivers`, `agents`) inherit these pre-baked bases to instantly execute isolated E2E runs alongside a local cluster of dependency containers (**PostgreSQL with `pgvector`**, **Temporal**, **Mem0**, and **WireMock**).
 
 ## Core Infrastructure Stack
 
@@ -45,27 +39,9 @@ To build the baseline frontend compiler and backend execution harness layers loc
 yarn turbo run build --filter=@ai-crew-suite/dockerfiles
 ```
 
----
-
-## Mock Ingestion & Tooling
+## External Service and Kubernetes Mock Ingestion & Tooling
 
 Mock injection, WireMock mapping synchronization, and traffic payload verifications are fully managed through our custom **`workspace-cli`** tool.
-
-### Registering Mock Fixtures
-
-To extend the mock perimeter, declarative JSON match rules and static asset storage paths must follow this rigid mapping matrix:
-
-* **`mock-control-plane/mappings/`**: Houses declarative WireMock match rules forcing predictable traffic simulation paths (e.g., matching a target GET/POST route).
-* **`mock-control-plane/__files/`**: Houses raw, complex multi-line JSON payload datasets returned by your mock matchers.
-
-To wire, format, or validate these maps into your active testing scopes, invoke our toolchain:
-
-```bash
-# Example syntax for registering mock boundaries via the CLI
-yarn workspace-cli mock:register --package=<target-plugin>
-```
-
----
 
 ## Compliance and Licensing
 

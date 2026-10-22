@@ -11,6 +11,7 @@
     "pgvector",
     "rjsf",
     "SARIF",
+    "tfvars",
     "tini",
     "unrestrictive",
     "yarnrc"

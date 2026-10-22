@@ -1,6 +1,6 @@
 {
   "name": "@ai-crew-suite/deploy-terraform",
-  "description": "",
+  "description": "Production Infrastructure-as-Code (IaC) blueprints and managed cloud service topologies for the AI Crew Suite platform.",
   "version": "0.0.1",
   "license": "Apache-2.0",
   "private": true,
@@ -14,15 +14,10 @@
     "directory": "packages/deploy/terraform"
   },
   "scripts": {
-    "tf:init": "terraform init",
-    "tf:validate": "terraform validate",
-    "tf:plan": "terraform plan"
-  },
-  "dependencies": {
-    "@ai-crew-suite/crew-cli": "catalog:dev",
-    "@ai-crew-suite/workbench-app": "workspace:*"
-  },
-  "devDependencies": {
-    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    "check": "terraform version >/dev/null 2>&1 || (echo -e \"\\n\\x1b[31m[Error] The Terraform CLI binary is missing or not reachable on your host machine PATH! Please install it before continuing.\\x1b[0m\\n\" && exit 1)",
+    "lint": "yarn check && echo '[IaC] Executing declarative formatting security validations...' && terraform fmt -check",
+    "tf:init": "yarn check && terraform init",
+    "tf:validate": "yarn check && terraform validate",
+    "tf:plan": "yarn check && terraform plan"
   }
 }

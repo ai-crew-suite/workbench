@@ -1,10 +1,6 @@
-# `@ai-crew-suite/deploy-kubernetes`
+# Kubernetes Deployment IaC
 
-⚓ High-availability production Kubernetes deployment schemas and release-orchestration templates for the AI Crew Suite platform.
-
-## Overview
-
-This workspace package contains the structural **Helm Charts** and deployment manifests required to release the AI Crew Suite platform onto production cloud infrastructure clusters. It encapsulates cluster runtime topologies, ingress routing maps, horizontal auto-scaling rules, and zero-downtime health verification frameworks, transforming raw container builds into resilient, scalable application environments.
+This workspace package contains the structural **Helm Charts** and deployment manifests to release the AI Crew Suite platform onto production cloud infrastructure clusters. It encapsulates cluster runtime topologies, ingress routing maps, horizontal auto-scaling rules, and zero-downtime health verification frameworks, transforming raw container builds into resilient, scalable application environments.
 
 ## Core Responsibilities
 
@@ -16,10 +12,10 @@ This workspace package contains the structural **Helm Charts** and deployment ma
 
 These two Helm configurations separate user-facing interfaces from heavy backend execution tasks:
 
-| Attribute             | Backstage Chart (`.../helm/backstage/templates/deployment.yaml`) | Platform Chart (`.../helm/platform/templates/deployment.yaml`) |
-| --------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| **Primary Process**   | **Node.js Web & API Gateway Server**                         | **Temporal Agentic Workflow Worker Nodes**                   |
-| **Primary Role**      | Runs the Backstage container image to compile dashboards and route user REST API interactions. | Runs **core automation logic** (the custom background python/node worker threads). |
+| Attribute | Backstage Chart (`.../helm/backstage/templates/deployment.yaml`) | Platform Chart (`.../helm/platform/templates/deployment.yaml`) |
+| --- | --- | --- |
+| **Primary Process** | **Node.js Web & API Gateway Server** | **Temporal Agentic Workflow Worker Nodes** |
+| **Primary Role** | Runs the Backstage container image to compile dashboards and route user REST API interactions. | Runs **core automation logic** (the custom background python/node worker threads). |
 | **Network Presence**  | **Public/External Facing**. Requires an Ingress network rule and Load Balancer port routing to expose the UI. | **Internal/Private Only**. Has no ports exposed to the web. It communicates entirely via outbound worker polls to Temporal. |
 | **Network Variables** | Requires `APP_BASE_URL` to route cross-origin browser queries correctly. | Does **not** use `APP_BASE_URL`. It ignores web addresses because it handles asynchronous processing. |
 | **Scaling Profiles**  | Scaled horizontally based on browser query loads and request traffic volume. | Scaled horizontally based on background queue depth and heavy orchestration tasks. |

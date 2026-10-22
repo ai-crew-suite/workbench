@@ -1,9 +1,9 @@
 {
   "name": "@ai-crew-suite/testpad-app",
   "description": "An isolated, non-published local validation workspace and browser testpad executing UI/UX integration runs, visual sweeps, and hot-reloading diagnostics against the Backstage frontend application shell.",
-  "private": true,
   "version": "0.0.1",
   "license": "Apache-2.0",
+  "private": true,
   "keywords": [
     "agentic workflow",
     "ai-crew-suite",

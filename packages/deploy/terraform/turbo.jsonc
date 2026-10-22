@@ -1,6 +1,10 @@
 {
   "extends": ["//"],
   "tasks": {
+    "check": {
+      "cache": false,
+      "outputs": []
+    },
     "tf:init": {
       "cache": true,
       "outputs": [".terraform/**", ".terraform.lock.hcl"]

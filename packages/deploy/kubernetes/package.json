@@ -1,9 +1,23 @@
 {
   "name": "@ai-crew-suite/deploy-kubernetes",
-  "description": "",
+  "description": " High-availability production Kubernetes deployment schemas and release-orchestration templates for the AI Crew Suite platform.",
   "version": "0.0.1",
   "license": "Apache-2.0",
   "private": true,
+  "keywords": [
+    "agentic workflow",
+    "ai-crew-suite",
+    "backstage",
+    "kubernetes",
+    "helm-chart",
+    "gitops",
+    "argocd",
+    "temporal-worker",
+    "ingress-routing",
+    "horizontal-autoscaling",
+    "production-deployment",
+    "infrastructure-as-code"
+  ],
   "bugs": {
     "url": "https://github.com/ai-crew-suite/workbench/issues",
     "email": "support@ai-crew-suite.dev"
@@ -16,12 +30,5 @@
   "scripts": {
     "helm:lint": "helm lint helm/backstage && helm lint helm/platform",
     "helm:template": "helm template backstage helm/backstage --values helm/values-prod.yaml"
-  },
-  "dependencies": {
-    "@ai-crew-suite/crew-cli": "catalog:dev",
-    "@ai-crew-suite/workbench-app": "workspace:*"
-  },
-  "devDependencies": {
-    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
   }
 }

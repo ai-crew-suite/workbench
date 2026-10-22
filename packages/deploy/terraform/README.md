@@ -1,8 +1,4 @@
-# `@ai-crew-suite/deploy-terraform`
-
-🏗️ Production Infrastructure-as-Code (IaC) blueprints and managed cloud service topologies for the AI Crew Suite platform.
-
-## Overview
+# Terraform Deployment IaC
 
 This workspace package manages the declarative multi-region cloud topology infrastructure models for the AI Crew Suite platform. Built natively using **HashiCorp Terraform**, this configuration automates the provisioning of secure network perimeters (VPCs), immutable container registries (ECR), fully managed relational vector engines (AWS RDS PostgreSQL with `pgvector`), and clustered caching architectures (AWS ElastiCache Redis) required to sustain our production scale.
 

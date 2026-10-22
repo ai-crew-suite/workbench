@@ -1,11 +1,26 @@
 {
   "extends": ["//"],
   "tasks": {
-    "image:build": {
-      "dependsOn": ["build"],
+    "build": {
+      "dependsOn": ["build:backend", "build:frontend"],
       "cache": true,
       "outputs": []
+    },
+    "build:backend": {
+      "dependsOn": ["^build"],
+      "inputs": ["Dockerfile.backend", "scripts/build-script.sh"],
+      "cache": true,
+      "outputs": []
+    },
+    "build:frontend": {
+      "dependsOn": ["^build"],
+      "inputs": ["Dockerfile.frontend", "scripts/build-script.sh"],
+      "cache": true,
+      "outputs": []
+    },
+    "lint": {
+      "inputs": ["Dockerfile.*", "scripts/lint-docker.sh"],
+      "cache": true
     }
   }
 }
-

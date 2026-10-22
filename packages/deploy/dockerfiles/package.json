@@ -1,6 +1,6 @@
 {
   "name": "@ai-crew-suite/containers",
-  "description": "",
+  "description": "CI base harness images, deterministic testing infrastructure stacks, and mock control plane configurations for the AI Crew Suite platform",
   "version": "0.0.1",
   "license": "Apache-2.0",
   "private": true,
@@ -24,8 +24,5 @@
     "build": "turbo run build:frontend build:backend",
     "build:frontend": "./scripts/build-script.sh frontend",
     "build:backend": "./scripts/build-script.sh backend"
-  },
-  "devDependencies": {
-    "@turbo/gen": "catalog:dev"
   }
 }
