@@ -49,7 +49,7 @@
       "path": "./packages/testpad/backend"
     },
     {
-      "path": "./packages/wiremock"
+      "path": "./packages/workbench-cli"
     }
   ]
 }

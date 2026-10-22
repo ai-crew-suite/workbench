@@ -46,7 +46,6 @@ import { catalogOptionalLocalFixturesModule } from './modules/catalog-optional-f
 import { catalogModuleDynamicEntities } from './modules/dynamic-catalog-entity-processor';
 import { catalogModuleFixtureAnnotations } from './modules/dynamic-annotation-processor';
 import { TestPermissionPolicy } from './modules/test-permission-policy';
-import { wiremockBootstrapperModule } from './modules/wiremock-bootstrapper';
 import { globalWiremockInterceptorModule } from './modules/wiremock-interceptor';
 
 // Clean Service Factory Extracts
@@ -124,7 +123,6 @@ export async function startDevBackend(options: DevBackendOptions = {}) {
   // 6. Custom Internal Enterprise Sandboxing Modules
   backend.add(CustomKindsModule);
   backend.add(globalWiremockInterceptorModule);
-  backend.add(wiremockBootstrapperModule);
 
   // 7. Ingest Central Programmatic Seeders (Entities and Annotations)
   backend.add(catalogModuleDynamicEntities);
