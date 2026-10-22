@@ -13,3 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { getKubernetesClusterFixtures } from './fixtures/clusterData';
+import { WiremockMapping } from './types';
+
+export type { WiremockMapping, KubernetesFixtureContainer } from './types';
+
+/**
+ * Aggregates all Kubernetes specific Wiremock API routing mappings.
+ */
+export const getAllKubernetesMappings = (): WiremockMapping[] => {
+  return getKubernetesClusterFixtures().wiremockMappings;
+};
+
+/**
+ * Aggregates all mock JSON resource structures (Pods, Deployments) for cluster queries.
+ */
+export const getAllKubernetesResourcePayloads = (): Record<string, any> => {
+  return getKubernetesClusterFixtures().resourcePayloads;
+};

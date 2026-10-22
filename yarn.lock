@@ -137,7 +137,7 @@ __metadata:
   dependencies:
     "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
-    prettier: "catalog:dev"
+    vitest: "catalog:dev"
   languageName: unknown
   linkType: soft
 
