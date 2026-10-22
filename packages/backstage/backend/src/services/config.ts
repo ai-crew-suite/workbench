@@ -136,6 +136,14 @@ export const mockConfigServiceFactory = createServiceFactory({
               initialDelay: { seconds: 15 },
             },
           },
+          // Register the TechDocs indexer so local documentation sheets become searchable
+          techdocs: {
+            schedule: {
+              frequency: { minutes: 10 },
+              timeout: { minutes: 5 },
+              initialDelay: { seconds: 30 },
+            },
+          },
         },
       },
       techdocs: {
@@ -144,7 +152,9 @@ export const mockConfigServiceFactory = createServiceFactory({
         publisher: {
           type: 'local',
           local: {
-            publishFolder: process.env['CONSUMER_TECHDOCS_ROOT'] || '../../mock-fixtures/techdocs',
+            // Point to the repository root as the baseline publish folder
+            // context for clients adding their own techdocs mock fixtures
+            publishFolder: resolve(process.cwd()),
           },
         },
       },

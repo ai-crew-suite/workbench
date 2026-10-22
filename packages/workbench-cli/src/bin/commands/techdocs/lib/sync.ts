@@ -15,7 +15,6 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { getWorkspaceContext } from '../../../utils/workspace';
 
 export interface PackageJson {
   name?: string;

@@ -13,7 +13,7 @@ Consumers can override or add to the backend and frontend dev server configurati
 
 *Declarative Annotation Injection (`modules/dynamic-annotation-processor`)*
 
-Backend server module that hooks an automated `catalogModuleFixtureAnnotations` engine into the global entity ingestion pipeline, dynamically appending mock telemetry tags and integration identifiers to targeted software catalog components during background processing intervals.
+Backend server module that hooks an automated `catalogDynamicAnnotationsModule` engine into the global entity ingestion pipeline, dynamically appending mock telemetry tags and integration identifiers to targeted software catalog components during background processing intervals.
 
 - Disabling currently blocks all mock functionality
 - No current path to extend in calling code. ***How do you extend that to client call sites?* *Maybe programmatic in the core, and directory in call sites?***

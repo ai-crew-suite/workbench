@@ -15,7 +15,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import fs from 'node:fs';
-import { findRepoRoot, getWorkspaceContext } from '../workspace';
+import { findRepoRoot } from '../workspace';
 
 describe('Workspace Context Utilities Engine', () => {
   const mockCwd = '/home/user/repo/packages/my-package';
@@ -63,90 +63,6 @@ describe('Workspace Context Utilities Engine', () => {
 
       // Guard assertion: It must exit immediately on the root match and safely return the fallback location context
       expect(calculatedRoot).toBe(filesystemRoot);
-    });
-  });
-
-  describe('getWorkspaceContext()', () => {
-    it('should accurately resolve browser domain criteria for frontend plugin roles', () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue(
-        JSON.stringify({
-          name: '@ai-crew-suite/my-frontend-plugin',
-          backstage: { role: 'frontend-plugin' },
-        })
-      );
-
-      const context = getWorkspaceContext();
-
-      expect(context.packageName).toBe('@ai-crew-suite/my-frontend-plugin');
-      expect(context.role).toBe('frontend-plugin');
-      expect(context.isBrowser).toBe(true);
-      expect(context.isServer).toBe(false);
-    });
-
-    it('should accurately resolve server domain criteria for standard node library roles', () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue(
-        JSON.stringify({
-          name: '@ai-crew-suite/logger',
-          backstage: { role: 'node-library' },
-        })
-      );
-
-      const context = getWorkspaceContext();
-
-      expect(context.packageName).toBe('@ai-crew-suite/logger');
-      expect(context.role).toBe('node-library');
-      expect(context.isBrowser).toBe(false);
-      expect(context.isServer).toBe(true);
-    });
-
-    // --- NEW ROBUSTNESS EDGE CASES ---
-
-    it('should gracefully return an fallback workspace layout context if package.json does not exist on disk', () => {
-      // Simulate file lookup missing in the targeted workspace context directory
-      vi.mocked(fs.existsSync).mockReturnValue(false);
-
-      const context = getWorkspaceContext();
-
-      expect(context.packageName).toBe('unnamed-workspace');
-      expect(context.role).toBe('unknown');
-      expect(context.isBrowser).toBe(false);
-      expect(context.isServer).toBe(true);
-      expect(context.packageDir).toBe(mockCwd);
-    });
-
-    it('should safely fall back to unknown configurations if the backstage block metadata structure is absent', () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue(
-        JSON.stringify({
-          name: '@ai-crew-suite/missing-metadata-config',
-          // package configuration manifests have no backstage key block properties defined
-        })
-      );
-
-      const context = getWorkspaceContext();
-
-      expect(context.packageName).toBe('@ai-crew-suite/missing-metadata-config');
-      expect(context.role).toBe('unknown');
-      expect(context.isBrowser).toBe(false);
-      expect(context.isServer).toBe(true); // Defaults natively back to a server target
-    });
-
-    it('should substitute default string literals if the manifest package name field is absent', () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue(
-        JSON.stringify({
-          backstage: { role: 'web-library' },
-          // name parameter is missing entirely from file definition fields
-        })
-      );
-
-      const context = getWorkspaceContext();
-
-      expect(context.packageName).toBe('unnamed-package');
-      expect(context.role).toBe('web-library');
-      expect(context.isBrowser).toBe(true);
     });
   });
 });

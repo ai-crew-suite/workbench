@@ -1,16 +1,34 @@
 {
   "name": "@ai-crew-suite/fixtures-techdocs",
+  "description": "Pre-compiled programmatic TechDocs asset blueprints and search indexes for the AI Crew Suite dev server sandbox.",
   "version": "0.0.1",
-  "private": true,
-  "description": "Centralized, high-fidelity static ecosystem data fixtures for the AI Crew Suite platform.",
+  "license": "Apache-2.0",
+  "main": "src/index.ts",
+  "files": [
+    "dist",
+    "markdown/**/*"
+  ],
+  "bugs": {
+    "url": "https://github.com/ai-crew-suite/workbench/issues",
+    "email": "support@ai-crew-suite.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai-crew-suite/workbench",
+    "directory": "packages/fixtures/techdocs"
+  },
   "scripts": {
-    "build": "echo 'No-op build step completed for techdocs fixtures.'",
-    "lint": "prettier --check \"**/*.{yaml,yml,html,json}\"",
-    "lint:fix": "prettier --write \"**/*.{yaml,yml,html,json}\""
+    "clean": "rimraf dist static-compiled",
+    "build:ts": "tsc -b",
+    "build:techdocs": "./scripts/build-techdocs.sh",
+    "prepublishOnly": "yarn clean && yarn build:ts && yarn build:techdocs"
+  },
+  "dependencies": {
+    "@backstage/catalog-model": "backstage:^"
   },
   "devDependencies": {
-    "@ai-crew-suite/crew-cli": "catalog:dev",
-    "@ai-crew-suite/typescript-shared-config": "catalog:dev",
-    "prettier": "catalog:dev"
+    "@techdocs/cli": "catalog:dev",
+    "rimraf": "catalog:dev",
+    "typescript": "catalog:dev"
   }
 }

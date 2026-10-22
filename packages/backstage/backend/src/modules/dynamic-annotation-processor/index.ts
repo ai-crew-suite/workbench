@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { catalogModuleFixtureAnnotations, FixtureAnnotationProcessor } from './DynamicAnnotationProcessor';
+export { catalogDynamicAnnotationsModule, FixtureAnnotationProcessor } from './DynamicAnnotationProcessor';

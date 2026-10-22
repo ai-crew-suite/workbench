@@ -247,7 +247,7 @@ aiCrewSuite:
 
 Backstage provides the following `Kinds` of catalog entities by default: `Component`, `Api`, `Resource`, `System`, `Domain`, `User`, and `Group`. This plugin adds the kinds `DataProduct`, `Model`, `Product`, `Vulnerability`, and `ArchitectureDecision` to validate custom enterprise taxonomies against mandatory internal schemas, and to enforce explicit data policies, severity matrices, and operational ownership bounds before data commits to the catalog database.
 
-To disable the predefined custom kinds for catalog entities, add the following to your plugin's `dev/app-config.dev.yaml` file:
+To disable the default custom kinds for catalog entities, add the following to your plugin's `dev/app-config.dev.yaml` file:
 
 ```yaml
 aiCrewSuite:
@@ -260,7 +260,7 @@ aiCrewSuite:
 
 The Workbench includes the `@ai-crew-suite/fixtures-annotations` package which provides a comprehensive set of annotations for catalog entities defined in the `@ai-crew-suite/fixtures-catalog` package, for development and testing. This package is consumed by the dynamic annotation entity injector, and loaded during startup of the backend dev server.
 
-To disable loading annotations to catalog entities during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
+To disable loading the default mock annotations to catalog entities during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
 
 ```yaml
 aiCrewSuite:
@@ -273,7 +273,7 @@ aiCrewSuite:
 
 The Workbench includes the `@ai-crew-suite/fixtures-catalog` package which provides a comprehensive software catalog of entities for development and testing. This package is consumed by the dynamic catalog entity injector, and loaded during startup of the backend dev server.
 
-To disable loading the mock catalog during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
+To disable loading the default mock catalog entities during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
 
 ```yaml
 aiCrewSuite:
@@ -282,17 +282,90 @@ aiCrewSuite:
       enabled: false
 ```
 
-### Dynamic Scaffolder Template Injection
+### Dynamic Scaffolder Template Injection (uses Dynamic Catalog Entity Injection module)
 
 The Workbench includes the `@ai-crew-suite/fixtures-scaffolder` package which provides programmatic Scaffolder Template fixtures for development and testing. These templates are emitted by the same dynamic fixture provider as the catalog entities above, but are governed by a separate configuration toggle so each fixture group can be enabled or disabled independently.
 
-To disable loading the scaffolder templates during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
+To disable loading the default mock scaffolder templates during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
 
 ```yaml
 aiCrewSuite:
   modules:
     scaffolderTemplates:
       enabled: false
+```
+
+### Dynamic Techdocs Injection
+
+The Workbench includes the `@ai-crew-suite/fixtures-techdocs` package which provides a default set of Markdown docs for development and testing. These Markdown docs are compiled by Backstage's `techdocs-cli` as a build step into HTML files and `search_index.json` file. This package is consumed by the dynamic catalog entity injector, and loaded during startup of the backend dev server.
+
+To disable loading the default mock techdoc fixtures during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
+
+```yaml
+aiCrewSuite:
+  modules:
+    techdocsFixtures:
+      enabled: false # Bypasses mounting centralized default platform docs
+```
+
+#### Adding Client Techdocs Fixtures
+
+Backstage explicitly maps documentation resources to software entities using a strict lookup system based on the entity identifier triplet: **`<namespace>/<kind>/<name>`**. To provide custom documentation locally for your plugin, your pre-compiled HTML and index sheets must mirror this exact structural folder layout:
+
+```text
+your-plugin-repository/
+  └── dev/
+      └── techdocs/
+          └── default/                 <── [Namespace] (Defaults to 'default')
+              └── component/           <── [Kind]      (e.g., component, api, system)
+                  └── custom-service/  <── [Name]      (Matches metadata.name)
+                      ├── index.html
+                      ├── advanced-tuning.html
+                      └── search/
+                          └── search_index.json
+```
+
+#### Generate Static Documentation Assets
+
+Use the `techdocs-cli` compiler runner inside your pipeline or local terminal to compile your source Markdown files (`.md`) into a localized target layout matching your catalog entity name:
+
+```bash
+npx @backstage/techdocs-cli generate --source-dir ./docs --output-dir ./dev/techdocs/default/component/custom-service
+```
+
+This compilation task will generate your `.html` page views and output the mandatory `search/search_index.json` full-text metadata file.
+
+#### Ensure Your Mock Entity Maps the Reference Attribute
+
+Open your local sandbox data registration file (such as your `dev/catalog-info.yaml` block) and verify that your target object includes the official metadata annotation tag so the Backstage UI registers the **"Docs"** view actions link button:
+
+```yaml
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: custom-service
+  annotations:
+    # Signals to the UI dashboard to render documentation navigation elements
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: service
+  lifecycle: experimental
+  owner: tools-crew-team
+```
+
+#### Boot Up and Search
+
+Run your standard local startup orchestration command:
+
+```bash
+yarn turbo run start --filter=@ai-crew-suite/your-backend-plugin
+```
+
+Once initialized, navigating to your component's portal view will expose your documentation tabs natively. Furthermore, your custom sections are fully crawled by our background collators, making your text searchable inside the global workspace search bar on demand. The indexing occurs as a periodic task, currently set to every 60 seconds in the default backend dev server's `search.collators.schedule.frequency` config. You can trigger an immediate ingestion run via the API:
+
+```bash
+# Force an immediate, non-cached re-indexing sweep of the techdocs index
+curl -X POST http://localhost:7007/api/search/index/techdocs
 ```
 
 ### Test Permission Policy

@@ -16,7 +16,7 @@
 import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { startTestBackend } from '@backstage/backend-test-utils';
 import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node';
-import { catalogModuleFixtureAnnotations } from '../DynamicAnnotationProcessor';
+import { catalogDynamicAnnotationsModule } from '../DynamicAnnotationProcessor';
 import { Entity } from '@backstage/catalog-model';
 
 vi.mock('@ai-crew-suite/fixtures-annotations', () => ({
@@ -34,7 +34,7 @@ vi.mock('@ai-crew-suite/fixtures-annotations', () => ({
   ],
 }));
 
-describe('catalogModuleFixtureAnnotations', () => {
+describe('catalogDynamicAnnotationsModule', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -46,7 +46,7 @@ describe('catalogModuleFixtureAnnotations', () => {
     };
 
     await startTestBackend({
-      features: [catalogModuleFixtureAnnotations],
+      features: [catalogDynamicAnnotationsModule],
       extensionPoints: [
         [catalogProcessingExtensionPoint, mockCatalogProcessing],
       ],
@@ -71,7 +71,7 @@ describe('FixtureAnnotationProcessor internal mechanics', () => {
     };
 
     await startTestBackend({
-      features: [catalogModuleFixtureAnnotations],
+      features: [catalogDynamicAnnotationsModule],
       extensionPoints: [
         [catalogProcessingExtensionPoint, mockCatalogProcessing],
       ],

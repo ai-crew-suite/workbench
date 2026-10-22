@@ -124,7 +124,7 @@ backend.add(import('@backstage/plugin-catalog-backend-module-logs'));
 backend.add(import('@backstage/plugin-catalog-backend-module-scaffolder-entity-model'));
 
 // 3. Register your custom dynamic provider module
-backend.add(catalogModuleDynamicEntities);
+backend.add(catalogDynamicEntitiesModule);
 
 backend.start();
 ```

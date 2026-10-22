@@ -92,7 +92,7 @@ export class DynamicFixtureEntityProvider implements EntityProvider {
   }
 }
 
-export const catalogModuleDynamicEntities = createBackendModule({
+export const catalogDynamicEntitiesModule = createBackendModule({
   pluginId: 'catalog',
   moduleId: 'dynamic-entities',
   register(env) {
@@ -109,19 +109,11 @@ export const catalogModuleDynamicEntities = createBackendModule({
         const scaffolderTemplatesEnabled =
           config.getOptionalBoolean('aiCrewSuite.modules.scaffolderTemplates.enabled') ?? true;
 
-        if (!catalogEntitiesEnabled && !scaffolderTemplatesEnabled) {
-          console.log(
-            '[Catalog-Module] dynamic-entities and scaffolder templates are both explicitly ' +
-              'disabled via configuration. Skipping entity seeding.'
-          );
-          return;
-        }
-
         console.log(
-          `[Catalog-Module] dynamic-entities is active ` +
-            `(catalogEntities: ${catalogEntitiesEnabled}, ` +
-            `scaffolderTemplates: ${scaffolderTemplatesEnabled}). Connecting dynamic fixture provider.`
+          `[Catalog-Module] dynamic-entities initialized ` +
+          `(catalogEntities: ${catalogEntitiesEnabled}, scaffolderTemplates: ${scaffolderTemplatesEnabled}).`
         );
+
         catalog.addEntityProvider(
           new DynamicFixtureEntityProvider({
             includeCatalogEntities: catalogEntitiesEnabled,

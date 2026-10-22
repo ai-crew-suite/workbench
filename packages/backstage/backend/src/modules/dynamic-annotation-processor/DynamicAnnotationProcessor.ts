@@ -61,7 +61,7 @@ export class FixtureAnnotationProcessor implements CatalogProcessor {
   }
 }
 
-export const catalogModuleFixtureAnnotations = createBackendModule({
+export const catalogDynamicAnnotationsModule = createBackendModule({
   pluginId: 'catalog',
   moduleId: 'fixture-annotations',
   register(env) {

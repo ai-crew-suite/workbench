@@ -10,6 +10,7 @@
     "pgdata",
     "pgvector",
     "rjsf",
+    "rollup",
     "SARIF",
     "tfvars",
     "tini",

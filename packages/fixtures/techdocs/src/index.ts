@@ -13,3 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import path from 'path';
+
+/**
+ * Returns the absolute filesystem resolution path pointing to the
+ * pre-compiled static HTML and search_index.json assets directory.
+ */
+export function getProgrammaticTechDocsPath(): string {
+  // Resolves cleanly relative to the compiled root package layout
+  return path.resolve(__dirname, '../static-compiled');
+}

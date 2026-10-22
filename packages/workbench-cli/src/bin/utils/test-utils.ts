@@ -15,19 +15,9 @@
  */
 import { vi, beforeEach, afterEach } from 'vitest';
 import { spawnSync } from 'node:child_process';
-import type { WorkspaceContext } from '../utils/workspace';
 
 // Note: consuming test files must call `vi.mock('node:child_process', ...)`
 // themselves so it is hoisted above their own imports of '../orchestrate'.
-
-export const mockWorkspaceContext: WorkspaceContext = {
-  repoRoot: '/mock/repo/root',
-  packageDir: '/mock/repo/root/packages/mock-package',
-  packageName: '@ai-crew-suite/mock-package',
-  role: 'node-library',
-  isBrowser: false,
-  isServer: true,
-};
 
 export function setupOrchestratorTestContext() {
   const originalExitCode = process.exitCode;

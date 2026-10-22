@@ -15,7 +15,7 @@
  */
 
 export {
-  catalogModuleDynamicEntities,
+  catalogDynamicEntitiesModule,
   DynamicFixtureEntityProvider,
 } from './DynamicCatalogEntityProcessor';
 export type { DynamicFixtureEntityProviderOptions } from './DynamicCatalogEntityProcessor';
