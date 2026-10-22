@@ -50,6 +50,7 @@
   "dependencies": {
     "@ai-crew-suite/fixtures-annotations": "workspace:^",
     "@ai-crew-suite/fixtures-catalog": "workspace:^",
+    "@ai-crew-suite/fixtures-scaffolder": "workspace:^",
     "@ai-crew-suite/utils-wiremock": "workspace:^",
     "@backstage/backend-defaults": "backstage:^",
     "@backstage/backend-plugin-api": "backstage:^",

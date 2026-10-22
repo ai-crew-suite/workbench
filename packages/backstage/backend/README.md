@@ -282,6 +282,19 @@ aiCrewSuite:
       enabled: false
 ```
 
+### Dynamic Scaffolder Template Injection
+
+The Workbench includes the `@ai-crew-suite/fixtures-scaffolder` package which provides programmatic Scaffolder Template fixtures for development and testing. These templates are emitted by the same dynamic fixture provider as the catalog entities above, but are governed by a separate configuration toggle so each fixture group can be enabled or disabled independently.
+
+To disable loading the scaffolder templates during localized testing sessions, add the following to the plugin's `dev/app-config.dev.yaml` file:
+
+```yaml
+aiCrewSuite:
+  modules:
+    scaffolderTemplates:
+      enabled: false
+```
+
 ### Test Permission Policy
 
 The Workbench backend dev server includes a very open default permission policy. It issues unconditional blanket approvals (`AuthorizeResult.ALLOW`) for all incoming permission requests. Its primary purpose is to act as an unrestrictive pass-through layer that eliminates permission bottlenecks during local workspace sandboxing, prototyping, and testing.

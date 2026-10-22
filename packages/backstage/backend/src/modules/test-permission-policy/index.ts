@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { TestPermissionPolicy, testPermissionModule } from './TestPermissionPolicy';
+export { TestPermissionPolicy } from './TestPermissionPolicy';

@@ -19,8 +19,29 @@ import { EntityProvider, EntityProviderConnection } from '@backstage/plugin-cata
 import { getProgrammaticEntities } from '@ai-crew-suite/fixtures-catalog';
 import { getProgrammaticTemplates } from '@ai-crew-suite/fixtures-scaffolder';
 
+/**
+ * Options controlling which programmatic fixture groups the provider emits.
+ */
+export interface DynamicFixtureEntityProviderOptions {
+  /** Whether to emit the catalog entities from `@ai-crew-suite/fixtures-catalog`. */
+  includeCatalogEntities?: boolean;
+  /** Whether to emit the scaffolder templates from `@ai-crew-suite/fixtures-scaffolder`. */
+  includeScaffolderTemplates?: boolean;
+}
+
 export class DynamicFixtureEntityProvider implements EntityProvider {
   private connection?: EntityProviderConnection;
+  private readonly includeCatalogEntities: boolean;
+  private readonly includeScaffolderTemplates: boolean;
+
+  /**
+   * @param options - Toggle fixture groups independently. Both default to
+   *   `true`; disabled groups are excluded from the emitted `full` mutation.
+   */
+  constructor(options: DynamicFixtureEntityProviderOptions = {}) {
+    this.includeCatalogEntities = options.includeCatalogEntities ?? true;
+    this.includeScaffolderTemplates = options.includeScaffolderTemplates ?? true;
+  }
 
   getProviderName(): string {
     return 'DynamicFixtureEntityProvider';
@@ -34,8 +55,12 @@ export class DynamicFixtureEntityProvider implements EntityProvider {
   async refreshEntities(): Promise<void> {
     if (!this.connection) return;
 
-    const catalogEntities = getProgrammaticEntities();
-    const scaffolderTemplates = getProgrammaticTemplates();
+    const catalogEntities = this.includeCatalogEntities
+      ? getProgrammaticEntities()
+      : [];
+    const scaffolderTemplates = this.includeScaffolderTemplates
+      ? getProgrammaticTemplates()
+      : [];
 
     const allProgrammaticEntities = [...catalogEntities, ...scaffolderTemplates];
     const providerName = this.getProviderName();
@@ -77,15 +102,32 @@ export const catalogModuleDynamicEntities = createBackendModule({
         config: coreServices.rootConfig,
       },
       async init({ catalog, config }) {
-        const isEnabled = config.getOptionalBoolean('aiCrewSuite.modules.dynamicEntities.enabled') ?? true;
+        // Two independent toggles: one for the programmatic catalog entities,
+        // one for the programmatic scaffolder templates.
+        const catalogEntitiesEnabled =
+          config.getOptionalBoolean('aiCrewSuite.modules.dynamicEntities.enabled') ?? true;
+        const scaffolderTemplatesEnabled =
+          config.getOptionalBoolean('aiCrewSuite.modules.scaffolderTemplates.enabled') ?? true;
 
-        if (!isEnabled) {
-          console.log('[Catalog-Module] dynamic-entities is explicitly disabled via configuration. Skipping entity seeding.');
+        if (!catalogEntitiesEnabled && !scaffolderTemplatesEnabled) {
+          console.log(
+            '[Catalog-Module] dynamic-entities and scaffolder templates are both explicitly ' +
+              'disabled via configuration. Skipping entity seeding.'
+          );
           return;
         }
 
-        console.log('[Catalog-Module] dynamic-entities is active. Connecting dynamic fixture provider with Scaffolder Templates.');
-        catalog.addEntityProvider(new DynamicFixtureEntityProvider());
+        console.log(
+          `[Catalog-Module] dynamic-entities is active ` +
+            `(catalogEntities: ${catalogEntitiesEnabled}, ` +
+            `scaffolderTemplates: ${scaffolderTemplatesEnabled}). Connecting dynamic fixture provider.`
+        );
+        catalog.addEntityProvider(
+          new DynamicFixtureEntityProvider({
+            includeCatalogEntities: catalogEntitiesEnabled,
+            includeScaffolderTemplates: scaffolderTemplatesEnabled,
+          })
+        );
       },
     });
   },

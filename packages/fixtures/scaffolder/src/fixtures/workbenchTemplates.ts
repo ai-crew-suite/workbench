@@ -14,7 +14,50 @@
  * limitations under the License.
  */
 import { Entity } from '@backstage/catalog-model';
-import { TemplateEntityV1beta3 as TemplateEntity } from '@backstage/plugin-scaffolder-common';
+import { TemplateEntityV1beta3 } from '@backstage/plugin-scaffolder-common';
+
+/**
+ * A single Markdown text blob in a Template `spec.output.text` list.
+ *
+ * The v1beta3 runtime JSON Schema requires `output.text` to be an array of
+ * these objects rather than a plain string, so the blob itself lives in
+ * `content`.
+ */
+type TemplateOutputText = {
+  /** Templated condition that excludes this blob when it evaluates to false. */
+  if?: string;
+  /** User friendly display name for the text blob. */
+  title?: string;
+  /** Key representing a visual icon displayed alongside the text blob. */
+  icon?: string;
+  /** Markdown text blob rendered in the scaffolder task completion UI. */
+  content: string;
+};
+
+/**
+ * Runtime-valid shape of a Template `spec.output` section.
+ *
+ * @see The upstream `TemplateEntityV1beta3` TypeScript type declares output
+ *      values as plain strings, but the authoritative `Template.v1beta3` JSON
+ *      Schema enforced by the catalog's `ScaffolderEntitiesProcessor` requires
+ *      `output.text` to be an array of Markdown text blob objects (and
+ *      `output.links` an array of link objects). This type mirrors the JSON
+ *      Schema so fixtures pass runtime entity validation.
+ */
+type TemplateOutput = {
+  /** Markdown text blobs surfaced on the scaffolder task completion screen. */
+  text?: TemplateOutputText[];
+};
+
+/**
+ * A `TemplateEntityV1beta3` whose `spec.output` matches the runtime JSON
+ * Schema rather than the looser upstream TypeScript declaration.
+ */
+type WorkbenchTemplateEntity = Omit<TemplateEntityV1beta3, 'spec'> & {
+  spec: Omit<TemplateEntityV1beta3['spec'], 'output'> & {
+    output?: TemplateOutput;
+  };
+};
 
 /**
  * Generates the central programmatic Scaffolder Template fixtures for the dev workspace sandbox.
@@ -22,7 +65,7 @@ import { TemplateEntityV1beta3 as TemplateEntity } from '@backstage/plugin-scaff
 export function getWorkbenchScaffolderTemplates(): Entity[] {
 
   // 1. Baseline Hermetic Offline Test Template
-  const offlineHelloWorldTemplate: TemplateEntity = {
+  const offlineHelloWorldTemplate: WorkbenchTemplateEntity = {
     apiVersion: 'scaffolder.backstage.io/v1beta3',
     kind: 'Template',
     metadata: {
@@ -67,14 +110,21 @@ export function getWorkbenchScaffolderTemplates(): Entity[] {
         },
       ],
       output: {
-        // FIXED: Converted from an object array to a type-safe string property string property
-        text: 'Offline scaffold finished successfully for parameter name: ${{ parameters.name }}',
+        // The v1beta3 runtime schema requires `text` to be an array of
+        // Markdown text blob objects, not a plain string.
+        text: [
+          {
+            title: 'Scaffold Result',
+            content:
+              'Offline scaffold finished successfully for parameter name: ${{ parameters.name }}',
+          },
+        ],
       },
     },
   };
 
   // 2. Secondary AI-Crew-Suite Demo Template
-  const aiAgentProvisionerTemplate: TemplateEntity = {
+  const aiAgentProvisionerTemplate: WorkbenchTemplateEntity = {
     apiVersion: 'scaffolder.backstage.io/v1beta3',
     kind: 'Template',
     metadata: {
@@ -144,8 +194,15 @@ export function getWorkbenchScaffolderTemplates(): Entity[] {
         },
       ],
       output: {
-        // FIXED: Converted from an object array to a type-safe string property
-        text: 'Your synthetic workspace agent **${{ parameters.agentName }}** is fully seeded and available under topology rules via routing cluster endpoint defaults.',
+        // The v1beta3 runtime schema requires `text` to be an array of
+        // Markdown text blob objects, not a plain string.
+        text: [
+          {
+            title: 'Provisioning Result',
+            content:
+              'Your synthetic workspace agent **${{ parameters.agentName }}** is fully seeded and available under topology rules via routing cluster endpoint defaults.',
+          },
+        ],
       },
     },
   };

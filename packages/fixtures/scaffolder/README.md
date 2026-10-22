@@ -61,7 +61,7 @@ yarn turbo run test:unit --filter=@ai-crew-suite/fixtures-scaffolder
 
 When designing a new programmatic software template to seed into this repository, make sure it satisfies the following checklist criteria:
 
-- [ ] **Strict Typing Compliance**: Ensure `spec.output` properties are mapped strictly to type-safe string patterns (`Record<string, string>`) to avoid template engine compiler crashes.
+- [ ] **Strict Output Compliance**: Ensure `spec.output.text` is an array of Markdown text blob objects (`{ if?, title?, icon?, content }`) matching the runtime v1beta3 JSON Schema. A plain string value is rejected by the catalog's `ScaffolderEntitiesProcessor`, which silently hides the template from the frontend catalog.
 - [ ] **Network Isolation**: Restrict standard action definitions to offline-safe steps (e.g., `debug:log`) unless your development environment includes pre-configured, live proxy endpoints.
 - [ ] **Ownership Assignment**: Explicitly define a valid `spec.owner` that bridges back to one of the teams established inside the `@ai-crew-suite/fixtures-catalog` topology map.
 

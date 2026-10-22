@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
-export { catalogModuleDynamicEntities, DynamicFixtureEntityProvider } from './DynamicCatalogEntityProcessor';
+export {
+  catalogModuleDynamicEntities,
+  DynamicFixtureEntityProvider,
+} from './DynamicCatalogEntityProcessor';
+export type { DynamicFixtureEntityProviderOptions } from './DynamicCatalogEntityProcessor';
