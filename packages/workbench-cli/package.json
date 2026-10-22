@@ -1,0 +1,64 @@
+{
+  "name": "@ai-crew-suite/workbench-cli",
+  "description": "CLI for workbench tasks",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": "22 || 24"
+  },
+  "keywords": [
+    "ai-crew-suite",
+    "cli",
+    "workbench"
+  ],
+  "packageManager": "yarn@4.18.1",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/ai-crew-suite/workbench/issues",
+    "email": "support@ai-crew-suite.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai-crew-suite/workbench",
+    "directory": "packages/workbench-cli"
+  },
+  "bin": {
+    "crew": "./dist/bin/workbench.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "yarn clean && rollup --config rollup.config.ts --configPlugin esbuild && tsc --emitDeclarationOnly --outDir dist",
+    "lint": "crew lint",
+    "test:e2e": "crew test:e2e",
+    "test:unit": "crew test:unit",
+    "test:unit:coverage": "crew test:unit:coverage",
+    "typecheck": "crew typecheck"
+  },
+  "dependencies": {
+    "chalk": "catalog:prod",
+    "commander": "catalog:prod"
+  },
+  "devDependencies": {
+    "@ai-crew-suite/typescript-shared-config/node": "catalog:dev",
+    "@rollup/plugin-node-resolve": "catalog:dev",
+    "@types/node": "catalog:dev",
+    "glob": "catalog:dev",
+    "rollup": "catalog:dev",
+    "rollup-plugin-dts": "catalog:dev",
+    "rollup-plugin-esbuild": "catalog:dev",
+    "typescript": "catalog:dev",
+    "vitest": "catalog:dev"
+  }
+}

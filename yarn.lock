@@ -137,7 +137,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ai-crew-suite/fixtures-scaffolder@workspace:packages/fixtures/scaffolder":
+"@ai-crew-suite/fixtures-scaffolder@workspace:^, @ai-crew-suite/fixtures-scaffolder@workspace:packages/fixtures/scaffolder":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/fixtures-scaffolder@workspace:packages/fixtures/scaffolder"
   dependencies:
@@ -250,6 +250,7 @@ __metadata:
     "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/fixtures-annotations": "workspace:^"
     "@ai-crew-suite/fixtures-catalog": "workspace:^"
+    "@ai-crew-suite/fixtures-scaffolder": "workspace:^"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
     "@ai-crew-suite/utils-wiremock": "workspace:^"
     "@backstage/backend-defaults": "backstage:^"
@@ -282,14 +283,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ai-crew-suite/workbench-cli@workspace:packages/cli":
+"@ai-crew-suite/workbench-cli@workspace:packages/workbench-cli":
   version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/workbench-cli@workspace:packages/cli"
+  resolution: "@ai-crew-suite/workbench-cli@workspace:packages/workbench-cli"
   dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
-    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    "@rollup/plugin-node-resolve": "catalog:dev"
+    "@types/node": "catalog:dev"
+    chalk: "catalog:prod"
+    commander: "catalog:prod"
+    glob: "catalog:dev"
+    rollup: "catalog:dev"
+    rollup-plugin-dts: "catalog:dev"
+    rollup-plugin-esbuild: "catalog:dev"
     typescript: "catalog:dev"
     vitest: "catalog:dev"
+  bin:
+    crew: ./dist/bin/workbench.js
   languageName: unknown
   linkType: soft
 
@@ -9307,6 +9316,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@rollup/plugin-node-resolve@npm:^16.0.3":
+  version: 16.0.3
+  resolution: "@rollup/plugin-node-resolve@npm:16.0.3"
+  dependencies:
+    "@rollup/pluginutils": "npm:^5.0.1"
+    "@types/resolve": "npm:1.20.2"
+    deepmerge: "npm:^4.2.2"
+    is-module: "npm:^1.0.0"
+    resolve: "npm:^1.22.1"
+  peerDependencies:
+    rollup: ^2.78.0||^3.0.0||^4.0.0
+  peerDependenciesMeta:
+    rollup:
+      optional: true
+  checksum: 10c0/5bafff8e51cd28b5b3b8f415c30a893f5bfdb1a54469e00b3dc6530f26051620f3dfa172f40544361948b46cc3070cb34fd44ade66d38c0677d74c846fbc58dc
+  languageName: node
+  linkType: hard
+
 "@rollup/plugin-yaml@npm:^4.0.0":
   version: 4.1.2
   resolution: "@rollup/plugin-yaml@npm:4.1.2"
@@ -13940,6 +13967,15 @@ __metadata:
   peerDependencies:
     acorn: ^6.0.0 || ^7.0.0 || ^8.0.0
   checksum: 10c0/4c54868fbef3b8d58927d5e33f0a4de35f59012fe7b12cf9dfbb345fb8f46607709e1c4431be869a23fb63c151033d84c4198fa9f79385cec34fcb1dd53974c1
+  languageName: node
+  linkType: hard
+
+"acorn@npm:^7.1.0":
+  version: 7.4.1
+  resolution: "acorn@npm:7.4.1"
+  bin:
+    acorn: bin/acorn
+  checksum: 10c0/bd0b2c2b0f334bbee48828ff897c12bd2eb5898d03bf556dcc8942022cec795ac5bb5b6b585e2de687db6231faf07e096b59a361231dd8c9344d5df5f7f0e526
   languageName: node
   linkType: hard
 
@@ -29052,7 +29088,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup-plugin-dts@npm:^6.1.0":
+"rollup-plugin-dts@npm:^6.1.0, rollup-plugin-dts@npm:^6.5.1":
   version: 6.5.1
   resolution: "rollup-plugin-dts@npm:6.5.1"
   dependencies:
@@ -29075,7 +29111,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup-plugin-esbuild@npm:^6.1.1":
+"rollup-plugin-esbuild@npm:^6.1.1, rollup-plugin-esbuild@npm:^6.2.1":
   version: 6.2.1
   resolution: "rollup-plugin-esbuild@npm:6.2.1"
   dependencies:
@@ -29119,6 +29155,19 @@ __metadata:
   dependencies:
     estree-walker: "npm:^0.6.1"
   checksum: 10c0/20947bec5a5dd68b5c5c8423911e6e7c0ad834c451f1a929b1f4e2bc08836ad3f1a722ef2bfcbeca921870a0a283f13f064a317dc7a6768496e98c9a641ba290
+  languageName: node
+  linkType: hard
+
+"rollup@npm:^1.0.0":
+  version: 1.32.1
+  resolution: "rollup@npm:1.32.1"
+  dependencies:
+    "@types/estree": "npm:*"
+    "@types/node": "npm:*"
+    acorn: "npm:^7.1.0"
+  bin:
+    rollup: dist/bin/rollup
+  checksum: 10c0/543df647c89ed94a2d043caef49c695d7a6a2d85e5e091f7a573dec0e5d5c1e0bb4eb26c68a508728461f055be982e4ed1360222dc402f728acbaaab27342195
   languageName: node
   linkType: hard
 

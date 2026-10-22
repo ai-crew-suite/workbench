@@ -1,17 +1,22 @@
 {
   "name": "@ai-crew-suite/testpad-app",
+  "description": "An isolated, non-published local validation workspace and browser testpad executing UI/UX integration runs, visual sweeps, and hot-reloading diagnostics against the Backstage frontend application shell.",
+  "private": true,
   "version": "0.0.1",
   "license": "Apache-2.0",
   "keywords": [
     "agentic workflow",
     "ai-crew-suite",
     "app",
-    "backstage"
+    "backstage",
+    "backstage-frontend",
+    "testpad",
+    "sandbox",
+    "ui-testing",
+    "component-playground",
+    "hot-reload",
+    "visual-regression"
   ],
-  "private": true,
-  "backstage": {
-    "role": "frontend-plugin"
-  },
   "bugs": {
     "url": "https://github.com/ai-crew-suite/workbench/issues",
     "email": "support@ai-crew-suite.dev"
@@ -24,8 +29,11 @@
   "scripts": {
     "start": "backstage-dev-app"
   },
-  "devDependencies": {
+  "dependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",
     "@ai-crew-suite/workbench-app": "workspace:*"
+  },
+  "devDependencies": {
+    "@ai-crew-suite/typescript-shared-config/node": "catalog:dev"
   }
 }
