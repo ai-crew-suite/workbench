@@ -18,8 +18,7 @@ import type { EntityAnnotationFixture } from './types';
 
 export type { EntityAnnotationFixture } from './types';
 
-// Consolidate all independent files into a single scalable array registry
 export const annotationsFixtureRegistry: EntityAnnotationFixture[] = [
-  paymentServiceAnnotations,
-  // otherServiceAnnotations
+  paymentServiceAnnotations
 ];
+

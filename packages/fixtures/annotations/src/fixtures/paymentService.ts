@@ -23,6 +23,12 @@ export const paymentServiceAnnotations: EntityAnnotationFixture = {
       generatedAt: new Date().toISOString(),
       fixtureStatus: 'active',
       notes: `Automated workspace fixture targeting entity: ${entity.metadata.name}.`
-    })
+    }),
+
+    // Core Backstage TechDocs metadata route link annotation.
+    // Points back to the current directory 'dir:.' relative root framework.
+    // This instructs the Backstage UI to display the "Docs" action button tabs.
+    'backstage.io/techdocs-ref': 'dir:.'
   })
 };
+
