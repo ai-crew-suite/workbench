@@ -50,6 +50,11 @@ describe('CustomKindsProcessor', () => {
         apiVersion: 'ai-crew-suite.dev/v1alpha1',
         kind: 'DataProduct',
         metadata: { name: 'my-data-product' },
+        spec: {
+          owner: 'team-a',
+          dataGovernancePolicy: 'policy-v1',
+          slaTarget: '99.9%'
+        },
       };
       await expect(processor.validateEntityKind(entity)).resolves.toBe(true);
     });

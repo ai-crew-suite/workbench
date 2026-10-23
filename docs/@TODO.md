@@ -4,11 +4,7 @@
 
 - CSpell is adding new words to `.vscode/settings.json` CSpell key instead of the root `cspell.json` file. This is probably a common issue across all repos.
 
-## Code Extensions to the `workbench-backend` Dev Server
-
-There's no clean way for plugin authors to extend the dev server in code, for example a factory function that plugins can be added to, or a way to modify the auth config.
-
-## Custom Kinds
+## Client Specified Custom Kinds
 
 The `workbench-backend` dev server has a module to add custom kinds (`modules/catalog-schema-extensions`) that can be turned off via config. But there's no way for plugin users to add their own custom kinds to the backend dev server.
 

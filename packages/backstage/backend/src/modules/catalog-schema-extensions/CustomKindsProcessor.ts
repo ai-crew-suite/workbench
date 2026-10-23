@@ -17,11 +17,9 @@ import { createBackendModule, coreServices } from '@backstage/backend-plugin-api
 import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node';
 import { CatalogProcessor, CatalogProcessorEmit } from '@backstage/plugin-catalog-node';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
-import { Entity } from '@backstage/catalog-model';
+import { Entity, entityKindSchemaValidator } from '@backstage/catalog-model';
+import customCatalogSchema from './catalog.schema.json';
 
-/**
- * The custom enterprise kinds governed by this processor's validation contracts.
- */
 const CUSTOM_KINDS = ['DataProduct', 'Model', 'Product', 'Vulnerability', 'ArchitectureDecision'];
 
 interface EnterpriseCustomSpec {
@@ -36,10 +34,16 @@ interface EnterpriseCustomSpec {
 }
 
 export class CustomKindsProcessor implements CatalogProcessor {
+  private readonly schemaValidator = entityKindSchemaValidator(customCatalogSchema);
+
   getProcessorName(): string {
     return 'CustomKindsProcessor';
   }
 
+  /**
+   * Overriding validateEntityKind allows us to completely bypass
+   * default schema restrictions for these custom Kinds.
+   */
   async validateEntityKind(entity: Entity): Promise<boolean> {
     if (!CUSTOM_KINDS.includes(entity.kind)) {
       return false;
@@ -49,19 +53,17 @@ export class CustomKindsProcessor implements CatalogProcessor {
       throw new Error(`Invalid apiVersion for custom kind ${entity.kind}. Expected 'ai-crew-suite.dev/v1alpha1'`);
     }
 
+    // Run structural check against catalog.schema.json rules
+    const isValid = this.schemaValidator(entity);
+    if (!isValid) {
+      throw new Error(`Entity structural layout failed catalog.schema.json compliance verification.`);
+    }
+
     return true;
   }
 
   /**
    * Enforces the enterprise spec contracts for the custom kinds only.
-   *
-   * `postProcessEntity` is invoked by the catalog pipeline for every entity
-   * kind, not just the kinds this processor claims, so any non-custom kind
-   * (e.g. `Location`, which has no `spec.owner`) must pass through untouched.
-   * Throwing on foreign kinds fails the whole entity-processing run and
-   * blocks all catalog ingestion.
-   *
-   * @throws when a custom-kind entity violates its required spec contract.
    */
   async postProcessEntity(
     entity: Entity,
