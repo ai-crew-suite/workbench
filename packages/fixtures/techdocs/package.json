@@ -3,10 +3,20 @@
   "description": "Pre-compiled programmatic TechDocs asset blueprints and search indexes for the AI Crew Suite dev server sandbox.",
   "version": "0.0.1",
   "license": "Apache-2.0",
-  "main": "src/index.ts",
+  "keywords": [
+    "agentic workflow",
+    "ai-crew-suite",
+    "backstage",
+    "techdocs",
+    "fixtures",
+    "documentation",
+    "search-index"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.js",
   "files": [
     "dist",
-    "markdown/**/*"
+    "static-compiled"
   ],
   "bugs": {
     "url": "https://github.com/ai-crew-suite/workbench/issues",
@@ -18,15 +28,16 @@
     "directory": "packages/fixtures/techdocs"
   },
   "scripts": {
-    "clean": "rimraf dist static-compiled",
+    "build": "turbo run build:ts build:techdocs",
     "build:ts": "tsc -b",
     "build:techdocs": "./scripts/build-techdocs.sh",
-    "prepublishOnly": "yarn clean && yarn build:ts && yarn build:techdocs"
-  },
-  "dependencies": {
-    "@backstage/catalog-model": "backstage:^"
+    "clean": "rimraf dist static-compiled",
+    "format": "crew format",
+    "lint": "crew lint",
+    "typecheck": "crew typecheck"
   },
   "devDependencies": {
+    "@ai-crew-suite/crew-cli": "catalog:dev",
     "@techdocs/cli": "catalog:dev",
     "rimraf": "catalog:dev",
     "typescript": "catalog:dev"

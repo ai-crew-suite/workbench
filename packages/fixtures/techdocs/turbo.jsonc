@@ -1,0 +1,20 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["build:ts", "build:techdocs"],
+      "cache": true
+    },
+    "build:ts": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.ts", "tsconfig.json"],
+      "outputs": ["dist/**"],
+      "cache": true
+    },
+    "build:techdocs": {
+      "inputs": ["markdown/**/*"],
+      "outputs": ["static-compiled/**"],
+      "cache": true
+    }
+  }
+}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { beforeEach, describe, it, expect, vi } from 'vitest';
-import { startTestBackend } from '@backstage/backend-test-utils';
+import { mockServices, startTestBackend } from '@backstage/backend-test-utils';
 import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node';
 import { catalogDynamicAnnotationsModule } from '../DynamicAnnotationProcessor';
 import { Entity } from '@backstage/catalog-model';
@@ -58,6 +58,45 @@ describe('catalogDynamicAnnotationsModule', () => {
         getProcessorName: expect.any(Function),
       })
     );
+  });
+
+  it('should still register the processor when default fixtures are disabled', async () => {
+    const mockCatalogProcessing = {
+      addEntityProvider: vi.fn(),
+      addProcessor: vi.fn(),
+    };
+
+    await startTestBackend({
+      features: [
+        catalogDynamicAnnotationsModule,
+        mockServices.rootConfig.factory({
+          data: {
+            aiCrewSuite: {
+              modules: {
+                fixtureAnnotations: { enabled: false },
+              },
+            },
+          },
+        }),
+      ],
+      extensionPoints: [
+        [catalogProcessingExtensionPoint, mockCatalogProcessing],
+      ],
+    });
+
+    // FIXED: Asserts registration stays active so consumer modules remain fully reachable
+    expect(mockCatalogProcessing.addProcessor).toHaveBeenCalledTimes(1);
+    const processor = mockCatalogProcessing.addProcessor.mock.calls[0][0];
+
+    // Verify it is empty by ensuring it leaves an unrelated entity completely untouched
+    const testEntity: Entity = {
+      apiVersion: 'backstage.io/v1alpha1',
+      kind: 'Component',
+      metadata: { name: 'platform', namespace: 'default', annotations: {} },
+      spec: { owner: 'guest', type: 'service' },
+    };
+    const result = await processor.preProcessEntity(testEntity, { type: 'url', target: 'http://localhost' }, vi.fn());
+    expect(result.metadata.annotations).toEqual({});
   });
 });
 

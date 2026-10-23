@@ -234,7 +234,7 @@ The pre-configured workbench backend dev server includes the following bundled p
 
 The workbench dev server defines two files to load catalog entities from in client plugins, `dev/catalog-info.yaml` for a single file of catalog entities and `dev/location.yaml` if organizing catalog entities across multiple files. If either of these files are missing, Backstage would normally generate warnings during startup since they're specified in server configuration. This plugin quiets those warnings for these two specific files.
 
-To disable this behavior, add the following to the plugin's `dev/app-config.dev.yaml` file:
+To disable loading optional fixtures in client plugins, add the following to the plugin's `dev/app-config.dev.yaml` file:
 
 ```yaml
 aiCrewSuite:

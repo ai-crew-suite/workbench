@@ -71,15 +71,15 @@ export const catalogDynamicAnnotationsModule = createBackendModule({
         config: coreServices.rootConfig,
       },
       async init({ catalog, config }) {
-        const isEnabled = config.getOptionalBoolean('aiCrewSuite.modules.fixtureAnnotations.enabled') ?? true;
+        // Renamed config binding to align with your default fixtures fallback conventions
+        const defaultFixturesEnabled = config.getOptionalBoolean('aiCrewSuite.modules.fixtureAnnotations.enabled') ?? true;
 
-        if (!isEnabled) {
-          console.log('[Catalog-Module] fixture-annotations is explicitly disabled via configuration. Skipping registration.');
-          return;
-        }
+        console.log(`[Catalog-Module] fixture-annotations initialized (defaultFixtures: ${defaultFixturesEnabled}). Connecting annotation processor.`);
 
-        console.log('[Catalog-Module] fixture-annotations is active. Initializing annotation hooks.');
-        catalog.addProcessor(new FixtureAnnotationProcessor(annotationsFixtureRegistry));
+        // Pass the registry arrays if enabled; otherwise, supply an empty array to ensure
+        // client/consumer processors downstream can run smoothly without loading platform defaults.
+        const activeFixtures = defaultFixturesEnabled ? annotationsFixtureRegistry : [];
+        catalog.addProcessor(new FixtureAnnotationProcessor(activeFixtures));
       },
     });
   },

@@ -1,0 +1,12 @@
+site_name: AI Crew Suite Platform Documentation Core
+site_description: Technical baseline documentation architecture for the platform service layer.
+
+nav:
+  - Home: index.md
+  - Operations Manual: operations.md
+
+theme:
+  name: material # Standard modern theme layout for Backstage TechDocs
+
+plugins:
+  - search # Crucial: Dictates the automated compilation of your search_index.json payload
