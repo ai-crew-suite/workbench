@@ -1,120 +1,30 @@
-# 🌐 Workbench Planning
+# 🌐 Docker Compose Notes
 
-## Wrapping Backstage in Docker
+## Convenient Docker Compose Commands
 
-Here is what the architecture looks like when containerizing the Backstage runtime inside the workbench while allowing consumer repos to overlay mock footprints natively.
+If you ever want to check what is happening inside those background infrastructure containers, you can use these supporting commands:
 
-### The Base `workbench/docker-compose.yml`
+- **View a point-in-time snapshot of logs:**
 
-This file maps out the core platform services alongside your containerized Backstage application node.
+  ```bash
+  docker compose -f docker-compose.infra.yml logs
+  ```
 
-```yaml
-services:
-  postgres:
-    image: pgvector/pgvector:pg18
-    container_name: crew-infra-db
-    environment:
-      POSTGRES_USER: backstage
-      POSTGRES_PASSWORD: backstage
-      POSTGRES_DB: backstage_plugin_catalog
-    ports:
-      - "5432:5432"
+- **Actively tail/stream the logs (without locking your main boot tab):**
 
-  redis:
-    image: redis:8.10-alpine
-    container_name: crew-infra-cache
-    ports:
-      - "6379:6379"
+  ```bash
+  docker compose -f docker-compose.infra.yml logs -f
+  ```
 
-  wiremock:
-    image: wiremock/wiremock:3.13.2-alpine
-    container_name: crew-infra-mocks
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./mock-network/mappings:/home/wiremock/mappings:ro
-      - ./mock-fixtures:/home/wiremock/__files:ro
-    command: --global-response-templating --async-response-enabled=true
+- **Check the health and port statuses of the running backing stack:**
 
-  backstage:
-    build:
-      context: .
-      target: dev
-    container_name: crew-backstage-workbench
-    ports:
-      - "7007:7007" # Backend API
-      - "3000:3000" # Frontend UI Portal
-    environment:
-      NODE_ENV: development
-      MOCK_PROXY_URL: http://wiremock:8080  # Points to internal compose DNS name
-    volumes:
-      # 1. Overlay the local application code to enable instant hot-reloading
-      - .:/app
-      # 2. Hiding Trick: Prevents host computer files from stepping over container-built assets
-      - /app/node_modules
-      - /app/packages/backend/node_modules
-      - /app/packages/app/node_modules
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-```
+  ```bash
+  docker compose -f docker-compose.infra.yml ps
+  ```
 
-### The Downstream Consumer Repository Overlay
+## Volumes
 
-When a developer checks out a downstream workspace—for example, the `drivers` repo—they do not need to modify the workbench directly. They maintain a file named `docker-compose.workbench.yml` inside their own project root:
-
-```yaml
-# drivers-repo/docker-compose.workbench.yml
-services:
-  # Inject specific drivers mock plane directly onto the active WireMock node
-  wiremock:
-    volumes:
-      - ./test/wiremock-mappings:/home/wiremock/mappings/drivers:ro
-      - ./test/wiremock-fixtures:/home/wiremock/__files/drivers:ro
-
-  # Inject custom test catalog schemas onto the Backstage orchestration boundary
-  backstage:
-    environment:
-      CONSUMER_CATALOG_TYPE: file
-      CONSUMER_CATALOG_TARGET: /app/external-mounts/drivers-catalog.yaml
-    volumes:
-      - ./catalog-info.yaml:/app/external-mounts/drivers-catalog.yaml:ro
-```
-
-## Docker Compose Volume Persistence
-
-### Named vs. Anonymous Volumes
-
-When mapping local code into a container using bind mounts, your host directory overlays the container file system entirely. If your host machine (Mac/Windows) has local dependencies like `node_modules` or build caches, it will overwrite the container's built dependencies (Linux), causing runtime errors.
-
-```yaml
-services:
-  web:
-    image: node:lts
-    volumes:
-      # This creates an anonymous volume mapped to this container path
-      - /usr/src/app/node_modules
-  database:
-    image: postgres:15
-    # 1. Mount the named volume inside the container
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-# 2. Declare the named volume at the top level
-volumes:
-  pgdata:
-  # use a pre-existing volume instead of managing its lifecycle automatically
-    external: true
-```
-
-By switching to named volumes, your developers can confidently manage their workflows without anxiety over losing data:
-
-- **`my-dev-env down`**: This stops the containers and removes the isolated network bridge. However, the data volumes (`pgdata`) remain safely intact inside Docker's storage engine. Running `my-dev-env up` again seamlessly reconnects the database to its exact previous state.
-- **`my-dev-env down -v`**: If a developer intentionally messes up a migration, populates bad mock data, or simply wants a completely clean slate, passing the native `-v` (volumes) flag tells Docker to purge the database and reset the volume to zero.
-
-#### The Anonymous Volume Trick
+### Bind Mounting Anonymous Volumes
 
 You can use **anonymous volumes** to isolate and protect specific container subdirectories. Because Docker mounts deeper paths with higher priority, an anonymous volume sits *on top* of your standard bind mount, shielding the container's internal directories from host pollution.
 
@@ -133,7 +43,7 @@ services:
       - /app/packages/app/node_modules
 ```
 
-#### Lifecycle & Mechanics
+### Lifecycle & Mechanics
 
 - **Container Boot:** During `docker compose up`, Docker creates an isolated cache for each unnamed path. It populates these volumes by copying the native Linux dependencies already baked into the image.
 - **The Trapped State:** Code changes sync instantly across `. :/app`. However, if you run `yarn add` or `npm install` on your *host machine*, the container will not see it because the anonymous volume completely isolates that path.
@@ -142,91 +52,253 @@ services:
 ```bash
 docker compose up -d --build --renew-anon-volumes
 ```
+### Volume States
 
-### The Multi-Repo Scope Magic: `--project-directory`
-
-Because your shell function uses the `--project-directory "$(pwd)"` flag, Docker Compose dynamically changes the **project namespace** based on the directory the developer is standing in.
-
-- If they run the command inside `/projects/repo-A`, Docker names the volume `repo-a_pgdata`.
-- If they move to `/projects/repo-B`, Docker names the volume `repo-b_pgdata`.
-
-This guarantees that **Repo A and Repo B keep their vectors and databases completely separate**, even though both are pulling down the exact same `curl` string from your core repository.
-
-### Handling Volume States in CI/CD
-
-In your GitHub Actions pipeline, you do not want data persisting between separate workflow runs (which can lead to weird runner caching bugs or test contamination).
-
-Because GitHub Actions spins up a completely fresh, isolated virtual machine (`runs-on: ubuntu-latest`) for every single commit, Docker starts with a blank slate every single time.
-
-You can securely run your setup, perform your E2E migrations and tests, and cleanly teardown the stack with volume removal to ensure the virtual machine leaves no footprints behind:
+The `-v` or `--volumes` flag explicitly tells Docker to delete named volumes declared in the `volumes` section of the Compose file, as well as any **anonymous volumes** attached to the containers. Without the `-v` flag, both named and anonymous volumes persist, and your data remains completely intact on your host machine. In your GitHub Actions pipeline, you do not want data persisting between separate workflow runs.  
 
 ```yaml
       # Inside your github actions pipeline
       - name: Stop Dev Stack & Purge Volumes
         if: always()
         run: |
-          curl -s https://githubusercontent.com | \
-          docker compose -f - --project-directory . down -v
+          curl -s https://githubusercontent.com/repo | \
+          docker compose -f - --project-directory "$(pwd)" down -v
 ```
 
-Now that the core architecture, CI/CD pipes, Windows guardrails, and data layers are designed, let me know if you would like to:
+## Compose File Execution Dynamics
 
-- See how to automate **database migrations** inside the `pgvector` container right after it boots up
-- Write the script to automatically install the `my-dev-env` function directly into a developer's **Zsh or Bash profile**
+### How the Host Path `.` is Determined
 
-### Update the Centralized `docker-compose.yml`
+**It is determined by the directory from which you execute the `docker compose` command**, but with a slight caveat depending on how you reference your file. Specifically:
 
-*The context of this is setting up devcontainers, in the `DOCKER_IMAGES.md` file.*
+- By default, Docker Compose resolves relative paths (like `.`) relative to the **directory of the `docker-compose.yml` file itself**, regardless of where your terminal is sitting.
+- However, if you use the `-f` flag to point to a file in a different directory (e.g., `docker compose -f ../docker-compose.yml up`), `.` will still resolve relative to that targeted configuration file, not your active terminal path.
 
-In your master `docker-compose.yml` (the one hosted on GitHub and streamed via `curl`), you must declare **named volumes** at the bottom of the file and map them into your infrastructure services.
+### Host Path Resolution with OCI Artifacts (`oci://`)
+
+When you run `docker compose -f oci://... up -d`, the behavior changes because there is no local file on disk to act as a baseline. **The `.` host path resolves to the directory from which you execute the `docker compose` command.**
+
+Here is exactly what happens behind the scenes:
+
+1. **Downloading to a Cache:** Docker Compose pulls the OCI artifact (which contains your `compose.yaml`) down from the remote registry. It unpacks the configuration file into a volatile, temporary cache directory managed by the Docker CLI.
+2. **Context Overriding:** Because the temporary cache directory has no logical connection to your source code, Docker Compose overrides its default relative path resolution. It dynamically binds the **Working Directory (the directory where your terminal is sitting when you run the command)** as the base context.
+3. **Path Resolution:** Every relative path inside that remote `compose.yaml` (such as `.:/app` or `./config:/etc/config`) will be resolved relative to your **current active terminal directory**.
+
+### Specifying Working Directory with `docker compose -f oci:...`
+
+To force Docker Compose to look at the monorepo root instead of the local package folder, use the **`--project-directory`** (or `-c`) flag in your script:
+
+```json
+// packages/my-package/package.json
+"scripts": {
+  "docker:up": "docker compose -f oci://ghcr.io/... --project-directory ./dev up -d"
+}
+```
+
+### Using `--project-directory` in Monorepo Setups
+
+When using the `--project-directory "$(pwd)"` flag, Docker Compose dynamically changes the **project namespace** based on the directory the developer is standing in.
+
+```bash
+curl -s https://githubusercontent.com/repo | \
+docker compose -f - --project-directory "$(pwd)" up
+```
+
+This guarantees that packages keep their vectors and databases completely separate, even though both are pulling down the exact same `curl` string from your core repository.
+
+### Use `working_dir` to Point to Plugin Folder
+
+Because `my-backend-plugin` and/or `my-frontend-plugin` rely on a shared workspace sibling (`my-backend-plugin-node`), you cannot isolate your mounting boundary to just a single package directory. If you mount only `my-backend-plugin`, the container will follow the symlink in `node_modules` and find a broken link pointing to a folder (`my-backend-plugin-node`) that doesn't exist inside the container. To make this work flawlessly, the container must have access to the entire monorepo layout so that Yarn's workspace symlinks remain completely intact.
+
+#### The Remote OCI `compose.yaml` Structure
+
+Design your remote OCI Compose file to assume it is being mounted at the **monorepo root**, but use the `working_dir` configuration to hyper-focus on the specific plugin you want to run.
 
 ```yaml
-version: '3.8'
-
+# Inside the remote OCI compose.yaml
 services:
-  express-app:
-    image: ghcr.io/your-org/my-dev-server:latest
-    ports:
-      - "3000:3000"
+  plugin-runner:
+    image: node:22-bookworm-slim
+    # 1. Mount the entire monorepo so sibling packages and root node_modules exist
     volumes:
-      - ./local.config.json:/app/local.config.json
-    depends_on:
-      - postgres
-
-  postgres:
-    image: ankane/pgvector:latest
-    ports:
-      - "5432:5432"
+      - .:/app
+      - /app/node_modules # Shield root dependencies
+    # 2. Tell Compose to execute commands directly inside the target plugin
+    working_dir: /app/packages/my-feature/${TARGET_PLUGIN_DIR}
+    # 3. Dynamic target command (e.g., yarn dev)
+    command: ["yarn", "dev"]
     environment:
-      POSTGRES_USER: workbench_user
-      POSTGRES_PASSWORD: workbench_password
-      POSTGRES_DB: workbench_db
-    volumes:
-      # Map the named volume to Postgres's internal data directory
-      - pgdata:/var/lib/postgresql/data
-
-  temporal:
-    image: temporalio/auto-setup:1.24.0
-    ports:
-      - "7233:7233"
-    volumes:
-      - temporaldata:/var/lib/temporal
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redisdata:/data
-
-# Declare the named volumes here
-volumes:
-  pgdata:
-  temporaldata:
-  redisdata:
+      - NODE_ENV=development
 ```
 
-## Docker Compose Distributed Stacks via OCI Artifacts
+#### The Developer Launch Command
+
+When developers execute this, they run it from the **monorepo root** (or explicitly pass `--project-directory` pointing to the root), and feed the targeted plugin folder name as an environment variable:
+
+```bash
+# To run the backend plugin
+TARGET_PLUGIN_DIR=my-backend-plugin docker compose -f oci://ghcr.io/... --project-directory . up -d
+
+# To run the frontend plugin
+TARGET_PLUGIN_DIR=my-frontend-plugin docker compose -f oci://ghcr.io/... --project-directory . up -d
+```
+
+### Local Layout Configuration Overrides
+
+External developers should not modify the core docker compose source files directly. They drop a localized `compose.override.yaml` file into their `dev` directory to adapt configurations on their machines. The system safely combines layers without creating file conflicts.
+
+If using a local override in a package, you could use a different name for the override (or not) and pass it with an `-f` flag:
+
+```bash
+# Developers must chain the files manually. 
+# The remote configuration is downloaded first, and the local file layers over it.
+docker compose \
+  -f oci://ghcr.io/your-org/workbench-compose:v1.0.0 \
+  -f packages/my-plugin/workbench.override.yml \
+  --project-directory . up -d
+```
+
+The command will strictly fail if `workbench.override.yml` is missing.
+
+### `COMPOSE_FILE` is a Default Var That Replaces `-f`
+
+The `COMPOSE_FILE` environment variable is a built-in Docker engine variable that can be used instead of `-f` parameters on your command line. The -`f` flag completely overrides and ignores the `COMPOSE_FILE` environment variable if the `-f` flag is present. Docker Compose reads the list of files in the `COMPOSE_FILE` variable from left to right and expects every single one of them to exist. If any file in that string is missing, Docker Compose will immediately crash with a fatal error.
+
+```env
+# <root>/.env
+# Use a colon (:) on Linux/macOS, or a semicolon (;) on Windows to separate files
+export COMPOSE_FILE="oci://ghcr.io/your-org/workbench-compose:v1.0.0:packages/my-plugin/workbench.override.yml"
+```
+
+#### Scenario A: Changing a Bound Network Service Port
+
+If a developer runs local PostgreSQL configurations on port `5432` natively, they can safely proxy the OCI workbench engine module outbound loop targeting alternate channels:
+
+```yaml
+# workbench.override.yml
+services:
+  postgres:
+    ports:
+      - "5433:5432" # Changes the host-facing port without breaking interior overlay spaces
+```
+
+Docker Compose merges list arrays (like `ports`) by **appending** items rather than completely replacing them. However, because the interior target engine space is bound to standard interface mappings, mapping `5433:5432` binds the external host interface to `5433` while keeping the internal container architecture routing smoothly over the shared container layout.
+
+#### Scenario B: Injecting Custom Ephemeral Core Modules
+
+If an engineering workflow depends on a third-party image instance (such as MongoDB) outside the standard OCI baseline, they can declare it inside their local layer file:
+
+```yaml
+# workbench.override.yml
+services:
+  custom-mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    networks:
+      - default # Joins the network bridge dynamically mapped by the base template
+```
+
+Because the OCI-pulled registry template defines a common bridge network (usually defaulting to the project name namespace), declaring a brand new service block under the exact same service array allows the custom database instance to connect to the unified engine layer instantly.
+
+## Using Docker Compose with a `my-dev-env` Shell Function
+
+```bash
+my-dev-env() {
+  # Path to where your shared core compose file is downloaded/stored
+  local COMPOSE_FILE="/path/to/shared/core/compose.yaml"
+  
+  # Inject the project directory globally before passing "$@" (up, down, etc.)
+  docker compose -f "$COMPOSE_FILE" --project-directory "$(pwd)" "$@"
+}
+```
+
+## Environment Variables
+
+### Turbo and Environment Variables
+
+The `globalPassThroughEnv` array simply tells Turbo: "If this variable happens to exist in the terminal shell where `turbo run` was invoked, do not strip it out; let it pass down to the spawned processes."
+
+### Passing Environment Variables Dynamically to OCI Compose
+
+Because the OCI artifact configuration is pulled down as a read-only snapshot, you cannot modify the file directly. Instead, you can pass runtime values using two native Docker Compose mechanisms. Docker Compose will also read a `.env` file and apply the variables from the directory it is launched from, but using that with the `--project-directory` flag pointing to package directories would require either `.env` files in every plugin folder or deep backtracking in relative file paths.
+
+#### Passing Env Vars Inline from Terminal
+
+Docker Compose automatically interpolates variables specified in your local shell environment into the `compose.yaml` file. If your remote configuration looks like this:
+
+```yaml
+# Inside the remote OCI compose.yaml
+services:
+  backstage:
+    image: node:20-bookworm-slim
+    ports:
+      - "${APP_PORT:-3000}:3000" # Fallback to 3000 if not provided
+```
+
+You can pass variables inline directly before your Turbo or script command:
+
+```bash
+APP_PORT=8080 yarn turbo run docker:up
+```
+
+#### Passing Environment File Paths
+
+If you want to support multiple configurations (e.g., local development vs. a shared staging playground), you can maintain separate environment files in your workspace and pass them explicitly using the `--env-file` flag:
+
+```bash
+docker compose -f oci://... --env-file ../../.env.staging up -d
+```
+
+### Passing Env Vars to a Containerized Node.js App
+
+To ensure a variable is read by both Compose and your Node.js code, you must explicitly declare it in the `environment` array of your service block.
+
+```yaml
+# Inside the remote OCI compose.yaml
+services:
+  backstage:
+    image: node:20-bookworm-slim
+    # 1. Compose reads this for host configurations
+    ports:
+      - "${HOST_PORT:-3000}:3000" 
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    # 2. Compose maps host env variables down into the Node process container
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - DATABASE_URL=${DATABASE_URL}
+      - THIRD_PARTY_API_KEY=${THIRD_PARTY_API_KEY}
+```
+
+If you omit the `environment` key in the compose file, your Node.js app (`process.env.DATABASE_URL`) will return `undefined`, even if the variable exists on your host terminal.
+
+### Configure Turbo Cache Invalidation and Handle Root `.env` Loading
+
+Turborepo needs to know which environment variables affect your tasks. If a variable changes, Turbo needs to invalidate the cache and rerun the script. To do so, update your root `turbo.json` to include your environment variables in the global hash tracking:
+
+```json
+// <root>/turbo.json
+{
+  "$schema": "https://turbo.build",
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "TEMPORAL_ADDRESS",
+    "MEM0_HOST"
+  ],
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
+```
+
+## Distributing Compose File via OCI Registry
 
 Modern environments treat `docker-compose.yml` graphs as version-controlled **OCI Artifacts**. Instead of pulling raw files from Git or via `curl`, Docker Compose can publish, pull, and scale architectural topologies straight from **GitHub Container Registry (GHCR)**.
 
@@ -321,64 +393,6 @@ npm run workbench up -d
 npm run workbench down
 ```
 
-## Local Layout Configuration Overrides
-
-External developers do not modify the core workspace source files directly. They drop a localized `compose.override.yaml` or `docker-compose.override.yml` into their working directory to adapt configurations on their machines. The system safely combines layers without creating file conflicts.
-
-If using a local override in a package, you could use a different name for the override (or not) and pass it with an `-f` flag:
-
-```bash
-# Developers must chain the files manually. 
-# The remote configuration is downloaded first, and the local file layers over it.
-docker compose \
-  -f oci://ghcr.io/your-org/workbench-compose:v1.0.0 \
-  -f packages/my-plugin/workbench.override.yml \
-  --project-directory . up -d
-```
-
-### `COMPOSE_FILE` is a Default Var That Replaces `-f`
-
-The `COMPOSE_FILE` environment variable is a built-in Docker engine variable designed specifically to replace the clunky `-f` parameters on your command line.
-
-Instead of forcing your developers to type a long string of chained `-f` flags every time they want to spin up a container, you can store those definitions directly inside a local `.env` file sitting at your project/workspace root:
-
-```env
-# <root>/.env
-# Use a colon (:) on Linux/macOS, or a semicolon (;) on Windows to separate files
-COMPOSE_FILE=oci://ghcr.io/your-org/workbench-compose:v1.0.0:compose.override.yaml
-```
-
-### Scenario A: Changing a Bound Network Service Port
-
-If a developer runs local PostgreSQL configurations on port `5432` natively, they can safely proxy the OCI workbench engine module outbound loop targeting alternate channels:
-
-```yaml
-# workbench.override.yml
-services:
-  postgres:
-    ports:
-      - "5433:5432" # Changes the host-facing port without breaking interior overlay spaces
-```
-
-Docker Compose merges list arrays (like `ports`) by **appending** items rather than completely replacing them. However, because the interior target engine space is bound to standard interface mappings, mapping `5433:5432` binds the external host interface to `5433` while keeping the internal container architecture routing smoothly over the shared container layout.
-
-### Scenario B: Injecting Custom Ephemeral Core Modules
-
-If an engineering workflow depends on a third-party image instance (such as MongoDB) outside the standard OCI baseline, they can declare it inside their local layer file:
-
-```yaml
-# workbench.override.yml
-services:
-  custom-mongo:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    networks:
-      - default # Joins the network bridge dynamically mapped by the base template
-```
-
-Because the OCI-pulled registry template defines a common bridge network (usually defaulting to the project name namespace), declaring a brand new service block under the exact same service array allows the custom database instance to connect to the unified engine layer instantly.
-
 ## GitHub Actions Workflow for GHCR Publish
 
 Create a file at `.github/workflows/publish-infra.yml` and paste the following content:
@@ -453,14 +467,4 @@ jobs:
           git push origin main --follow-tags
 ```
 
-## Using Docker Compose with a `my-dev-env` Shell Function
-
-```bash
-my-dev-env() {
-  # Path to where your shared core compose file is downloaded/stored
-  local COMPOSE_FILE="/path/to/shared/core/compose.yaml"
-  
-  # Inject the project directory globally before passing "$@" (up, down, etc.)
-  docker compose -f "$COMPOSE_FILE" --project-directory "$(pwd)" "$@"
-}
-```
+## 

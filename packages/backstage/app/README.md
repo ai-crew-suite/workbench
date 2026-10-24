@@ -52,8 +52,6 @@ To trigger the underlying Vitest engine under a simulated DOM environment (`jsdo
 yarn turbo run test:unit --filter=@ai-crew-suite/workbench-app
 ```
 
----
-
 ## 🔌 Consumer Integration Guide (How Plugins Use This)
 
 Follow this checklist to configure zero-config local boot loops inside a standalone frontend plugin repository.
@@ -114,8 +112,6 @@ To spin up your isolated local web server instance, run:
 ```bash
 LOG_LEVEL=debug yarn turbo run start --filter=@ai-crew-suite/testpad-app
 ```
-
----
 
 ## 📄 Compliance and Licensing
 

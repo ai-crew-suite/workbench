@@ -75,8 +75,6 @@ describe('Kubernetes Catalog Tab', () => {
 
 ```
 
-
-
 ### Local Ephemeral Clusters (Minikube or Kind)
 
 Instead of mocking the plugin, developers spin up a tiny, ephemeral **local cluster manager**. This satisfies the architecture of the plugin natively without rewriting code. Set up a single-node **Minikube** or **Kind (Kubernetes in Docker)** cluster on your local machine and map its context.

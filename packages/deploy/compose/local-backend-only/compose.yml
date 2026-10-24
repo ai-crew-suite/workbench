@@ -17,6 +17,11 @@ services:
     environment:
       NODE_ENV: development
     command: yarn workspace @internal/backend start
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   backstage-frontend:
     build:
@@ -24,14 +29,26 @@ services:
       dockerfile: Dockerfile.frontend.dev
     volumes:
       - .:/app
+      # Prevents host computer files from stepping over container-built assets
       - /app/node_modules
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: development
+      MOCK_PROXY_URL: http://wiremock:8080 # Points to internal compose DNS name
     command: yarn workspace @internal/app start
 
-  # 🐘 Core Relational Database + Agentic Vector Layer (Mem0 Support)
+  mem0:
+    image: memcached:1.6-alpine
+    container_name: crew-infra-mem0
+    ports:
+      - "11211:11211"
+    healthcheck:
+      test: ["CMD", "memcached-tool", "127.0.0.1:11211", "stats"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   postgres:
     image: pgvector/pgvector:pg18
     container_name: crew-infra-db
@@ -43,13 +60,16 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      # Automatically executes your vector extensions and schema seeds on startup
-      - ./database-init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U backstage -d backstage_plugin_catalog"]
-      interval: 5s
-      timeout: 5s
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -h 127.0.0.1 -p 5432 -U $$POSTGRES_USER -d backstage_plugin_catalog",
+        ]
+      interval: 3s
+      timeout: 3s
       retries: 5
+      start_period: 2s
 
   # 🏎️ Transient State Cache & Temporal Support Queue
   redis:
@@ -65,7 +85,25 @@ services:
       timeout: 5s
       retries: 5
 
-  # 🔌 Third-Party Driver API Interceptor (PagerDuty, Datadog Mock Plane)
+  temporal:
+    image: temporalio/auto-setup:latest
+    ports:
+      - "${TEMPORAL_ADDRESS##*:}:7233"
+    environment:
+      - DB=postgresql
+      - POSTGRES_SEEDS=postgres
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PWD=${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 7233 || exit 1"]
+      interval: 4s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
   wiremock:
     image: wiremock/wiremock:3.13.2-alpine
     container_name: crew-infra-mocks

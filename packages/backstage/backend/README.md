@@ -198,6 +198,8 @@ await startDevBackend({
 });
 ```
 
+For details on adding custom Kinds, see [our detailed docs](../../../docs/ADDING_CUSTOM_KINDS.md).
+
 ### 6. Running the Dev Server
 
 To fire up the server inside the plugin directory and activate hot-reloading, execute:
@@ -243,7 +245,7 @@ aiCrewSuite:
       enabled: false
 ```
 
-### Catalog Schema Extensions
+### Catalog Schema Extensions (Custom Kinds)
 
 Backstage provides the following `Kinds` of catalog entities by default: `Component`, `Api`, `Resource`, `System`, `Domain`, `User`, and `Group`. This plugin adds the kinds `DataProduct`, `Model`, `Product`, `Vulnerability`, and `ArchitectureDecision` to validate custom enterprise taxonomies against mandatory internal schemas, and to enforce explicit data policies, severity matrices, and operational ownership bounds before data commits to the catalog database.
 

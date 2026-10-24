@@ -12,6 +12,7 @@
     "rjsf",
     "rollup",
     "SARIF",
+    "temporalio",
     "tfvars",
     "tini",
     "unrestrictive",
