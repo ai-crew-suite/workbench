@@ -1,0 +1,70 @@
+log:
+  stdout: true
+  level: "${TEMPORAL_LOG_LEVEL:-info}"
+
+persistence:
+  defaultStore: postgres-default
+  visibilityStore: postgres-visibility
+  numHistoryShards: 512
+
+  dataStores:
+    postgres-default:
+      sql:
+        pluginName: "postgres"
+        databaseName: "${POSTGRES_DB:-backstage_plugin_catalog}"
+        user: "${POSTGRES_USER:-backstage}"
+        password: "${POSTGRES_PASSWORD:-backstage_secret_pass}"
+        host: "${POSTGRES_HOST:-postgres-store}"
+        port: ${POSTGRES_PORT:-5432}
+        maxConns: 20
+        maxIdleConns: 10
+        maxConnLifetime: "1h"
+    postgres-visibility:
+      sql:
+        pluginName: "postgres"
+        databaseName: "${POSTGRES_DB:-backstage_plugin_catalog}"
+        user: "${POSTGRES_USER:-backstage}"
+        password: "${POSTGRES_PASSWORD:-backstage_secret_pass}"
+        host: "${POSTGRES_HOST:-postgres-store}"
+        port: ${POSTGRES_PORT:-5432}
+        maxConns: 10
+        maxIdleConns: 5
+        maxConnLifetime: "1h"
+
+global:
+  metrics:
+    prometheus:
+      listenAddress: "0.0.0.0:${TEMPORAL_METRICS_PORT:-9090}"
+      handlerPath: "/metrics"
+
+services:
+  frontend:
+    rpc:
+      grpcPort: ${TEMPORAL_FRONTEND_PORT:-7233}
+      membershipPort: ${TEMPORAL_FRONTEND_MEMBERSHIP_PORT:-6933}
+      bindOnIP: "0.0.0.0"
+  history:
+    rpc:
+      grpcPort: ${TEMPORAL_HISTORY_PORT:-7234}
+      membershipPort: ${TEMPORAL_HISTORY_MEMBERSHIP_PORT:-6934}
+      bindOnIP: "0.0.0.0"
+  matching:
+    rpc:
+      grpcPort: ${TEMPORAL_MATCHING_PORT:-7235}
+      membershipPort: ${TEMPORAL_MATCHING_MEMBERSHIP_PORT:-6935}
+      bindOnIP: "0.0.0.0"
+  worker:
+    rpc:
+      grpcPort: ${TEMPORAL_WORKER_PORT:-7236}
+      membershipPort: ${TEMPORAL_WORKER_MEMBERSHIP_PORT:-6936}
+      bindOnIP: "0.0.0.0"
+
+clusterMetadata:
+  enableGlobalNamespace: false
+  failoverVersionIncrement: 10
+  masterClusterName: "active"
+  currentClusterName: "active"
+  clusterInformation:
+    active:
+      enabled: true
+      initialFailoverVersion: 1

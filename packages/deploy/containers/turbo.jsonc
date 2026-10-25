@@ -1,0 +1,95 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": [
+        "build:backend",
+        "build:frontend",
+        "build:mem0",
+        "build:temporal",
+        "build:grafana",
+        "build:otel-collector",
+        "build:prometheus",
+        "build:tempo"
+      ],
+      "cache": true,
+      "outputs": []
+    },
+    "build:backend": {
+      "dependsOn": ["^build"],
+      "inputs": ["backend/Dockerfile", "scripts/build-script.sh"],
+      "cache": true,
+      "outputs": []
+    },
+    "build:frontend": {
+      "dependsOn": ["^build"],
+      "inputs": ["frontend/Dockerfile", "scripts/build-script.sh"],
+      "cache": true,
+      "outputs": []
+    },
+    "build:temporal": {
+      "inputs": [
+        "temporal/Dockerfile",
+        "temporal/src/entrypoint.sh",
+        "temporal/src/config.yaml",
+        "scripts/build-script.sh"
+      ],
+      "cache": true,
+      "outputs": []
+    },
+    "build:mem0": {
+      "inputs": [
+        "mem0/Dockerfile",
+        "mem0/requirements.txt",
+        "mem0/src/entrypoint.sh",
+        "mem0/src/config.yaml",
+        "scripts/build-script.sh"
+      ],
+      "cache": true,
+      "outputs": []
+    },
+    "build:grafana": {
+      "inputs": [
+        "grafana/Dockerfile",
+        "grafana/src/**/*",
+        "scripts/build-script.sh"
+      ],
+      "cache": true,
+      "outputs": []
+    },
+    "build:otel-collector": {
+      "inputs": [
+        "otel-collector/Dockerfile",
+        "otel-collector/src/otel-collector.yaml",
+        "scripts/build-script.sh"
+      ],
+      "cache": true,
+      "outputs": []
+    },
+    "build:prometheus": {
+      "inputs": [
+        "prometheus/Dockerfile",
+        "prometheus/src/prometheus.yaml",
+        "scripts/build-script.sh"
+      ],
+      "cache": true,
+      "outputs": []
+    },
+    "build:tempo": {
+      "inputs": [
+        "tempo/Dockerfile",
+        "tempo/src/tempo.yaml",
+        "scripts/build-script.sh"
+      ],
+      "cache": true,
+      "outputs": []
+    },
+    "lint": {
+      "inputs": [
+        "**/Dockerfile",
+        "scripts/lint-docker.sh"
+      ],
+      "cache": true
+    }
+  }
+}

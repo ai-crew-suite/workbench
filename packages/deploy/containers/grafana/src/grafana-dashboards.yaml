@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: 'Crew Infrastructure Dashboards'
+    orgId: 1
+    folder: 'Core Operations'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

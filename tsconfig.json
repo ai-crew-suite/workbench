@@ -13,7 +13,7 @@
       "path": "./packages/deploy/compose"
     },
     {
-      "path": "./packages/deploy/dockerfiles"
+      "path": "./packages/deploy/containers"
     },
     {
       "path": "./packages/deploy/kubernetes"

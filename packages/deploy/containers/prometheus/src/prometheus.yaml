@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'temporal-cluster'
+    static_configs:
+      - targets: ['temporal-cluster:9090']
+
+  - job_name: 'mem0-service'
+    static_configs:
+      - targets: ['mem0-service:8000']
+
+  - job_name: 'redis-cache'
+    static_configs:
+      - targets: ['redis-exporter:9121']

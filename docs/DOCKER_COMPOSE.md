@@ -1,5 +1,17 @@
 # 🌐 Docker Compose Notes
 
+## Executing inside Third-Party Repositories
+
+When engineers spin up your infrastructure remotely from the root of their custom plugin paths, they pass the active directory boundaries on the fly:
+
+```bash
+export PROJECT_DIR="$(pwd)"
+export WORKING_DIR="/app"
+export OPENAI_API_KEY="sk-..."
+
+docker compose -f /path/to/shared/compose.yaml --project-directory "$PROJECT_DIR" up -d
+```
+
 ## Convenient Docker Compose Commands
 
 If you ever want to check what is happening inside those background infrastructure containers, you can use these supporting commands:

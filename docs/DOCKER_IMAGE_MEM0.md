@@ -1,2 +1,0 @@
-# Mem0 Dockerfile
-
