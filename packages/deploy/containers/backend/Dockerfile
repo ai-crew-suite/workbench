@@ -22,6 +22,11 @@ RUN yarn workspaces focus @ai-crew-suite/workbench-backend
 
 # 3. Pull in the real source directories needed to perform the compilation step
 COPY packages/backstage/backend/ ./packages/backstage/backend/
+# Fixtures are specified as dependencies with "workspace:^" versions. in the
+# backend dev server. Yarn treats workspace:^ as a strict local link within the
+# repo. These dependencies must be explicitly copied into the build context to
+# satisfy Yarn's workspace linking.
+COPY packages/fixtures/ ./packages/fixtures/
 
 # Execute compilation and purge caches
 RUN yarn workspace @ai-crew-suite/workbench-backend build && \

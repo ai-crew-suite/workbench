@@ -16,8 +16,15 @@
     "sandbox-environment",
     "data-blueprints"
   ],
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "bugs": {
     "url": "https://github.com/ai-crew-suite/workbench/issues",
     "email": "support@ai-crew-suite.dev"
@@ -28,7 +35,7 @@
     "directory": "packages/fixtures/catalog"
   },
   "scripts": {
-    "build": "crew build",
+    "build": "tsc -b --force",
     "format": "crew format",
     "lint": "crew lint",
     "test:e2e": "crew test:e2e",

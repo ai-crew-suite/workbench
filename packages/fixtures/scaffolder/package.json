@@ -3,8 +3,6 @@
   "description": "Programmatic Software Templates for the AI Crew Suite dev backend.",
   "version": "0.0.1",
   "license": "Apache-2.0",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
   "keywords": [
     "agentic workflow",
     "ai-crew-suite",
@@ -18,6 +16,15 @@
     "workflow-automation",
     "task-pipeline"
   ],
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "bugs": {
     "url": "https://github.com/ai-crew-suite/workbench/issues",
     "email": "support@ai-crew-suite.dev"
@@ -28,7 +35,7 @@
     "directory": "packages/fixtures/scaffolder"
   },
   "scripts": {
-    "build": "crew build",
+    "build": "tsc -b --force",
     "lint": "crew lint",
     "test:e2e": "crew test:e2e",
     "test:unit": "crew test:unit",
