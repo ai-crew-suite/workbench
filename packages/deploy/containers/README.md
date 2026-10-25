@@ -12,6 +12,10 @@ When spun up via our orchestration pipeline, this package provisions a complete 
 * **Mem0 Memory Node**: A standalone, self-hosted **Mem0 FastAPI REST API service** compiled from source that provides unified HTTP endpoints for agent long-term memory management and semantic graph orchestration.
 * **Data Layer Isolation**: A pre-configured **pgvector/pgvector:17** engine that serves double duty: hosting standard relational schemas for Temporal tables, while simultaneously instantiating vector extensions and Hierarchical Navigable Small World (HNSW) index trees to support Mem0 episodic memory loops.
 * **Traffic Simulation**: A standalone **WireMock** network boundary interceptor used to isolate third-party platform API vectors (like PagerDuty or Datadog) completely offline.
+* **OpenTelemetry Collector Gateway**: A standalone **otel-collector** daemon container featuring a baked-in, zero-host-dependency data routing configuration map to ingest, process, and propagate cross-boundary trace telemetry over gRPC port 4317.
+* **Prometheus Metrics Engine**: A custom metrics time-series store running **Prometheus v3** configured with an automated 5-second polling schedule tracking native Temporal worker loops, Mem0 REST nodes, and Redis metrics sidecars completely out-of-the-box.
+* **Tempo Tracing Backend**: A highly performant distributed tracing store utilizing **Grafana Tempo** to capture, store, and display unified execution span timelines for downstream microservice calls.
+* **Grafana Control Panel**: A pre-provisioned visualization hub running **Grafana v13** that automatically loads internal database paths and dashboards (including dedicated layouts for tracking Temporal task queue starvation and Redis memory limits) with zero manual click configuration.
 
 ## Architectural Workflow (CI vs. Local)
 
@@ -29,25 +33,82 @@ Run these tasks from the **monorepo root** utilizing Turborepo's pipeline cachin
 To lint all system Dockerfiles against strict image layer best practices using Hadolint, run:
 
 ```bash
-yarn turbo run lint --filter=@ai-crew-suite/dockerfiles
+yarn turbo run lint --filter=@ai-crew-suite/containers
+```
+
+Lint a single targeted Container:
+
+```bash
+# Lint only the Temporal Cluster image
+yarn turbo run image:lint --filter=@ai-crew-suite/containers -- temporal
+```
+
+### Run All Tests
+
+To run all image tests against all system Dockerfiles, run:
+
+```bash
+yarn turbo run test --filter=@ai-crew-suite/containers
+```
+
+### Dockerfile Security Scanning
+
+To run the Trivy security scan against all system Dockerfiles, run:
+
+```bash
+yarn turbo run image:test:security --filter=@ai-crew-suite/containers
+```
+
+Scan a single targeted Container:
+
+```bash
+# Scan only the Temporal Cluster image
+yarn turbo run image:test:security --filter=@ai-crew-suite/containers -- temporal
+```
+
+### Dockerfile Structure Tests
+
+To run Google Container Structure tests against all system Dockerfiles, run:
+
+```bash
+yarn turbo run image:test:structure --filter=@ai-crew-suite/containers
+```
+
+Structure test a single targeted Container:
+
+```bash
+# Structure test only the Temporal Cluster image
+yarn turbo run image:test:structure --filter=@ai-crew-suite/containers -- temporal
+```
+
+### Dockerfile Smoke Tests
+
+To run the Vitest integration tests for built images against all system Dockerfiles, run:
+
+```bash
+yarn turbo run image:test:unit --filter=@ai-crew-suite/containers
+```
+
+Vitest integration test a single targeted Container:
+
+```bash
+# Vitest integration test only the Temporal Cluster image
+yarn turbo run image:test:unit --filter=@ai-crew-suite/containers -- temporal
 ```
 
 ### Compiling Base Images
 
-To compile the baseline frontend compiler, backend execution harness, and standalone infrastructure engines locally, run:
+To compile the baseline images locally, run:
 
 ```bash
-yarn turbo run build --filter=@ai-crew-suite/dockerfiles
+yarn turbo run build --filter=@ai-crew-suite/containers
 ```
 
-Alternatively, you can target specific sub-components using individual script aliases:
+Build a single targeted Container:
 
 ```bash
 # Build only the Temporal Cluster image
-yarn workspace @ai-crew-suite/dockerfiles build:temporal
-
-# Build only the Mem0 Memory service image
-yarn workspace @ai-crew-suite/dockerfiles build:mem0
+yarn turbo run image:build --filter=@ai-crew-suite/containers -- temporal
 ```
 
 ## External Service and Kubernetes Mock Ingestion & Tooling

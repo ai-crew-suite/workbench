@@ -20,15 +20,17 @@
     "directory": "packages/deploy/containers"
   },
   "scripts": {
-    "lint": "./scripts/lint-docker.sh",
-    "build": "turbo run build:*",
-    "build:backend": "./scripts/build-script.sh backend",
-    "build:frontend": "./scripts/build-script.sh frontend",
-    "build:grafana": "./scripts/build-script.sh grafana",
-    "build:mem0": "./scripts/build-script.sh mem0",
-    "build:otel-collector": "./scripts/build-script.sh otel-collector",
-    "build:prometheus": "./scripts/build-script.sh prometheus",
-    "build:tempo": "./scripts/build-script.sh tempo",
-    "build:temporal": "./scripts/build-script.sh temporal"
+    "build": "yarn turbo run image:build",
+    "image:build": "./scripts/build.sh",
+    "lint": "yarn turbo run image:lint",
+    "image:lint": "./scripts/lint.sh",
+    "test": "yarn turbo run image:test:structure image:test:security image:test:unit",
+    "image:test:structure": "./scripts/test-structure.sh",
+    "image:test:security": "./scripts/scan-security.sh",
+    "image:test:unit": "crew test:unit"
+  },
+  "devDependencies": {
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev",
+    "vitest": "catalog:dev"
   }
 }

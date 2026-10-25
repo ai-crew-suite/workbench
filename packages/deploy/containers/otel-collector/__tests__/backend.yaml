@@ -1,0 +1,10 @@
+schemaVersion: "2.0.0"
+metadataTest:
+  exposedPorts: ["8080"]
+  env:
+    - key: "NODE_ENV"
+      value: "production"
+commandTests:
+  - name: "Health Endpoint Availability"
+    command: "wget"
+    args: ["--spider", "-q", "http://localhost:8080/health"]

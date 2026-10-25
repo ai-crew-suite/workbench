@@ -1,0 +1,42 @@
+schemaVersion: "2.0.0"
+
+metadataTest:
+  exposedPorts: ["7007"]
+  user: "1000"
+  workdir: "/app"
+  entrypoint: ["/usr/bin/tini", "--"]
+  cmd: ["node", "packages/backstage/backend/dist/index.js", "--config", "packages/backstage/backend/skeleton/empty-fallback.yaml"]
+  env:
+    - key: "NODE_ENV"
+      value: "production"
+    - key: "NODE_OPTIONS"
+      value: "--no-node-snapshot"
+
+commandTests:
+  - name: "Validate Execution Tooling Core"
+    command: "node"
+    args: ["-v"]
+    expectedOutput: ["v22.*"]
+
+  - name: "Validate Process Init Daemon System"
+    command: "tini"
+    args: ["--version"]
+    expectedOutput: ["tini version 0.19.0.*"]
+
+fileExistenceTests:
+  - name: "Assert Node Production Modules Present"
+    path: "/app/node_modules"
+    shouldExist: true
+
+  - name: "Assert Main Production Artifact Compiled"
+    path: "/app/packages/backstage/backend/dist/index.js"
+    shouldExist: true
+
+  - name: "Assert Local Plugin Volume Target Directory"
+    path: "/app/external-plugins"
+    shouldExist: true
+    permissions: "drwxr-xr-x"
+
+  - name: "Confirm Build Optimization Tooling Dropped"
+    path: "/usr/bin/g++"
+    shouldExist: false

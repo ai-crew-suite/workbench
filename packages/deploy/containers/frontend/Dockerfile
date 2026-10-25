@@ -21,9 +21,6 @@ COPY ${SKELETON_DIR}/ ./
 RUN yarn workspaces focus @ai-crew-suite/workbench-app
 
 # 3. Pull in the real source directories needed to perform the compilation step
-COPY packages/cli/ ./packages/cli/
-COPY packages/fixtures/ ./packages/fixtures/
-COPY packages/wiremock/ ./packages/wiremock/
 COPY packages/backstage/app/ ./packages/backstage/app/
 
 RUN yarn cache clean
