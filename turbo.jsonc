@@ -1,8 +1,6 @@
 {
   "$schema": "https://turbo.build",
   "globalEnv": [
-    "BACKSTAGE_APP_CONFIG",
-    "BACKSTAGE_USER_SECRET",
     "CI",
     "NODE_ENV",
     "POSTGRES_PASSWORD",

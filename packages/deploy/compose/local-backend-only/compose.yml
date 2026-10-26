@@ -1,111 +1,129 @@
-# ====================================================================================
-# 🛡️ COMPLIANCE & ORCHESTRATION LAYER (HIGH-COMPLIANCE SANDBOX)
-# Frameworks: SOC 2 Type II | FINRA | HIPAA Data Isolation
-# ====================================================================================
 version: "3.8"
+name: workbench
+
+x-postgres-env: &postgres-env
+  POSTGRES_DB: ${POSTGRES_DB:-postgres_workbench}
+  POSTGRES_HOST: ${POSTGRES_HOST:-postgres-store}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_secret_pass}
+  POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+  POSTGRES_USER: ${POSTGRES_USER:-workbench}
 
 services:
-  # --- Application Execution Boundaries ---
-  backstage-backend:
+  backend:
     image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-backend:${IMAGE_TAG:-latest}
-    container_name: crew-app-backend
-    working_dir: ${WORKING_DIR:-/app}
-    volumes:
-      - ${PROJECT_DIR:-.}:${WORKING_DIR:-/app}
-      - /app/node_modules # Prevents local host node_modules from overriding container binaries
+    working_dir: /app
     ports:
       - "${BACKEND_PORT:-7007}:7007"
-    environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      POSTGRES_HOST: postgres-store
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: ${POSTGRES_USER:-backstage}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-backstage_secret_pass}
-      POSTGRES_DB: ${POSTGRES_DB:-backstage_plugin_catalog}
-      REDIS_URL: redis://redis-cache:6379
-      TEMPORAL_ADDRESS: temporal-cluster:7233
-      MEM0_API_URL: http://mem0-service:8000
-    command: ${BACKEND_START_CMD:-yarn workspace @internal/backend start}
     depends_on:
-      postgres-store:
+      pgvector:
         condition: service_healthy
-      redis-cache:
+      redis:
         condition: service_healthy
-      temporal-cluster:
+      temporal:
         condition: service_healthy
-
-  backstage-frontend:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-frontend:${IMAGE_TAG:-latest}
-    container_name: crew-app-frontend
-    working_dir: ${WORKING_DIR:-/app}
     volumes:
-      - ${PROJECT_DIR:-.}:${WORKING_DIR:-/app}
-      - /app/node_modules # Prevents host computer files from stepping over container-built assets
+      - .:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      <<: *postgres-env
+      REDIS_URL: redis://${REDIS_HOST_PORT:-redis:6379}
+      TEMPORAL_ADDRESS: ${TEMPORAL_ADDRESS:-temporal:7233}
+      MEM0_API_URL: ${MEM0_API_URL:-http://mem0:8000}
+    command: ${BACKEND_START_CMD:-yarn workspace @internal/backend start}
+
+  frontend:
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-frontend:${IMAGE_TAG:-latest}
+    working_dir: /app
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
-    environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      MOCK_PROXY_URL: http://wiremock-harness:8080 # Points to internal compose DNS name
-    command: ${FRONTEND_START_CMD:-yarn workspace @internal/app start}
     depends_on:
-      backstage-backend:
+      backend:
         condition: service_started
-
-  # --- AI Agent Episodic Memory & Vector Node ---
-  mem0-service:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-mem0:${IMAGE_TAG:-latest}
-    container_name: crew-infra-mem0
+    volumes:
+      - .:/app
+      - /app/node_modules
     environment:
-      - POSTGRES_HOST=postgres-store
-      - POSTGRES_PORT=5432
-      - POSTGRES_DB=${POSTGRES_DB:-backstage_plugin_catalog}
-      - POSTGRES_USER=${POSTGRES_USER:-backstage}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-backstage_secret_pass}
-      - MEM0_PORT=8000
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - MEM0_LLM_PROVIDER=${MEM0_LLM_PROVIDER:-openai}
-      - MEM0_LLM_MODEL=${MEM0_LLM_MODEL:-gpt-4o-mini}
-      - MEM0_LLM_TEMPERATURE=${MEM0_LLM_TEMPERATURE:-0.1}
-      - MEM0_EMBEDDER_PROVIDER=${MEM0_EMBEDDER_PROVIDER:-openai}
-      - MEM0_EMBEDDER_MODEL=${MEM0_EMBEDDER_MODEL:-text-embedding-3-small}
+      NODE_ENV: development
+      WIREMOCK_URL: http://wiremock:8080
+    command: ${FRONTEND_START_CMD:-yarn workspace @internal/app start}
+
+  grafana:
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-grafana:${IMAGE_TAG:-latest}
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    depends_on:
+      - prometheus
+      - tempo
+      - otel-collector
+    volumes:
+      - grafana_data_volume:/var/lib/grafana
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: true
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+    healthcheck:
+      test: ["CMD", "curl", "-f", "curl -f http://localhost:3000/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  mem0:
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-mem0:${IMAGE_TAG:-latest}
     ports:
       - "${MEM0_PORT:-8000}:8000"
+    depends_on:
+      pgvector:
+        condition: service_healthy
+    environment:
+      <<: *postgres-env
+      MEM0_PORT: 8000
+      MEM0_PROVIDER_API_KEY: ${MEM0_PROVIDER_API_KEY}
+      MEM0_LLM_PROVIDER: ${MEM0_LLM_PROVIDER:-openai}
+      MEM0_LLM_MODEL: ${MEM0_LLM_MODEL:-gpt-4o-mini}
+      MEM0_LLM_TEMPERATURE: ${MEM0_LLM_TEMPERATURE:-0.1}
+      MEM0_EMBEDDER_PROVIDER: ${MEM0_EMBEDDER_PROVIDER:-openai}
+      MEM0_EMBEDDER_MODEL: ${MEM0_EMBEDDER_MODEL:-text-embedding-3-small}
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "8000"]
       interval: 5s
       timeout: 5s
       retries: 5
-    depends_on:
-      postgres-store:
-        condition: service_healthy
 
-  # --- Persistent High-Compliance Vector & Relational Storage ---
-  postgres-store:
+  otel-collector:
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-otel-collector:${IMAGE_TAG:-latest}
+    ports:
+      - "4317:4317"
+    depends_on:
+      - tempo
+    command: ["--config=/etc/otel-collector-config.yaml"]
+
+  pgvector:
     image: pgvector/pgvector:pg18
-    container_name: crew-infra-db
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-backstage}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-backstage_secret_pass}
-      POSTGRES_DB: ${POSTGRES_DB:-backstage_plugin_catalog}
     ports:
       - "${POSTGRES_HOST_PORT:-5432}:5432"
     volumes:
       - pgdata_volume:/var/lib/postgresql/data
+    environment:
+      <<: *postgres-env
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
       interval: 3s
       timeout: 3s
       retries: 5
       start_period: 2s
 
-  # --- Transient State Cache & Temporal Support Queue ---
-  redis-cache:
+  prometheus:
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-prometheus:${IMAGE_TAG:-latest}
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+
+  redis:
     image: redis:8.10-alpine
-    container_name: crew-infra-cache
     ports:
       - "${REDIS_HOST_PORT:-6379}:6379"
     volumes:
-      - redisdata_volume:/data
+      - redis_volume:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -114,40 +132,39 @@ services:
 
   redis-exporter:
     image: oliver006/redis_exporter:v1.96.0-alpine
-    container_name: crew-redis-exporter
-    environment:
-      - REDIS_ADDR=${REDIS_ADDR:-redis-cache:6379}
     ports:
       - "${REDIS_EXPORTER_PORT:-9121}:9121"
-    depends_on:
-      - redis-cache
-
-  # --- Standalone Custom Temporal Cluster Engine ---
-  # --- Standalone Custom Temporal Cluster Engine ---
-  temporal-cluster:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-temporal:${IMAGE_TAG:-latest}
-    container_name: crew-infra-temporal
     environment:
-      - POSTGRES_HOST=postgres-store
-      - POSTGRES_PORT=5432
-      - POSTGRES_DB=${POSTGRES_DB:-backstage_plugin_catalog}
-      - POSTGRES_USER=${POSTGRES_USER:-backstage}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-backstage_secret_pass}
-      - TEMPORAL_FRONTEND_PORT=${TEMPORAL_FRONTEND_PORT:-7233}
-      - TEMPORAL_FRONTEND_MEMBERSHIP_PORT=${TEMPORAL_FRONTEND_MEMBERSHIP_PORT:-6933}
-      - TEMPORAL_HISTORY_PORT=${TEMPORAL_HISTORY_PORT:-7234}
-      - TEMPORAL_HISTORY_MEMBERSHIP_PORT=${TEMPORAL_HISTORY_MEMBERSHIP_PORT:-6934}
-      - TEMPORAL_MATCHING_PORT=${TEMPORAL_MATCHING_PORT:-7235}
-      - TEMPORAL_MATCHING_MEMBERSHIP_PORT=${TEMPORAL_MATCHING_MEMBERSHIP_PORT:-6935}
-      - TEMPORAL_WORKER_PORT=${TEMPORAL_WORKER_PORT:-7236}
-      - TEMPORAL_WORKER_MEMBERSHIP_PORT=${TEMPORAL_WORKER_MEMBERSHIP_PORT:-6936}
-      - TEMPORAL_METRICS_PORT=9090
+      REDIS_ADDR: ${REDIS_ADDR:-redis:6379}
+    depends_on:
+      - redis
+
+  tempo:
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-tempo:${IMAGE_TAG:-latest}
+    ports:
+      - "3200:3200"
+    command: ["-config.file=/etc/tempo.yaml"]
+
+  temporal:
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-temporal:${IMAGE_TAG:-latest}
     ports:
       - "${TEMPORAL_PORT:-7233}:${TEMPORAL_FRONTEND_PORT:-7233}"
       - "${TEMPORAL_MEMBERSHIP_PORT:-6933}:${TEMPORAL_FRONTEND_MEMBERSHIP_PORT:-6933}"
     depends_on:
-      postgres-store:
+      pgvector:
         condition: service_healthy
+    environment:
+      <<: *postgres-env
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-backstage_secret_pass}
+      TEMPORAL_FRONTEND_PORT: ${TEMPORAL_FRONTEND_PORT:-7233}
+      TEMPORAL_FRONTEND_MEMBERSHIP_PORT: ${TEMPORAL_FRONTEND_MEMBERSHIP_PORT:-6933}
+      TEMPORAL_HISTORY_PORT: ${TEMPORAL_HISTORY_PORT:-7234}
+      TEMPORAL_HISTORY_MEMBERSHIP_PORT: ${TEMPORAL_HISTORY_MEMBERSHIP_PORT:-6934}
+      TEMPORAL_MATCHING_PORT: ${TEMPORAL_MATCHING_PORT:-7235}
+      TEMPORAL_MATCHING_MEMBERSHIP_PORT: ${TEMPORAL_MATCHING_MEMBERSHIP_PORT:-6935}
+      TEMPORAL_WORKER_PORT: ${TEMPORAL_WORKER_PORT:-7236}
+      TEMPORAL_WORKER_MEMBERSHIP_PORT: ${TEMPORAL_WORKER_MEMBERSHIP_PORT:-6936}
+      TEMPORAL_METRICS_PORT: 9090
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost $${TEMPORAL_FRONTEND_PORT:-7233}"]
       interval: 4s
@@ -155,66 +172,29 @@ services:
       retries: 10
       start_period: 5s
 
-  # --- Traffic Simulation / Network Boundary Mocking ---
-  wiremock-harness:
+  wiremock:
     image: wiremock/wiremock:3.13.2-alpine
-    container_name: crew-infra-mocks
     ports:
       - "${WIREMOCK_PORT:-8080}:8080"
     volumes:
-      # If external repos require mock synchronization, they drop a wiremock directory locally
       - ${PROJECT_DIR:-.}/wiremock/mappings:/home/wiremock/mappings
       - ${PROJECT_DIR:-.}/wiremock/__files:/home/wiremock/__files
-    command: --global-response-templating
+    environment:
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    command: >
+      --global-response-templating
       --async-response-enabled=true
       --enable-cors
       --enable-extensions io.github.wiremock.extension.opentel.OpenTelemetryExtension
-    environment:
-      - OTEL_TRACES_EXPORTER=otlp
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 8080"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  # --- Portable Observability Flight Deck (Baked Configuration Images) ---
-  otel-collector:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-otel-collector:${IMAGE_TAG:-latest}
-    container_name: crew-otel-collector
-    command: ["--config=/etc/otel-collector-config.yaml"]
-    ports:
-      - "4317:4317"
-    depends_on:
-      - tempo-backend
-
-  prometheus:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-prometheus:${IMAGE_TAG:-latest}
-    container_name: crew-prometheus
-    ports:
-      - "${PROMETHEUS_PORT:-9090}:9090"
-
-  tempo-backend:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-tempo:${IMAGE_TAG:-latest}
-    container_name: crew-tempo-backend
-    command: ["-config.file=/etc/tempo.yaml"]
-    ports:
-      - "3200:3200"
-
-  grafana:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-grafana:${IMAGE_TAG:-latest}
-    container_name: crew-grafana
-    environment:
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-    ports:
-      - "${GRAFANA_PORT:-3000}:3000"
-    depends_on:
-      - prometheus
-      - tempo-backend
-
 volumes:
   pgdata_volume:
     name: crew_platform_pgdata_${IMAGE_TAG:-latest}
-  redisdata_volume:
+  redis_volume:
     name: crew_platform_redisdata_${IMAGE_TAG:-latest}

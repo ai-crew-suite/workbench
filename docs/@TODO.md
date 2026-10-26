@@ -57,3 +57,31 @@ The core issue can't be configured away (turbo deliberately hashes args). Option
 3. **Bypass turbo for targeted work:** run `yarn workspace @ai-crew-suite/containers image:test:unit backend` directly (arg reaches the script, docker layer cache makes it cheap), and keep turbo for no-arg full runs only. Cheapest, but loses `dependsOn` on direct runs and needs README updates.
 
 Also worth deciding: whether `image:test:unit` should keep `dependsOn: ["image:build"]` at all, given the specs self-build via Testcontainers (dropping it would make targeted unit tests instant), and the missing `scripts/test-unit.sh` needs implementing either way. Let me know which direction you'd like and I can carry it out.
+
+## Same Issue on Image Build and Lint
+
+When turbo runs the `build` task, it executes `yarn run build mem0` __inside the package directory__. Yarn Berry resolves `yarn turbo` only against the *current package's* scripts and dependency binaries — and `turbo` is a devDependency of the __root workspace only__, not of `@ai-crew-suite/containers` (its devDeps are just the shared TS config, vitest, and testcontainers; it has no local `node_modules/.bin` at all). So Yarn gives up with `Couldn't find a script named "turbo"`. I reproduced it directly: `cd packages/deploy/containers && yarn turbo --version` → identical error.
+
+Two important side facts:
+
+- __The `-- mem0` was irrelevant__ — the same command fails identically without it, and the old `.turbo/turbo-build.log` ends with the same error, so this script has never worked. (It only "works" from the repo root, where turbo *is* a dependency.)
+- Even if `turbo` had resolved, `-- mem0` couldn't work through this alias: turbo appends the arg to the script → `yarn turbo run image:build mem0` — the inner turbo would parse `mem0` as a second __task name__, not a build target.
+
+While investigating I found the same latent breakage in the package's `lint`/`test` aliases, and the __root `package.json` scripts filtering on `@ai-crew-suite/dockerfiles` — a package that doesn't exist__ (actual names: `@ai-crew-suite/containers` and `@ai-crew-suite/compose`). This also means plain `yarn build` at the repo root has been failing wholesale, since containers#build is in its pipeline.
+
+## What I fixed
+
+1. __`packages/deploy/containers/package.json`__ — replaced the nested-turbo aliases with direct script calls (consistent with the pattern we've established):
+
+   - `"build": "./scripts/build.sh"`, `"lint": "./scripts/lint.sh"`
+   - `"test": "./scripts/test-structure.sh && ./scripts/scan-security.sh && vitest run"`
+
+2. __`packages/deploy/containers/turbo.jsonc`__ — added `build` and `lint` task overrides mirroring `image:build`/`image:lint` (Dockerfiles + script in `inputs`, `REGISTRY`/`IMAGE_TAG` env tracking, no `dist/**` outputs) — without this, the root `build`/`lint` task config (inputs `src/**`, outputs `dist/**`) would mis-cache this package.
+
+3. __Root `package.json`__ — retargeted the dead filters: `image:build` → `@ai-crew-suite/containers`; `infra:up`/`infra:down`/`infra:logs` → `@ai-crew-suite/compose`.
+
+## Validated (including one happy accident)
+
+My dry-run flags accidentally came *after* the `--`, so turbo treated them as passthrough args and executed your exact command for real — which turned out to be the best proof: it ran `./scripts/build.sh mem0`, produced __"Processing static infrastructure engine target: mem0"__ (targeted build only, not the full cascade), and a repeat invocation was a __cache hit__. The properly-ordered dry-run also confirms: `command = ./scripts/build.sh`, `cliArguments = ["mem0"]`, `mem0/Dockerfile` + `scripts/build.sh` hashed as inputs, `REGISTRY`/`IMAGE_TAG` tracked.
+
+So your original command now works exactly as the README intends. One heads-up: root `yarn build` now legitimately includes containers#build — a full image cascade on the first (uncached) run, which docker's layer cache keeps to roughly a minute. That was always the intent; it just used to fail fast instead.

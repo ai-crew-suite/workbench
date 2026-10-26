@@ -1,6 +1,18 @@
 {
   "extends": ["//"],
   "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "**/Dockerfile",
+        "**/src/**/*",
+        "**/requirements.txt",
+        "scripts/build.sh"
+      ],
+      "env": ["REGISTRY", "IMAGE_TAG"],
+      "cache": true,
+      "outputs": []
+    },
     "image:build": {
       "dependsOn": ["^build"],
       "inputs": [
@@ -12,6 +24,10 @@
       "env": ["REGISTRY", "IMAGE_TAG"],
       "cache": true,
       "outputs": []
+    },
+    "lint": {
+      "inputs": ["**/Dockerfile", "scripts/lint.sh"],
+      "cache": true
     },
     "image:lint": {
       "inputs": [

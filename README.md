@@ -112,7 +112,7 @@ To prevent compilation crashes and ensure absolute cryptographic supply-chain se
 - `AWS_ACCESS_KEY_ID`: The operational access credential token allowing the public GitHub-hosted runner (`ubuntu-latest`) to validate its identity during initial infrastructure steps.
 - `AWS_SECRET_ACCESS_KEY`: The cryptographically masked access key used to authorize secure resource provisioning sweeps.
 - `AWS_PROD_DB_HOST`: The secure endpoint address of your AWS RDS PostgreSQL cluster, mapped straight to the cluster's internal storage layer.
-- `AWS_PROD_DB_PASSWORD`: The high-security password injected straight into the `TF_VAR_database_secure_password` block to seed your relational PostgreSQL nodes non-interactively.
+- `AWS_PROD_POSTGRES_PASSWORD`: The high-security password injected straight into the `TF_VAR_database_secure_password` block to seed your relational PostgreSQL nodes non-interactively.
 
 #### 2. Dynamic Runtime Environment Variables (`env.*`)
 

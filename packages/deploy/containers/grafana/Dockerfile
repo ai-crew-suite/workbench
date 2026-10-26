@@ -1,7 +1,10 @@
 FROM grafana/grafana:13.2.4
 
-COPY packages/deploy/containers/grafana/src/grafana-datasources.yaml /etc/grafana/provisioning/datasources/datasources.yaml
-COPY packages/deploy/containers/grafana/src/grafana-dashboards.yaml /etc/grafana/provisioning/dashboards/dashboards.yaml
-COPY packages/deploy/containers/grafana/src/dashboards /etc/grafana/provisioning/dashboards
+ARG SRC_DIR=packages/deploy/containers/grafana/src
+ARG DEST_DIR=/etc/grafana/provisioning
+
+COPY ${SRC_DIR}/grafana-datasources.yaml ${DEST_DIR}/datasources/datasources.yaml
+COPY ${SRC_DIR}/grafana-dashboards.yaml ${DEST_DIR}/dashboards/dashboards.yaml
+COPY ${SRC_DIR}/dashboards ${DEST_DIR}/dashboards
 
 EXPOSE 3000

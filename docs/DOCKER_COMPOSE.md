@@ -7,7 +7,7 @@ When engineers spin up your infrastructure remotely from the root of their custo
 ```bash
 export PROJECT_DIR="$(pwd)"
 export WORKING_DIR="/app"
-export OPENAI_API_KEY="sk-..."
+export MEM0_PROVIDER_API_KEY="sk-..."
 
 docker compose -f /path/to/shared/compose.yaml --project-directory "$PROJECT_DIR" up -d
 ```
