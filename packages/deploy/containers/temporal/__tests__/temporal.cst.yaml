@@ -1,0 +1,29 @@
+schemaVersion: "2.0.0"
+
+metadataTest:
+  exposedPorts: ["7233", "7234", "6933"]
+  user: "1002"
+  workdir: "/etc/temporal"
+  entrypoint: ["/usr/local/bin/entrypoint.sh"]
+
+fileExistenceTests:
+  - name: "Confirm Custom Go Temporal Server Binary Deployed"
+    path: "/usr/local/bin/temporal-server"
+    shouldExist: true
+
+  - name: "Confirm Database Schema Migration Utility Present"
+    path: "/usr/local/bin/temporal-sql-tool"
+    shouldExist: true
+
+  - name: "Verify Native Postgresql Versioned Schemas Ingested"
+    path: "/etc/temporal/schema/postgresql"
+    shouldExist: true
+
+  - name: "Verify Parameterized Cluster Configuration Profile Present"
+    path: "/etc/temporal/config/config.yaml"
+    shouldExist: true
+
+  - name: "Assert Operational Entrypoint Script Privileges"
+    path: "/usr/local/bin/entrypoint.sh"
+    shouldExist: true
+    permissions: "-rwxr-xr-x"

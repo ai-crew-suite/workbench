@@ -1,0 +1,31 @@
+schemaVersion: "2.0.0"
+
+metadataTest:
+  user: "0"
+  workdir: "/app"
+  cmd: ["yarn", "workspace", "@ai-crew-suite/workbench-app", "build"]
+  envVars:
+    - key: "NODE_ENV"
+      value: "production"
+    - key: "NODE_OPTIONS"
+      value: "--max-old-space-size=4096"
+
+commandTests:
+  - name: "Validate Baseline Node Version"
+    command: "node"
+    args: ["-v"]
+    expectedOutput: ["v22.*"]
+
+fileExistenceTests:
+  - name: "Assert Local Plugin Volume Target Directory"
+    path: "/app/external-plugin-src"
+    shouldExist: true
+    permissions: "drwxr-xr-x"
+
+  - name: "Assert Project Sub-App Shell Blueprint Present"
+    path: "/app/packages/backstage/app"
+    shouldExist: true
+
+  - name: "Assert Clean Dependency Node Modules Graph Map"
+    path: "/app/packages/backstage/app/node_modules"
+    shouldExist: true

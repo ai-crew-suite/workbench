@@ -1,0 +1,11 @@
+schemaVersion: "2.0.0"
+
+metadataTest:
+  exposedPorts: ["9090"]
+  user: "65534" # Explicit numeric fallback matching the 'nobody' user ID
+  workdir: "/prometheus"
+
+fileExistenceTests:
+  - name: "Verify Parameterized Scrape Configuration Map Present"
+    path: "/etc/prometheus/prometheus.yml"
+    shouldExist: true

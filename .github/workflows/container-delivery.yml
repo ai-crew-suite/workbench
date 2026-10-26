@@ -36,11 +36,15 @@ jobs:
         run: yarn workspace @ai-crew-suite/containers build
 
       # 2. Run the integration readiness probes
-      - name: Execute Container Integration Smoke Tests
-        env:
-          REGISTRY: ghcr.io/${{ github.repository }}
-          IMAGE_TAG: test-${{ github.sha }}
-        run: yarn workspace @ai-crew-suite/containers test:smoke
+      - name: Install container-structure-test binary
+        run: |
+          curl -LO https://github.com/GoogleContainerTools/container-structure-test/releases/download/v1.22.1/container-structure-test-linux-amd64
+          chmod +x container-structure-test-linux-amd64
+          sudo mv container-structure-test-linux-amd64 /usr/local/bin/container-structure-test
+          container-structure-test version
+
+      - name: Execute Container Validation Suite via Turborepo
+        run: yarn turbo run image:test:structure
 
       # 3. If the smoke test passes successfully, log into GHCR and distribute the artifacts
       - name: Authenticate against GitHub Container Registry (GHCR)

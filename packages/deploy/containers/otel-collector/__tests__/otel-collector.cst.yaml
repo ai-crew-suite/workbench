@@ -1,0 +1,10 @@
+schemaVersion: "2.0.0"
+
+metadataTest:
+  exposedPorts: ["4317"]
+  workdir: "/"
+
+fileExistenceTests:
+  - name: "Verify Baked Ingress Pipeline Logic Matrix Present"
+    path: "/etc/otel-collector-config.yaml"
+    shouldExist: true

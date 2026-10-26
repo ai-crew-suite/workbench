@@ -6,7 +6,7 @@ metadataTest:
   workdir: "/app"
   entrypoint: ["/usr/bin/tini", "--"]
   cmd: ["node", "packages/backstage/backend/dist/index.js", "--config", "packages/backstage/backend/skeleton/empty-fallback.yaml"]
-  env:
+  envVars:
     - key: "NODE_ENV"
       value: "production"
     - key: "NODE_OPTIONS"
@@ -29,7 +29,11 @@ fileExistenceTests:
     shouldExist: true
 
   - name: "Assert Main Production Artifact Compiled"
-    path: "/app/packages/backstage/backend/dist/index.js"
+    path: "/app/packages/backstage/backend/dist/bundle.tar.gz"
+    shouldExist: true
+
+  - name: "Assert Bundle Skeleton Manifest Compiled"
+    path: "/app/packages/backstage/backend/dist/skeleton.tar.gz"
     shouldExist: true
 
   - name: "Assert Local Plugin Volume Target Directory"

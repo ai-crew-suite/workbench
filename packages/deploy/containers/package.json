@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "license": "Apache-2.0",
   "private": true,
+  "type": "module",
   "keywords": [
     "agentic workflow",
     "ai-crew-suite",
@@ -27,10 +28,11 @@
     "test": "yarn turbo run image:test:structure image:test:security image:test:unit",
     "image:test:structure": "./scripts/test-structure.sh",
     "image:test:security": "./scripts/scan-security.sh",
-    "image:test:unit": "crew test:unit"
+    "image:test:unit": "vitest run"
   },
   "devDependencies": {
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
+    "testcontainers": "catalog:dev",
     "vitest": "catalog:dev"
   }
 }

@@ -7,26 +7,33 @@
         "**/Dockerfile",
         "**/src/**/*",
         "**/requirements.txt",
-        "scripts/build-script.sh"
+        "scripts/build.sh"
       ],
+      "env": ["REGISTRY", "IMAGE_TAG"],
       "cache": true,
       "outputs": []
     },
     "image:lint": {
-      "inputs": ["**/Dockerfile", "scripts/lint-docker.sh"],
+      "inputs": [
+        "**/Dockerfile",
+        "scripts/lint.sh"
+      ],
       "cache": true
     },
-    "test:structure": {
+    "image:test:structure": {
       "dependsOn": ["image:build"],
       "inputs": [
-        "**/__tests__/*.yaml",
+        "**/__tests__/*.cst.yaml",
+        "**/Dockerfile",
         "scripts/test-structure.sh"
       ],
       "cache": true
     },
     "image:test:security": {
       "dependsOn": ["image:build"],
-      "inputs": ["scripts/scan-security.sh"],
+      "inputs": [
+        "scripts/scan-security.sh"
+      ],
       "cache": true
     },
     "image:test:unit": {
@@ -34,7 +41,8 @@
       "inputs": [
         "**/__tests__/*.spec.ts",
         "**/Dockerfile",
-        "**/src/**/*"
+        "**/src/**/*",
+        "vitest.config.ts"
       ],
       "cache": true
     }

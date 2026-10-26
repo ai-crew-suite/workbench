@@ -1,0 +1,29 @@
+schemaVersion: "2.0.0"
+
+metadataTest:
+  exposedPorts: ["8000"]
+  user: "1001"
+  workdir: "/app"
+  entrypoint: ["/usr/local/bin/entrypoint.sh"]
+
+fileExistenceTests:
+  - name: "Verify Ingested FastAPI Server Sub-Module Assets Present"
+    path: "/app/server"
+    shouldExist: true
+
+  - name: "Verify Target Configuration Manifest Present"
+    path: "/app/config.yaml"
+    shouldExist: true
+
+  - name: "Assert Operational Entrypoint Script Privileges"
+    path: "/usr/local/bin/entrypoint.sh"
+    shouldExist: true
+    permissions: "-rwxr-xr-x"
+
+  - name: "Verify Python Site Packages Copied Successfully"
+    path: "/usr/local/lib/python3.11/site-packages"
+    shouldExist: true
+
+  - name: "Verify Uvicorn Binary Executable Available"
+    path: "/usr/local/bin/uvicorn"
+    shouldExist: true

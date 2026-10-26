@@ -1,0 +1,23 @@
+schemaVersion: "2.0.0"
+
+metadataTest:
+  exposedPorts: ["3000"]
+  user: "472" # Official Grafana container non-root default UID contract boundary
+  workdir: "/usr/share/grafana"
+
+fileExistenceTests:
+  - name: "Confirm Provisioned Datasource Configurations Present"
+    path: "/etc/grafana/provisioning/datasources/datasources.yaml"
+    shouldExist: true
+
+  - name: "Confirm Provisioned Dashboard Providers Present"
+    path: "/etc/grafana/provisioning/dashboards/dashboards.yaml"
+    shouldExist: true
+
+  - name: "Verify Redis Dashboard Metrics Panel Ingested"
+    path: "/etc/grafana/provisioning/dashboards/redis.json"
+    shouldExist: true
+
+  - name: "Verify Temporal Task Queue Starvation Panel Ingested"
+    path: "/etc/grafana/provisioning/dashboards/temporal.json"
+    shouldExist: true

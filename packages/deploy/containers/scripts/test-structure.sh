@@ -3,7 +3,6 @@
 ##
 # Google Container Structure Tests - uses declarative YAML tests against a built image
 ##
-#!/usr/bin/env bash
 set -euo pipefail
 
 # 1. Resolve paths early relative to the script location
@@ -25,8 +24,13 @@ done < <(find "$PACKAGE_ROOT" -maxdepth 2 -name "Dockerfile" -print0)
 # 3. Core Blueprint Test Worker
 run_structure_test() {
   local target_name="$1"
-  local config_file="${PACKAGE_ROOT}/${target_name}/__tests__/${target_name}.yaml"
-  local image_tag="local/${target_name}:latest"
+  # FIX 1: Explicitly target the new .cst.yaml (Container Structure Test) format extension
+  local config_file="${PACKAGE_ROOT}/${target_name}/__tests__/${target_name}.cst.yaml"
+
+  # FIX 2: Standardize the image reference to match your build-script.sh output schema
+  local registry="${REGISTRY:-localhost:32443/ai-crew-suite}"
+  local image_tag="latest"
+  local image_ref="${registry}/workbench-${target_name}:${image_tag}"
 
   # Silently skip if this specific service doesn't have a localized structural test written yet
   if [ ! -f "$config_file" ]; then
@@ -34,17 +38,17 @@ run_structure_test() {
     return 0
   fi
 
-  echo "🧱 Validating container structure for [${image_tag}]..."
+  echo "🧱 Validating container structure for [${target_name}] -> ${target_name}.cst.yaml..."
 
   if command -v container-structure-test &> /dev/null; then
-    container-structure-test test --image "$image_tag" --config "$config_file"
+    container-structure-test test --image "$image_ref" --config "$config_file"
   else
     echo "⚠️  container-structure-test binary not found. Executing via Docker..."
     docker run --rm \
       -v /var/run/docker.sock:/var/run/docker.sock \
       -v "${config_file}:/config.yaml" \
       gcr.io/container-structure-test/container-structure-test:latest \
-      test --image "$image_tag" --config /config.yaml
+      test --image "$image_ref" --config /config.yaml
   fi
 }
 
@@ -65,4 +69,4 @@ else
   done
 fi
 
-echo "✅ All structural configurations match expectations!"
+echo -e "\n✅ All structural configurations match expectations!"

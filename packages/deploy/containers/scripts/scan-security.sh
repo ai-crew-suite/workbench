@@ -22,16 +22,30 @@ run_trivy() {
   local target_name="$1"
   local image_tag="local/${target_name}:latest"
 
+  # Set a generous 15-minute threshold for slow/restricted networks.
+  # NOTE: the vulnerability DB OCI download deadline is governed by trivy's
+  # global `--timeout` flag (default 5m0s) — there is no
+  # TRIVY_DB_REPOSITORY_TIMEOUT env var, so the download must be extended here.
+  local scan_timeout="${TRIVY_SCAN_TIMEOUT:-15m}"
+
   echo "🛡️  Scanning image [${image_tag}] for high/critical security vulnerabilities..."
 
   if command -v trivy &> /dev/null; then
-    trivy image --severity HIGH,CRITICAL --exit-code 1 "$image_tag"
+    trivy image \
+      --timeout "$scan_timeout" \
+      --severity HIGH,CRITICAL \
+      --exit-code 1 \
+      "$image_tag"
   else
     echo "⚠️  trivy binary not found on host. Running via Docker wrapper..."
     docker run --rm \
       -v /var/run/docker.sock:/var/run/docker.sock \
       -v "${HOME}/.cache/trivy:/root/.cache" \
-      aquasec/trivy:latest image --severity HIGH,CRITICAL --exit-code 1 "$image_tag"
+      aquasec/trivy:latest image \
+      --timeout "$scan_timeout" \
+      --severity HIGH,CRITICAL \
+      --exit-code 1 \
+      "$image_tag"
   fi
 }
 
