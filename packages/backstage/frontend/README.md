@@ -33,7 +33,7 @@ These commands are for maintaining, linting, and running tests on this wrapper o
 To trigger the Crew CLI provided ESLint configuration, execute:
 
 ```bash
-yarn turbo run lint --filter=@ai-crew-suite/workbench-app
+yarn turbo run lint --filter=@ai-crew-suite/workbench-frontend
 ```
 
 ### Running Unit Test Suites
@@ -41,7 +41,7 @@ yarn turbo run lint --filter=@ai-crew-suite/workbench-app
 To trigger a `tsc` typecheck run, execute:
 
 ```bash
-yarn turbo run typecheck --filter=@ai-crew-suite/workbench-app
+yarn turbo run typecheck --filter=@ai-crew-suite/workbench-frontend
 ```
 
 ### Running Unit Test Suites
@@ -49,7 +49,7 @@ yarn turbo run typecheck --filter=@ai-crew-suite/workbench-app
 To trigger the underlying Vitest engine under a simulated DOM environment (`jsdom`), execute:
 
 ```bash
-yarn turbo run test:unit --filter=@ai-crew-suite/workbench-app
+yarn turbo run test:unit --filter=@ai-crew-suite/workbench-frontend
 ```
 
 ## 🔌 Consumer Integration Guide (How Plugins Use This)
@@ -69,7 +69,7 @@ Declare the shared orchestrator utility inside your dependencies tree and bind t
     "start": "backstage-dev-app"
   },
   "devDependencies": {
-    "@ai-crew-suite/workbench-app": "workspace:*"
+    "@ai-crew-suite/workbench-frontend": "workspace:*"
   }
 }
 ```
@@ -80,7 +80,7 @@ Create a new directory at `dev/` and write a clean, statically typed pass-throug
 
 ```tsx
 // dev/index.tsx
-import { bootstrapFrontendWorkbench } from '@ai-crew-suite/workbench-app';
+import { bootstrapFrontendWorkbench } from '@ai-crew-suite/workbench-frontend';
 import { RootPage } from '../src/index';
 
 // Boot the centralized corporate shell matrix using your local view component

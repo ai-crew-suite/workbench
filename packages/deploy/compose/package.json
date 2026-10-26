@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",
-    "@ai-crew-suite/workbench-app": "workspace:*"
+    "@ai-crew-suite/workbench-frontend": "workspace:*"
   },
   "devDependencies": {
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"

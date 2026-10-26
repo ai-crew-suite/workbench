@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { bootstrapFrontendWorkbench } from '@ai-crew-suite/workbench-app';
+import { bootstrapFrontendWorkbench } from '@ai-crew-suite/workbench-frontend';
 
 import TargetFeature from '../src/index';
 
