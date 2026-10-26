@@ -28,8 +28,8 @@ export const mockConfigServiceFactory = createServiceFactory({
   service: coreServices.rootConfig,
   deps: {},
   async factory() {
-    const appHost = process.env['APP_HOST'] || 'localhost';
-    const appPort = process.env['APP_PORT'] || '3000';
+    const appHost = process.env['FRONTEND_HOST'] || 'localhost';
+    const appPort = process.env['FRONTEND_PORT'] || '3000';
     const backendHost = process.env['BACKEND_HOST'] || 'localhost';
     const backendPort = process.env['BACKEND_PORT'] || '7007';
 

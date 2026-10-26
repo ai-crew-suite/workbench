@@ -1,11 +1,11 @@
 app:
   title: AI Crew Suite Dev App
-  baseUrl: http://${APP_HOST:-localhost}:${APP_PORT:-3000}
+  baseUrl: http://${FRONTEND_HOST:-localhost}:${FRONTEND_PORT:-3000}
 
 backend:
   baseUrl: http://${BACKEND_HOST:-localhost}:${BACKEND_PORT:-7007}
   cors:
-    origin: http://${APP_HOST:-localhost}:${APP_PORT:-3000}
+    origin: http://${FRONTEND_HOST:-localhost}:${FRONTEND_PORT:-3000}
 
 proxy:
   endpoints:

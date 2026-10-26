@@ -1,0 +1,225 @@
+name: workbench
+
+x-postgres-credentials: &postgres-credentials
+  POSTGRES_DB: "${POSTGRES_DB:-postgres_workbench}"
+  POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-postgres_secret_pass}"
+  POSTGRES_USER: "${POSTGRES_USER:-workbench}"
+
+x-postgres-env: &postgres-env
+  <<: *postgres-credentials
+  POSTGRES_HOST: pgvector
+  POSTGRES_PORT: "5432"
+
+x-healthcheck: &healthcheck
+  interval: 5s
+  timeout: 3s
+  retries: 12
+  start_period: 10s
+
+services:
+  backend:
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-backend:${IMAGE_TAG:-latest}
+    working_dir: /app
+    command: "${BACKEND_START_CMD:-yarn workspace @ai-crew-suite/testpad-backend start}"
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-7007}:7007"
+    depends_on:
+      mem0:
+        condition: service_healthy
+      pgvector:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      temporal:
+        condition: service_healthy
+      wiremock:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: ${PROJECT_DIR:-.}
+        target: /app
+      - type: volume
+        target: /app/node_modules
+    environment:
+      <<: *postgres-env
+      MEM0_API_URL: http://mem0:8000
+      NODE_ENV: development
+      REDIS_URL: redis://redis:6379
+      TEMPORAL_ADDRESS: temporal:7233
+      WIREMOCK_URL: http://wiremock:8080
+    healthcheck:
+      <<: *healthcheck
+      test:
+        - CMD
+        - node
+        - -e
+        - "require('http').get('http://127.0.0.1:7007/healthcheck', res => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+      retries: 24
+      start_period: 30s
+
+  frontend:
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-frontend:${IMAGE_TAG:-latest}
+    working_dir: /app
+    command: "${FRONTEND_START_CMD:-yarn workspace @ai-crew-suite/testpad-app start}"
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: ${PROJECT_DIR:-.}
+        target: /app
+      - type: volume
+        target: /app/node_modules
+    environment:
+      NODE_ENV: development
+    healthcheck:
+      <<: *healthcheck
+      test:
+        - CMD
+        - node
+        - -e
+        - "require('http').get('http://127.0.0.1:3000/', res => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+      retries: 24
+      start_period: 30s
+
+  grafana:
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-grafana:${IMAGE_TAG:-latest}
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3001}:3000"
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      tempo:
+        condition: service_started
+    volumes:
+      - grafana_data_volume:/var/lib/grafana
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+    healthcheck:
+      <<: *healthcheck
+      test: [CMD, curl, --fail, --silent, --show-error, http://127.0.0.1:3000/api/health]
+
+  mem0:
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-mem0:${IMAGE_TAG:-latest}
+    depends_on:
+      pgvector:
+        condition: service_healthy
+    networks:
+      default:
+        aliases:
+          - mem0-service
+    environment:
+      <<: *postgres-env
+      MEM0_EMBEDDER_MODEL: "${MEM0_EMBEDDER_MODEL:-text-embedding-3-small}"
+      MEM0_EMBEDDER_PROVIDER: "${MEM0_EMBEDDER_PROVIDER:-openai}"
+      MEM0_LLM_MAX_TOKENS: "${MEM0_LLM_MAX_TOKENS:-2000}"
+      MEM0_LLM_MODEL: "${MEM0_LLM_MODEL:-gpt-4o-mini}"
+      MEM0_LLM_PROVIDER: "${MEM0_LLM_PROVIDER:-openai}"
+      MEM0_LLM_TEMPERATURE: "${MEM0_LLM_TEMPERATURE:-0.1}"
+      MEM0_PROVIDER_API_KEY: "${MEM0_PROVIDER_API_KEY:-}"
+    healthcheck:
+      <<: *healthcheck
+      test: [CMD, nc, -z, 127.0.0.1, "8000"]
+
+  otel-collector:
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-otel-collector:${IMAGE_TAG:-latest}
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    depends_on:
+      tempo:
+        condition: service_started
+
+  pgvector:
+    image: pgvector/pgvector:pg18
+    volumes:
+      - pgdata_volume:/var/lib/postgresql/data
+    environment:
+      <<: *postgres-credentials
+    healthcheck:
+      <<: *healthcheck
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+
+  prometheus:
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-prometheus:${IMAGE_TAG:-latest}
+    ports:
+      - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
+    healthcheck:
+      <<: *healthcheck
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:9090/-/healthy]
+
+  redis:
+    image: redis:8.10-alpine
+    volumes:
+      - redis_volume:/data
+    healthcheck:
+      <<: *healthcheck
+      test: [CMD, redis-cli, ping]
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.96.0-alpine
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      REDIS_ADDR: redis://redis:6379
+    healthcheck:
+      <<: *healthcheck
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:9121/metrics]
+
+  tempo:
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-tempo:${IMAGE_TAG:-latest}
+    command: ["-config.file=/etc/tempo.yaml"]
+    networks:
+      default:
+        aliases:
+          - tempo-backend
+
+  temporal:
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-temporal:${IMAGE_TAG:-latest}
+    depends_on:
+      pgvector:
+        condition: service_healthy
+    networks:
+      default:
+        aliases:
+          - temporal-cluster
+    environment:
+      <<: *postgres-env
+    healthcheck:
+      <<: *healthcheck
+      test: [CMD, nc, -z, 127.0.0.1, "7233"]
+      retries: 24
+      start_period: 20s
+
+  wiremock:
+    image: wiremock/wiremock:3.13.2-alpine
+    command: >-
+      --global-response-templating
+      --async-response-enabled=true
+      --enable-cors
+      --enable-extensions io.github.wiremock.extension.opentel.OpenTelemetryExtension
+    ports:
+      - "127.0.0.1:${WIREMOCK_PORT:-8080}:8080"
+    depends_on:
+      otel-collector:
+        condition: service_started
+    volumes:
+      - type: bind
+        source: ${PROJECT_DIR:-.}/wiremock/mappings
+        target: /home/wiremock/mappings
+      - type: bind
+        source: ${PROJECT_DIR:-.}/wiremock/__files
+        target: /home/wiremock/__files
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_TRACES_EXPORTER: otlp
+    healthcheck:
+      <<: *healthcheck
+      test: [CMD, nc, -z, 127.0.0.1, "8080"]
+
+volumes:
+  grafana_data_volume:
+  pgdata_volume:
+  redis_volume:
