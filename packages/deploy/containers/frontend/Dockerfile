@@ -18,7 +18,7 @@ RUN apt-get update && \
 COPY ${SKELETON_DIR}/ ./
 
 # 2. Focus dependencies safely
-RUN yarn workspaces focus @ai-crew-suite/workbench-app
+RUN yarn workspaces focus @ai-crew-suite/workbench-frontend
 
 # 3. Pull in the real source directories needed to perform the compilation step
 COPY packages/backstage/app/ ./packages/backstage/app/
@@ -37,4 +37,4 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 RUN mkdir -p /app/external-plugin-src
 
-CMD ["yarn", "workspace", "@ai-crew-suite/workbench-app", "build"]
+CMD ["yarn", "workspace", "@ai-crew-suite/workbench-frontend", "build"]

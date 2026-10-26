@@ -1,4 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig.json",
-  "extends": "@ai-crew-suite/typescript-shared-config/node"
+  "extends": "@ai-crew-suite/typescript-shared-config/node",
+  "references": [
+    {
+      "path": "../../backstage/app"
+    }
+  ]
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@ai-crew-suite/workbench-app",
+  "name": "@ai-crew-suite/workbench-frontend",
   "bundled": true,
   "license": "Apache-2.0",
   "keywords": [
@@ -14,7 +14,7 @@
     "role": "frontend"
   },
   "bin": {
-    "backstage-dev-app": "./launcher.js"
+    "backstage-dev-frontend": "./launcher.js"
   },
   "files": [
     "dist",
@@ -28,10 +28,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ai-crew-suite/workbench",
-    "directory": "packages/app"
+    "directory": "packages/frontend"
   },
   "scripts": {
-    "build": "crew build",
     "format": "crew format",
     "lint": "crew lint",
     "test:unit": "crew test:unit",

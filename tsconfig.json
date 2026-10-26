@@ -4,7 +4,7 @@
   "files": [],
   "references": [
     {
-      "path": "./packages/backstage/app"
+      "path": "./packages/backstage/frontend"
     },
     {
       "path": "./packages/backstage/backend"

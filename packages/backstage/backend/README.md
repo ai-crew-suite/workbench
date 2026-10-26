@@ -29,6 +29,14 @@ To hook a plugin into our server, calling sites add a simple `dev/index.ts` file
 
 These commands are for linting, typechecking, and testing the backend workbench backend dev server package itself within this repo.
 
+### Building the Package
+
+To build the backstage dev server package:
+
+```bash
+yarn turbo run build --filter=@ai-crew-suite/workbench-backend
+```
+
 ### Running Lint
 
 To lint the backstage dev server package:
