@@ -1,15 +1,17 @@
 {
-  "name": "@ai-crew-suite/otel-collector-container",
-  "description": "CI base harness images, deterministic testing infrastructure stacks, and mock control plane configurations for the AI Crew Suite platform",
+  "name": "@ai-crew-suite/otel-container",
+  "description": "Standalone otel-collector daemon container with custom gRPC pipeline data routing maps",
   "version": "0.0.1",
   "license": "Apache-2.0",
   "private": true,
   "type": "module",
   "keywords": [
-    "agentic workflow",
+    "opentelemetry",
+    "otel-collector",
+    "grpc",
+    "tracing",
     "ai-crew-suite",
-    "docker",
-    "containers"
+    "docker"
   ],
   "bugs": {
     "url": "https://github.com/ai-crew-suite/workbench/issues",
@@ -18,21 +20,19 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ai-crew-suite/workbench",
-    "directory": "packages/deploy/containers/otel-collector"
+    "directory": "packages/otel-container"
   },
   "scripts": {
-    "build": "./scripts/build.sh",
-    "image:build": "./scripts/build.sh",
-    "lint": "./scripts/lint.sh",
-    "image:lint": "./scripts/lint.sh",
-    "test": "./scripts/test-structure.sh && ./scripts/scan-security.sh && vitest run",
-    "image:test:structure": "./scripts/test-structure.sh",
-    "image:test:security": "./scripts/scan-security.sh",
-    "image:test:unit": "vitest run"
+    "build": "workbench image:build otel-container",
+    "lint": "workbench image:lint otel-container",
+    "image:test:structure": "workbench image:test-structure otel-container",
+    "image:test:security": "workbench image:security-scanner otel-container",
+    "publish": "workbench image:publish otel-container",
+    "test": "yarn image:test:structure && yarn image:test:security"
   },
   "devDependencies": {
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
-    "testcontainers": "catalog:dev",
+    "@ai-crew-suite/workbench-cli": "workspace:^",
     "vitest": "catalog:dev"
   }
 }

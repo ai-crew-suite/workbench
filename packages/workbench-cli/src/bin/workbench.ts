@@ -68,7 +68,17 @@ program
     createCommandOpts('image-lint'),
   )
   .command(
-    'image:test-structure',
+    'image:publish',
+    'Tag and push compiled monorepo container images to target registries',
+    createCommandOpts('image-publish'),
+  )
+  .command(
+    'image:test:security',
+    'Scan built container images for High and Critical CVE vulnerabilities using trivy',
+    createCommandOpts('image-security-scanner'),
+  )
+  .command(
+    'image:test:structure',
     'Execute declarative container structure tests using configuration blueprints',
     createCommandOpts('image-test-structure'),
   );

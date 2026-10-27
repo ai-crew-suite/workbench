@@ -1,12 +1,14 @@
 {
   "name": "@ai-crew-suite/backend-container",
-  "description": "CI base harness images, deterministic testing infrastructure stacks, and mock control plane configurations for the AI Crew Suite platform",
+  "description": "Pre-compiled Backstage Node runtime shell base runner image for the AI Crew Suite platform",
   "version": "0.0.1",
   "license": "Apache-2.0",
   "private": true,
   "type": "module",
   "keywords": [
-    "agentic workflow",
+    "backstage",
+    "dev-server",
+    "backend-harness",
     "ai-crew-suite",
     "docker",
     "containers"
@@ -18,21 +20,19 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ai-crew-suite/workbench",
-    "directory": "packages/deploy/containers/backend"
+    "directory": "packages/backend-container"
   },
   "scripts": {
-    "build": "./scripts/build.sh",
-    "image:build": "./scripts/build.sh",
-    "lint": "./scripts/lint.sh",
-    "image:lint": "./scripts/lint.sh",
-    "test": "./scripts/test-structure.sh && ./scripts/scan-security.sh && vitest run",
-    "image:test:structure": "./scripts/test-structure.sh",
-    "image:test:security": "./scripts/scan-security.sh",
-    "image:test:unit": "vitest run"
+    "build": "workbench image:build backend-container",
+    "lint": "workbench image:lint backend-container",
+    "image:test:structure": "workbench image:test-structure backend-container",
+    "image:test:security": "workbench image:security-scanner backend-container",
+    "publish": "workbench image:publish backend-container",
+    "test": "yarn image:test:structure && yarn image:test:security"
   },
   "devDependencies": {
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
-    "testcontainers": "catalog:dev",
+    "@ai-crew-suite/workbench-cli": "workspace:^",
     "vitest": "catalog:dev"
   }
 }

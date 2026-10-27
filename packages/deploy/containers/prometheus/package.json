@@ -1,15 +1,17 @@
 {
   "name": "@ai-crew-suite/prometheus-container",
-  "description": "CI base harness images, deterministic testing infrastructure stacks, and mock control plane configurations for the AI Crew Suite platform",
+  "description": "Custom Prometheus v3 time-series metrics engine container with native worker polling schedules for the AI Crew Suite platform",
   "version": "0.0.1",
   "license": "Apache-2.0",
   "private": true,
   "type": "module",
   "keywords": [
-    "agentic workflow",
+    "prometheus",
+    "metrics",
+    "time-series",
+    "observability",
     "ai-crew-suite",
-    "docker",
-    "containers"
+    "docker"
   ],
   "bugs": {
     "url": "https://github.com/ai-crew-suite/workbench/issues",
@@ -21,18 +23,16 @@
     "directory": "packages/deploy/containers/prometheus"
   },
   "scripts": {
-    "build": "./scripts/build.sh",
-    "image:build": "./scripts/build.sh",
-    "lint": "./scripts/lint.sh",
-    "image:lint": "./scripts/lint.sh",
-    "test": "./scripts/test-structure.sh && ./scripts/scan-security.sh && vitest run",
-    "image:test:structure": "./scripts/test-structure.sh",
-    "image:test:security": "./scripts/scan-security.sh",
-    "image:test:unit": "vitest run"
+    "build": "workbench image:build prometheus-container",
+    "lint": "workbench image:lint prometheus-container",
+    "image:test:structure": "workbench image:test-structure prometheus-container",
+    "image:test:security": "workbench image:security-scanner prometheus-container",
+    "publish": "workbench image:publish prometheus-container",
+    "test": "yarn image:test:structure && yarn image:test:security"
   },
   "devDependencies": {
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
-    "testcontainers": "catalog:dev",
+    "@ai-crew-suite/workbench-cli": "workspace:^",
     "vitest": "catalog:dev"
   }
 }

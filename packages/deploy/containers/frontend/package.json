@@ -1,12 +1,15 @@
 {
   "name": "@ai-crew-suite/frontend-container",
-  "description": "CI base harness images, deterministic testing infrastructure stacks, and mock control plane configurations for the AI Crew Suite platform",
+  "description": "Nginx container optimized to serve compiled Backstage frontend plugin static assets with zero performance overhead",
   "version": "0.0.1",
   "license": "Apache-2.0",
   "private": true,
   "type": "module",
   "keywords": [
-    "agentic workflow",
+    "backstage",
+    "dev-server",
+    "nginx",
+    "frontend-harness",
     "ai-crew-suite",
     "docker",
     "containers"
@@ -18,21 +21,19 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ai-crew-suite/workbench",
-    "directory": "packages/deploy/containers/frontend"
+    "directory": "packages/frontend-container"
   },
   "scripts": {
-    "build": "./scripts/build.sh",
-    "image:build": "./scripts/build.sh",
-    "lint": "./scripts/lint.sh",
-    "image:lint": "./scripts/lint.sh",
-    "test": "./scripts/test-structure.sh && ./scripts/scan-security.sh && vitest run",
-    "image:test:structure": "./scripts/test-structure.sh",
-    "image:test:security": "./scripts/scan-security.sh",
-    "image:test:unit": "vitest run"
+    "build": "workbench image:build frontend-container",
+    "lint": "workbench image:lint frontend-container",
+    "image:test:structure": "workbench image:test-structure frontend-container",
+    "image:test:security": "workbench image:security-scanner frontend-container",
+    "publish": "workbench image:publish frontend-container",
+    "test": "yarn image:test:structure && yarn image:test:security"
   },
   "devDependencies": {
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
-    "testcontainers": "catalog:dev",
+    "@ai-crew-suite/workbench-cli": "workspace:^",
     "vitest": "catalog:dev"
   }
 }

@@ -1,15 +1,17 @@
 {
   "name": "@ai-crew-suite/tempo-container",
-  "description": "CI base harness images, deterministic testing infrastructure stacks, and mock control plane configurations for the AI Crew Suite platform",
+  "description": "Grafana Tempo distributed tracing backend container for tracking microservice execution span timelines across the AI Crew Suite platform",
   "version": "0.0.1",
   "license": "Apache-2.0",
   "private": true,
   "type": "module",
   "keywords": [
-    "agentic workflow",
+    "grafana-tempo",
+    "distributed-tracing",
+    "spans",
+    "observability",
     "ai-crew-suite",
-    "docker",
-    "containers"
+    "docker"
   ],
   "bugs": {
     "url": "https://github.com/ai-crew-suite/workbench/issues",
@@ -21,18 +23,16 @@
     "directory": "packages/deploy/containers/tempo"
   },
   "scripts": {
-    "build": "./scripts/build.sh",
-    "image:build": "./scripts/build.sh",
-    "lint": "./scripts/lint.sh",
-    "image:lint": "./scripts/lint.sh",
-    "test": "./scripts/test-structure.sh && ./scripts/scan-security.sh && vitest run",
-    "image:test:structure": "./scripts/test-structure.sh",
-    "image:test:security": "./scripts/scan-security.sh",
-    "image:test:unit": "vitest run"
+    "build": "workbench image:build tempo-container",
+    "lint": "workbench image:lint tempo-container",
+    "image:test:structure": "workbench image:test-structure tempo-container",
+    "image:test:security": "workbench image:security-scanner tempo-container",
+    "publish": "workbench image:publish tempo-container",
+    "test": "yarn image:test:structure && yarn image:test:security"
   },
   "devDependencies": {
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
-    "testcontainers": "catalog:dev",
+    "@ai-crew-suite/workbench-cli": "workspace:^",
     "vitest": "catalog:dev"
   }
 }
