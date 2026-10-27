@@ -43,7 +43,8 @@
   },
   "dependencies": {
     "chalk": "catalog:prod",
-    "commander": "catalog:prod"
+    "commander": "catalog:prod",
+    "dotenv": "catalog:prod"
   },
   "devDependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",

@@ -17,12 +17,26 @@ import { Command, Option, type ExecutableCommandOptions } from 'commander';
 import chalk from 'chalk';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { existsSync, statSync } from 'node:fs';
+import dotenv from 'dotenv';
+import { findRepoRoot } from './utils/workspace.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+try {
+  const repoRoot = findRepoRoot(__dirname);
+  const envFilePath = path.join(repoRoot, '.env');
+  if (existsSync(envFilePath) && statSync(envFilePath).isFile()) {
+    dotenv.config({ path: envFilePath });
+  }
+} catch (err) {
+  console.warn('⚠️  Workbench CLI: Bypassed programmatic .env loading hook.');
+}
 
 process.env['FORCE_COLOR'] = '3';
 chalk.level = 3;
 
 const program = new Command();
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 program
   .name('workbench')

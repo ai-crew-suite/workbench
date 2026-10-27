@@ -23,6 +23,7 @@ Thumbs.db
 .env.development.local
 .env.test.local
 .env.production.local
+cosign.key
 *.sqlite
 .clinerules
 
@@ -47,6 +48,7 @@ artifacts/
 
 # Turbo repository cache directories
 .turbo
+**/.turbo.build.lock
 **/.turbo
 
 # Turborepo pruned Docker outputs

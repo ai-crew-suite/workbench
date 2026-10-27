@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import fs from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
@@ -24,18 +24,17 @@ export function findRepoRoot(startDir: string = process.cwd()): string {
   let currentDir = startDir;
 
   while (currentDir !== dirname(currentDir)) {
-    if (fs.existsSync(resolve(currentDir, 'backstage.json'))) {
+    if (existsSync(resolve(currentDir, 'backstage.json'))) {
       return currentDir;
     }
     currentDir = dirname(currentDir);
   }
-
-  // Fallback case to avoid infinite loop parameters if file isn't present during dev setups
   return startDir;
 }
 
 /**
- * Discovers container directories by looking for folders that contain a Dockerfile
+ * Discovers container directories by looking for folders containing a Dockerfile,
+ * indexing them strictly by their official package name tail (e.g. 'temporal-container').
  */
 export function discoverContainerTargets(repoRoot: string): Map<string, string> {
   const targets = new Map<string, string>();
@@ -46,19 +45,36 @@ export function discoverContainerTargets(repoRoot: string): Map<string, string> 
   ];
 
   function scan(dir: string) {
-    if (!fs.existsSync(dir)) return;
-    const files = fs.readdirSync(dir);
+    if (!existsSync(dir)) return;
+    const files = readdirSync(dir);
 
     if (files.includes('Dockerfile') && !dir.includes('node_modules')) {
-      const name = basename(dir);
-      targets.set(name, dir);
+      try {
+        const pkgJsonPath = join(dir, 'package.json');
+        if (existsSync(pkgJsonPath)) {
+          const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
+          if (pkgJson.name) {
+            // Extracts 'temporal-container' from '@ai-crew-suite/temporal-container'
+            const cleanName = pkgJson.name.split('/').pop();
+            if (cleanName) {
+              targets.set(cleanName, dir);
+              return;
+            }
+          }
+        }
+      } catch {
+        // Fallback to directory name if JSON parsing fails
+      }
+
+      const fallbackName = basename(dir);
+      targets.set(fallbackName, dir);
       return;
     }
 
     for (const file of files) {
       const fullPath = join(dir, file);
       if (
-        fs.statSync(fullPath).isDirectory() &&
+        statSync(fullPath).isDirectory() &&
         !file.startsWith('.') &&
         file !== 'node_modules' &&
         file !== 'dist' &&

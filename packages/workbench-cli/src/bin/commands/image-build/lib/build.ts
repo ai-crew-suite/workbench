@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import fs from 'node:fs';
-import path from 'node:path';
+import { existsSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
+import { join, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import chalk from 'chalk';
 import { discoverContainerTargets, findRepoRoot } from '../../../utils/workspace';
@@ -29,11 +29,11 @@ export interface BuildOptions {
  * Sweeps up temporary artifacts and prunes dangling system layers safely
  */
 function executeCleanup(repoRoot: string, targetName: string): void {
-  const prunedDir = path.join(repoRoot, `out-${targetName}`);
+  const prunedDir = join(repoRoot, `out-${targetName}`);
 
   console.log(chalk.gray(`\n🧹 Sweeping up temporary build directories for ${targetName}...`));
-  if (fs.existsSync(prunedDir)) {
-    fs.rmSync(prunedDir, { recursive: true, force: true });
+  if (existsSync(prunedDir)) {
+    rmSync(prunedDir, { recursive: true, force: true });
   }
 
   console.log(chalk.gray('✂️ Pruning dangling Docker images...'));
@@ -46,15 +46,39 @@ function executeCleanup(repoRoot: string, targetName: string): void {
  * Compiles a singular localized Docker target image
  */
 function compileImage(repoRoot: string, targetName: string, targetDir: string, options: BuildOptions): void {
-  const { registry, imageTag } = options;
+  const { imageTag } = options;
   const isCI = process.env['CI'] === 'true';
   const buildAction = isCI ? '--push' : '--load';
+  const fullImageTag = `local/${targetName}:${imageTag}`;
 
-  const fullImageTag = registry === 'local'
-    ? `${registry}/${targetName}:${imageTag}`
-    : `${registry}/workbench-${targetName}:${imageTag}`;
+  const relativeDockerfilePath = relative(repoRoot, join(targetDir, 'Dockerfile')).replace(/\\/g, '/');
 
-  const relativeDockerfilePath = path.relative(repoRoot, path.join(targetDir, 'Dockerfile')).replace(/\\/g, '/');
+  let pkgDescription = 'AI Crew Suite internal infrastructure container package';
+  let pkgLicense = 'Apache-2.0';
+  let pkgTitle = targetName;
+  let pkgSource = 'https://github.com/ai-crew-suite/workbench';
+
+  try {
+    const pkgJsonPath = join(targetDir, 'package.json');
+    if (existsSync(pkgJsonPath)) {
+      const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
+      if (pkg.description) pkgDescription = pkg.description;
+      if (pkg.license) pkgLicense = pkg.license;
+      if (pkg.name) pkgTitle = pkg.name;
+
+      // Extract the formal Git repository URL target
+      if (pkg.repository) {
+        pkgSource = typeof pkg.repository === 'string'
+          ? pkg.repository
+          : pkg.repository.url || pkgSource;
+
+        // Normalize git+https prefix variants if present in package configuration
+        pkgSource = pkgSource.replace(/^git\+/, '');
+      }
+    }
+  } catch {
+    // Fail silently and use baseline defaults if JSON is malformed
+  }
 
   try {
     console.log(`\n📦 [${chalk.blue(targetName)}] Passing build context to Docker Engine...`);
@@ -64,6 +88,11 @@ function compileImage(repoRoot: string, targetName: string, targetDir: string, o
       buildAction,
       '-t', fullImageTag,
       '-f', relativeDockerfilePath,
+      '--label', `org.opencontainers.image.title=${pkgTitle}`,
+      '--label', `org.opencontainers.image.description=${pkgDescription}`,
+      '--label', `org.opencontainers.image.licenses=${pkgLicense}`,
+      '--label', `org.opencontainers.image.vendor=AI Crew Suite`,
+      '--label', `org.opencontainers.image.source=${pkgSource}`,
       '.'
     ];
 
@@ -92,6 +121,7 @@ export async function runImagesBuild(options: BuildOptions): Promise<void> {
 
   if (options.target) {
     const targetDir = validTargets.get(options.target);
+
     if (!targetDir) {
       console.error(chalk.red(`\n❌ Error: Invalid or unreachable target package '${options.target}'.`));
       console.error(`👉 Available options inside workspace: ${chalk.cyan([...validTargets.keys()].join(', '))}\n`);

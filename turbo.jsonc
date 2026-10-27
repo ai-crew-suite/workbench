@@ -1,10 +1,17 @@
 {
   "$schema": "https://turbo.build",
+  "globalDependencies": [
+    ".env"
+  ],
   "globalEnv": [
     "CI",
     "NODE_ENV",
     "POSTGRES_PASSWORD",
-    "POSTGRES_USER"
+    "POSTGRES_USER",
+    "REGISTRY",
+    "IMAGE_TAG",
+    "COSIGN_PASSWORD",
+    "COSIGN_PRIVATE_KEY"
   ],
   "tasks": {
     // Global root-level task

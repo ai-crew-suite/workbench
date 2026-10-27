@@ -24,6 +24,7 @@
     "srsly",
     "thinc",
     "temporalio",
+    "tlog",
     "tfvars",
     "tini",
     "unrestrictive",

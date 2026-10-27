@@ -13,30 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { execSync } from 'child_process';
-import { describe, it, expect } from 'vitest';
-import path from 'path';
+import { describe, expect, it } from 'vitest';
+import { execSync } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+function resolveTestImageContext(): string {
+  const pkgJsonPath = path.resolve(__dirname, '../package.json');
+  const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+  const cleanTargetName = pkgJson.name.split('/').pop() || ''; // Yields 'temporal-container'
+
+  const imageTag = process.env['IMAGE_TAG'] || 'latest';
+  return `local/${cleanTargetName}:${imageTag}`;
+}
 
 describe('Temporal Custom Infrastructure Image Structure Suite', () => {
-  const registry = process.env['REGISTRY'] || 'localhost:32443/ai-crew-suite';
-  const tag = process.env['IMAGE_TAG'] || 'latest';
-  const targetImage = `${registry}/workbench-temporal:${tag}`;
-
   it('should pass all binary placement and metadata structure assertions', () => {
-    try {
-      const configPath = path.resolve(__dirname, './temporal.cst.yaml');
+    const targetImage = resolveTestImageContext();
+    const configPath = path.resolve(__dirname, './temporal.cst.yaml');
 
-      const result = execSync(
+    try {
+      execSync(
         `container-structure-test test \
           --image ${targetImage} \
           --config ${configPath}`,
-        { encoding: 'utf-8', stdio: 'pipe' }
+        { stdio: ['pipe', 'pipe', 'pipe'], env: process.env }
       );
-
-      expect(result).toContain('PASS');
     } catch (error: any) {
-      console.error('❌ Temporal Structural Assertions Failed:\n', error.stdout || error.message);
-      throw error;
+      const output = error.stdout?.toString() || '';
+      const stderr = error.stderr?.toString() || '';
+
+      console.error('\n❌ --- CONTAINER STRUCTURE TEST FAILURE BREAKDOWN ---');
+      if (output) console.error(output);
+      if (stderr) console.error(stderr);
+      console.error('-------------------------------------------------------\n');
+
+      throw new Error(`Structure assertion failed for ${targetImage}. See breakdown above.`);
     }
   });
 });

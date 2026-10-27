@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 import { spawnSync } from 'node:child_process';
+import path from 'node:path';
+import fs from 'node:fs';
 import chalk from 'chalk';
-import { findRepoRoot, discoverContainerTargets } from '../../../utils/workspace';
+import { findRepoRoot, discoverContainerTargets, hasBinary } from '../../../utils/workspace.js';
 
 export interface PublishOptions {
   target?: string;
@@ -23,14 +25,10 @@ export interface PublishOptions {
   imageTag: string;
 }
 
-/**
- * Handles image tagging and remote pushing orchestration routines
- */
 function publishSingleImage(targetName: string, options: PublishOptions): void {
   const { registry, imageTag } = options;
   const localSourceTag = `local/${targetName}:${imageTag}`;
 
-  // Scenario matching: determine naming schemas for Zot vs GHCR/External registries
   const isLocalZot = registry.startsWith('localhost') || registry.startsWith('127.0.0.1') || registry.includes('zot');
 
   const remoteTargetTag = isLocalZot
@@ -38,29 +36,74 @@ function publishSingleImage(targetName: string, options: PublishOptions): void {
     : `${registry}/workbench-${targetName}:${imageTag}`;
 
   console.log(`\n🏷️  Preparing distribution layers for [${chalk.yellow(targetName)}]...`);
-  console.log(chalk.gray(`   Source: ${localSourceTag}`));
-  console.log(chalk.gray(`   Remote: ${remoteTargetTag}`));
 
-  // Step 1: Apply remote tracking tag configuration mapping
-  console.log(chalk.blue(`🔄 Tagging image layers...`));
+  // Step 1: Apply remote tracking tag configuration
   const tagResult = spawnSync('docker', ['tag', localSourceTag, remoteTargetTag], { stdio: 'inherit' });
   if (tagResult.status !== 0) {
     throw new Error(`Failed to tag target container image for ${targetName}`);
   }
 
-  // Step 2: Push compiled layer blobs to the target repository registry endpoints
+  // Push compiled layer blobs to the destination registry
   console.log(chalk.blue(`🚀 Streaming image packages to distribution registry...`));
+
   const pushResult = spawnSync('docker', ['push', remoteTargetTag], { stdio: 'inherit' });
+
   if (pushResult.status !== 0) {
     throw new Error(`Failed to push target container image layers to remote destination registry: ${remoteTargetTag}`);
   }
 
   console.log(chalk.green(`\n✅ Successfully published image package: ${remoteTargetTag}`));
+
+  // Cryptographically sign the image layers via Cosign
+  if (hasBinary('cosign')) {
+    const repoRoot = findRepoRoot(process.cwd());
+    const keyPath = path.resolve(repoRoot, 'cosign.key');
+
+    // Read the variable directly from process.env now that dotenv populates it globally
+    const cosignPass = process.env['COSIGN_PASSWORD'];
+
+    // Prefer the repo-root key file for local runs; otherwise fall back to the
+    // COSIGN_PRIVATE_KEY env parameter (GitHub Actions repository secret) so CI
+    // signing works without ever materializing the private key on disk.
+    const keyRef = fs.existsSync(keyPath)
+      ? keyPath
+      : process.env['COSIGN_PRIVATE_KEY']
+        ? 'env://COSIGN_PRIVATE_KEY'
+        : undefined;
+
+    if (keyRef && cosignPass) {
+      console.log(chalk.cyan(`\n🔏 Cryptographically signing image via Cosign...`));
+
+      const cosignArgs = [
+        'sign',
+        '--key', keyRef,
+        '--allow-http-registry=true',
+        // cosign v3 defaults to the TUF signing config; both flags are required to skip the public transparency log
+        '--use-signing-config=false',
+        '--tlog-upload=false',
+        '--yes',
+        remoteTargetTag
+      ];
+
+      const signResult = spawnSync('cosign', cosignArgs, {
+        stdio: 'inherit',
+        env: { ...process.env, COSIGN_PASSWORD: cosignPass }
+      });
+
+      if (signResult.status === 0) {
+        console.log(chalk.green(`🔑 Cryptographic signature verified and attached to Zot container context!`));
+      } else {
+        console.warn(chalk.yellow(`⚠️  Cosign error: Signature step exited with status code ${signResult.status}`));
+      }
+    } else {
+      const reason = !keyRef
+        ? `no cosign private key found at '${keyPath}' or via COSIGN_PRIVATE_KEY env parameter`
+        : 'COSIGN_PASSWORD env parameter missing';
+      console.log(chalk.gray(`\nℹ️  Skipping image signing: ${reason}.`));
+    }
+  }
 }
 
-/**
- * Orchestrator Router for single manual targets or cascading pipelines
- */
 export async function runImagesPublish(options: PublishOptions): Promise<void> {
   const repoRoot = findRepoRoot();
   const validTargets = discoverContainerTargets(repoRoot);
@@ -68,18 +111,12 @@ export async function runImagesPublish(options: PublishOptions): Promise<void> {
   if (options.target) {
     if (!validTargets.has(options.target)) {
       console.error(chalk.red(`\n❌ Error: Invalid container publish target '${options.target}'.`));
-      console.error(`👉 Available options inside workspace: ${chalk.cyan([...validTargets.keys()].join(', '))}\n`);
       throw new Error(`Target tracking mapping failure for ${options.target}`);
     }
-
     publishSingleImage(options.target, options);
   } else {
-    console.log(chalk.blue('🔄 No explicit target provided. Initiating a full distribution cascade...\n'));
-
     for (const targetName of validTargets.keys()) {
       publishSingleImage(targetName, options);
     }
   }
-
-  console.log(chalk.green('\n✨ All requested container distributions pushed successfully!'));
 }
