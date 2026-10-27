@@ -19,8 +19,8 @@ x-healthcheck: &healthcheck
 services:
   backend:
     image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-backend:${IMAGE_TAG:-latest}
-    working_dir: /app
-    command: "${BACKEND_START_CMD:-yarn workspace @ai-crew-suite/testpad-backend start}"
+    working_dir: /app/${BACKEND_PLUGIN_DIR:-.}
+    command: "${BACKEND_START_CMD:-yarn start}"
     ports:
       - "127.0.0.1:${BACKEND_PORT:-7007}:7007"
     depends_on:
@@ -38,8 +38,6 @@ services:
       - type: bind
         source: ${PROJECT_DIR:-.}
         target: /app
-      - type: volume
-        target: /app/node_modules
     environment:
       <<: *postgres-env
       MEM0_API_URL: http://mem0:8000
@@ -59,8 +57,9 @@ services:
 
   frontend:
     image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-frontend:${IMAGE_TAG:-latest}
-    working_dir: /app
-    command: "${FRONTEND_START_CMD:-yarn workspace @ai-crew-suite/testpad-app start}"
+    profiles: ["frontend"]
+    working_dir: /app/${FRONTEND_PLUGIN_DIR:-frontend}
+    command: "${FRONTEND_START_CMD:-yarn start}"
     ports:
       - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
     depends_on:
@@ -70,8 +69,6 @@ services:
       - type: bind
         source: ${PROJECT_DIR:-.}
         target: /app
-      - type: volume
-        target: /app/node_modules
     environment:
       NODE_ENV: development
     healthcheck:
@@ -100,7 +97,15 @@ services:
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
     healthcheck:
       <<: *healthcheck
-      test: [CMD, curl, --fail, --silent, --show-error, http://127.0.0.1:3000/api/health]
+      test:
+        [
+          CMD,
+          curl,
+          --fail,
+          --silent,
+          --show-error,
+          http://127.0.0.1:3000/api/health,
+        ]
 
   mem0:
     image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-mem0:${IMAGE_TAG:-latest}
@@ -139,7 +144,8 @@ services:
       <<: *postgres-credentials
     healthcheck:
       <<: *healthcheck
-      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      test:
+        [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
 
   prometheus:
     image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-prometheus:${IMAGE_TAG:-latest}

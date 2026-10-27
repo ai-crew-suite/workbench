@@ -110,7 +110,7 @@ export const RootPage = () => {
 To spin up your isolated local web server instance, run:
 
 ```bash
-LOG_LEVEL=debug yarn turbo run start --filter=@ai-crew-suite/testpad-app
+LOG_LEVEL=debug yarn turbo run start --filter=@ai-crew-suite/testpad-frontend
 ```
 
 ## 📄 Compliance and Licensing

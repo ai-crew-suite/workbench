@@ -2,13 +2,13 @@ schemaVersion: "2.0.0"
 
 metadataTest:
   exposedPorts: ["7007"]
-  user: "1000"
+  user: "0"
   workdir: "/app"
   entrypoint: ["/usr/bin/tini", "--"]
-  cmd: ["node", "packages/backstage/backend/dist/index.js", "--config", "packages/backstage/backend/skeleton/empty-fallback.yaml"]
+  cmd: ["yarn", "start"]
   envVars:
     - key: "NODE_ENV"
-      value: "production"
+      value: "development"
     - key: "NODE_OPTIONS"
       value: "--no-node-snapshot"
 
@@ -23,24 +23,24 @@ commandTests:
     args: ["--version"]
     expectedOutput: ["tini version 0.19.0.*"]
 
+  - name: "Validate Yarn Launcher"
+    command: "yarn"
+    args: ["--version"]
+    expectedOutput: [".+"]
+
 fileExistenceTests:
-  - name: "Assert Node Production Modules Present"
+  - name: "Assert Consumer Workspace Mount Target"
+    path: "/app"
+    shouldExist: true
+
+  - name: "Assert Dependencies Come From Mounted Workspace"
     path: "/app/node_modules"
-    shouldExist: true
+    shouldExist: false
 
-  - name: "Assert Main Production Artifact Compiled"
-    path: "/app/packages/backstage/backend/dist/bundle.tar.gz"
-    shouldExist: true
+  - name: "Assert Compiled Workbench Is Not Baked In"
+    path: "/app/packages"
+    shouldExist: false
 
-  - name: "Assert Bundle Skeleton Manifest Compiled"
-    path: "/app/packages/backstage/backend/dist/skeleton.tar.gz"
-    shouldExist: true
-
-  - name: "Assert Local Plugin Volume Target Directory"
-    path: "/app/external-plugins"
-    shouldExist: true
-    permissions: "drwxr-xr-x"
-
-  - name: "Confirm Build Optimization Tooling Dropped"
+  - name: "Confirm Build Tooling Is Not Installed"
     path: "/usr/bin/g++"
     shouldExist: false

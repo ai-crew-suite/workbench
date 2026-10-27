@@ -13,63 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { describe, it, expect, afterAll } from 'vitest';
-import { GenericContainer, StartedTestContainer } from 'testcontainers';
 import path from 'path';
+import { GenericContainer, Wait } from 'testcontainers';
+import { describe, expect, it } from 'vitest';
 
-describe('Backend Container Runtime Integration Suite', () => {
-  let container: StartedTestContainer;
-
-  afterAll(async () => {
-    if (container) {
-      console.log('🧹 Shutting down active backend test container instance...');
-      await container.stop();
-    }
-  });
-
-  it('should compile from the monorepo graph context and launch successfully', async () => {
+describe('Backend Development Runner Integration Suite', () => {
+  it('builds without workbench artifacts and executes the Node runtime', async () => {
     const monorepoRootPath = path.resolve(__dirname, '../../../../../');
     const dockerfilePath = 'packages/deploy/containers/backend/Dockerfile';
-
-    console.log('🏗️  Building backend image via Testcontainers engine...');
-
-    // 1. Core Fix: Chain .withBuildArgs() BEFORE calling .build()
-    const containerBlueprint = await GenericContainer.fromDockerfile(monorepoRootPath, dockerfilePath)
-      .withBuildArgs({
-        SKELETON_DIR: '.build-skeleton-backend'
-      })
-      .build();
-
-    // 2. Chain runtime networking options AFTER calling .build()
-    container = await containerBlueprint
-      .withExposedPorts(7007)
+    const image = await GenericContainer.fromDockerfile(
+      monorepoRootPath,
+      dockerfilePath,
+    ).build();
+    const container = await image
+      .withCommand([
+        'node',
+        '-e',
+        "console.log('backend development runner ready')",
+      ])
+      .withWaitStrategy(Wait.forLogMessage('backend development runner ready'))
       .start();
 
-    // Verify container runtime port mapping status
-    const mappedPort = container.getMappedPort(7007);
-    expect(mappedPort).toBeGreaterThan(0);
-
-    console.log(`🚀 Backend active on ephemeral host port: ${mappedPort}`);
-
-    // 3. Read the logs out as an asynchronous stream hook
-    const logStream = await container.logs();
-
-    await new Promise<void>((resolve, reject) => {
-      let logOutput = '';
-
-      logStream
-        .on('data', (chunk: string) => {
-          logOutput += chunk;
-          if (logOutput.includes('empty-fallback.yaml') || logOutput.includes('node')) {
-            resolve();
-          }
-        })
-        .on('error', (err) => reject(err))
-        .on('end', () => resolve());
-
-      setTimeout(resolve, 5000);
-    });
-
-    expect(container.getId()).toBeDefined();
+    try {
+      expect(container.getId()).toBeDefined();
+    } finally {
+      await container.stop();
+    }
   }, 90000);
 });

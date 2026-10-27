@@ -13,60 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { describe, it, expect, afterAll } from 'vitest';
-import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers';
-import { Readable } from 'stream';
 import path from 'path';
+import { GenericContainer, Wait } from 'testcontainers';
+import { describe, expect, it } from 'vitest';
 
-describe('Frontend Container Compilation Integration Suite', () => {
-  let container: StartedTestContainer;
-
-  afterAll(async () => {
-    if (container) {
-      console.log('🧹 Sweeping up frontend test container instance tracks...');
-      await container.stop();
-    }
-  });
-
-  it('should evaluate the workspace architecture matrix and invoke the builder shell cleanly', async () => {
+describe('Frontend Development Runner Integration Suite', () => {
+  it('builds without workbench artifacts and executes the Node runtime', async () => {
     const monorepoRootPath = path.resolve(__dirname, '../../../../../');
     const dockerfilePath = 'packages/deploy/containers/frontend/Dockerfile';
-
-    console.log('🏗️ Building frontend base compilation harness via Testcontainers engine...');
-
-    // 1. Build the target image from the root monorepo structural graph context
-    const containerBlueprint = await GenericContainer.fromDockerfile(monorepoRootPath, dockerfilePath)
-      .withBuildArgs({
-        SKELETON_DIR: '.build-skeleton-frontend'
-      })
-      .build();
-
-    console.log('🚀 Starting frontend container instance execution stream...');
-
-    // 2. Fix 1: Use the native Wait factory strategy to track the command engine invocation safely
-    container = await containerBlueprint
-      .withWaitStrategy(Wait.forLogMessage(/workbench-app|yarn/i))
+    const image = await GenericContainer.fromDockerfile(
+      monorepoRootPath,
+      dockerfilePath,
+    ).build();
+    const container = await image
+      .withCommand([
+        'node',
+        '-e',
+        "console.log('frontend development runner ready')",
+      ])
+      .withWaitStrategy(Wait.forLogMessage('frontend development runner ready'))
       .start();
 
-    expect(container.getId()).toBeDefined();
-
-    // 3. Fix 2: Wrap logs array cleanly using Node's stream reader to clear the 'on' method typing failure
-    const logBuffer = await container.logs();
-    const logStream = Readable.from(logBuffer);
-
-    const runtimeLogs = await new Promise<string>((resolve) => {
-      let accumulatedOutput = '';
-      logStream.on('data', (chunk) => {
-        accumulatedOutput += chunk.toString();
-      });
-      logStream.on('end', () => resolve(accumulatedOutput));
-      // Fallback safeguard constraint to protect build tracks
-      setTimeout(() => resolve(accumulatedOutput), 4000);
-    });
-
-    console.log('📊 Captured Frontend Execution Log Trace Summary:\n', runtimeLogs);
-
-    // Assert that the container targets your active application workspaces
-    expect(runtimeLogs.toLowerCase()).toMatch(/(yarn|workspace|workbench-app)/);
+    try {
+      expect(container.getId()).toBeDefined();
+    } finally {
+      await container.stop();
+    }
   }, 90000);
 });

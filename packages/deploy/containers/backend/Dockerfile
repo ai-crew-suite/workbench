@@ -1,64 +1,22 @@
-# --------------------------------------------------------------------
-# Stage 1: Build the Workbench Runner Core
-# --------------------------------------------------------------------
-
 ARG NODE_VERSION=22-bookworm-slim
-FROM node:${NODE_VERSION} AS builder
-WORKDIR /app
+FROM node:${NODE_VERSION}
 
-# Accept the unique skeleton directory name from the shell script
-ARG SKELETON_DIR
-
-# hadolint ignore=DL3008
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3 g++ make && \
-    rm -rf /var/lib/apt/lists/*
-
-# 1. Copy the target-specific structural skeleton configuration maps
-COPY ${SKELETON_DIR}/ ./
-
-# 2. Focus dependencies safely
-RUN yarn workspaces focus @ai-crew-suite/workbench-backend
-
-# 3. Pull in the real source directories needed to perform the compilation step
-COPY packages/backstage/backend/ ./packages/backstage/backend/
-# Fixtures are specified as dependencies with "workspace:^" versions. in the
-# backend dev server. Yarn treats workspace:^ as a strict local link within the
-# repo. These dependencies must be explicitly copied into the build context to
-# satisfy Yarn's workspace linking.
-COPY packages/fixtures/ ./packages/fixtures/
-
-# Execute compilation and purge caches
-RUN yarn workspace @ai-crew-suite/workbench-backend build && \
-    yarn cache clean
-
-# --------------------------------------------------------------------
-# Stage 2: Lean High-Security Runtime (The Base Image)
-# --------------------------------------------------------------------
-
-FROM node:${NODE_VERSION} AS runtime
 WORKDIR /app
 
 # hadolint ignore=DL3008
 RUN apt-get update && \
     apt-get install -y --no-install-recommends tini && \
     rm -rf /var/lib/apt/lists/* && \
-    mkdir -p /app/external-plugins && \
-    chown -R node:node /app/external-plugins
+    corepack enable
 
-USER 1000
+# Root matches root-mapped bind-mount owners in writable development environments.
+# hadolint ignore=DL3002
+USER 0
 
-COPY --chown=node:node --from=builder /app/package.json /app/yarn.lock /app/.yarnrc.yml ./
-COPY --chown=node:node --from=builder /app/.yarn/ .yarn/
-COPY --chown=node:node --from=builder /app/node_modules/ node_modules/
-COPY --chown=node:node --from=builder /app/packages/backstage/backend/package.json ./packages/backstage/backend/package.json
-COPY --chown=node:node --from=builder /app/packages/backstage/backend/dist/ ./packages/backstage/backend/dist/
-
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 ENV NODE_OPTIONS="--no-node-snapshot"
 
 EXPOSE 7007
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
-
-CMD ["node", "packages/backstage/backend/dist/index.js", "--config", "packages/backstage/backend/skeleton/empty-fallback.yaml"]
+CMD ["yarn", "start"]

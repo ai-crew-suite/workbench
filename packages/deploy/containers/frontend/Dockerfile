@@ -1,40 +1,22 @@
-# --------------------------------------------------------------------
-# Stage 1: Build the Workbench App Shell (Caching Layer)
-# --------------------------------------------------------------------
-
 ARG NODE_VERSION=22-bookworm-slim
-FROM node:${NODE_VERSION} AS builder
-WORKDIR /app
+FROM node:${NODE_VERSION}
 
-# Accept the unique skeleton directory name from the shell script
-ARG SKELETON_DIR
+WORKDIR /app
 
 # hadolint ignore=DL3008
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3 g++ make && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends tini && \
+    rm -rf /var/lib/apt/lists/* && \
+    corepack enable
 
-# 1. Copy the target-specific structural skeleton configuration maps
-COPY ${SKELETON_DIR}/ ./
+# Root matches root-mapped bind-mount owners in writable development environments.
+# hadolint ignore=DL3002
+USER 0
 
-# 2. Focus dependencies safely
-RUN yarn workspaces focus @ai-crew-suite/workbench-frontend
-
-# 3. Pull in the real source directories needed to perform the compilation step
-COPY packages/backstage/app/ ./packages/backstage/app/
-
-RUN yarn cache clean
-
-# --------------------------------------------------------------------
-# Stage 2: Production Compilation Shell (The Target Base Image)
-# --------------------------------------------------------------------
-
-FROM builder AS compiler
-WORKDIR /app
-
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-RUN mkdir -p /app/external-plugin-src
+EXPOSE 3000
 
-CMD ["yarn", "workspace", "@ai-crew-suite/workbench-frontend", "build"]
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["yarn", "start"]

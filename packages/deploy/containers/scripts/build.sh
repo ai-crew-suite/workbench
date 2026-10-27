@@ -21,12 +21,11 @@ TARGET="${1:-}"
 # 3. Global Cleanup Function (Explicitly bound via parameter to survive function scopes)
 execute_cleanup() {
   local target_name="$1"
-  local skeleton_dir=".build-skeleton-${target_name}"
   local pruned_dir="out-${target_name}"
 
   echo -e "\n🧹 Sweeping up temporary build directories for ${target_name}..."
   cd "$MONOREPO_ROOT"
-  rm -rf "$skeleton_dir" "$pruned_dir"
+  rm -rf "$pruned_dir"
   echo -e "✂️ Pruning dangling Docker images..."
   docker image prune -f
 }
@@ -55,43 +54,12 @@ compile_image() {
     build_action="--push"
   fi
 
-  local skeleton_dir=".build-skeleton-${target_name}"
+  cd "$MONOREPO_ROOT"
+  echo "📦 [$target_name] Passing build context to Docker Engine..."
 
-  # Execute optimization for Node applications vs static engines
-  local build_args=()
-  if [[ "$target_name" == "frontend" || "$target_name" == "backend" ]]; then
-    echo "🚀 Pre-formatting Monorepo Structural Graph for Node Target: $target_name"
-    cd "$MONOREPO_ROOT"
-
-    rm -rf "$skeleton_dir"
-    mkdir -p "$skeleton_dir"
-
-    # Mirror package.json AND tsconfig.json configurations, strictly ignoring artifacts
-    find . -type f \( -name "package.json" -o -name "tsconfig.json" \) \
-      -not -path "*/node_modules/*" \
-      -not -path "*/out-*" \
-      -not -path "*/.build-skeleton-*" | while read -r file; do
-        mkdir -p "$skeleton_dir/$(dirname "$file")"
-        cp "$file" "$skeleton_dir/$file"
-    done
-
-    # Bring in global workspace metadata roots into the unique skeleton directory
-    cp yarn.lock .yarnrc.yml backstage.json* "$skeleton_dir/" 2>/dev/null || true
-    if [ -d ".yarn" ]; then
-      cp -r .yarn "$skeleton_dir/"
-    fi
-
-    build_args=("--build-arg" "SKELETON_DIR=$skeleton_dir")
-  else
-    echo "🚀 Processing static infrastructure engine target: $target_name"
-    cd "$MONOREPO_ROOT"
-  fi
-
-  echo "📦 [$target_name] Structural metadata isolated. Passing context to Docker Engine..."
-
-  # Execute the image compilation step pointing to the relative path from monorepo root
+  # Development images rely on Compose to mount the consumer workspace and its
+  # dependencies; no repository skeleton or compiled application is baked in.
   docker buildx build $build_action \
-    "${build_args[@]}" \
     -t "$full_image_tag" \
     -f "packages/deploy/containers/${target_name}/Dockerfile" .
 

@@ -1,4 +1,4 @@
-# @ai-crew-suite/compose
+# Workbench Docker Compose File
 
 Centralized multi-container orchestration blueprints, Docker Compose environment layouts, and local cluster networking profiles for spinning up isolated workbench components and Wiremock virtualization services.
 

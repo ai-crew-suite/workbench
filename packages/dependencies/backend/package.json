@@ -1,0 +1,47 @@
+{
+  "name": "@ai-crew-suite/dependencies-backend",
+  "description": "Shared frontend dependency bundle for the AI Crew Suite platform",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "publishConfig": {
+    "directory": "."
+  },
+  "bugs": {
+    "url": "https://github.com",
+    "email": "support@ai-crew-suite.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com",
+    "directory": "packages/shared"
+  },
+  "dependencies": {
+    "@backstage/frontend-defaults": "backstage:^",
+    "@backstage/frontend-plugin-api": "backstage:^",
+    "@backstage/plugin-api-docs": "backstage:^",
+    "@backstage/plugin-app-react": "backstage:^",
+    "@backstage/plugin-app-visualizer": "backstage:^",
+    "@backstage/plugin-catalog": "backstage:^",
+    "@backstage/plugin-catalog-graph": "backstage:^",
+    "@backstage/plugin-kubernetes": "backstage:^",
+    "@backstage/plugin-notifications": "backstage:^",
+    "@backstage/plugin-org": "backstage:^",
+    "@backstage/plugin-scaffolder": "backstage:^",
+    "@backstage/plugin-search": "backstage:^",
+    "@backstage/plugin-signals": "backstage:^",
+    "@backstage/plugin-techdocs": "1.18.2",
+    "@backstage/plugin-user-settings": "backstage:^",
+    "@backstage/theme": "backstage:^",
+    "@backstage/ui": "backstage:^",
+    "@material-ui/core": "catalog:prod",
+    "@mui/icons-material": "catalog:prod",
+    "@mui/material": "catalog:prod",
+    "react": "catalog:prod",
+    "react-dom": "catalog:prod",
+    "react-router": "catalog:prod",
+    "react-router-dom": "catalog:prod",
+    "yaml": "catalog:prod"
+  }
+}
