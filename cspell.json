@@ -16,6 +16,8 @@
     "ollama",
     "pgdata",
     "pgvector",
+    "rekor",
+    "retag",
     "rjsf",
     "rollup",
     "rwxr",
