@@ -13,25 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import chalk from 'chalk';
-import { syncProjectReferences } from './lib/sync';
+import { runImagesBuild } from './lib/build';
 
 const program = new Command();
 
 program
-  .name('sync:refs')
-  .description('Synchronize all TypeScript package project references and heal the root configuration')
-  .action(() => {
+  .name('image:build')
+  .description('Build workspace container images via Docker Buildx')
+  .argument('[target]', 'Specific container directory to build (omitting builds all targets sequentially)')
+  .addOption(new Option('-r, --registry <registry>', 'Target container registry').env('REGISTRY').default('local'))
+  .addOption(new Option('-t, --tag <tag>', 'Docker image tag version').env('IMAGE_TAG').default('latest'))
+  .action(async (target, options) => {
     try {
-      console.log(`\n${chalk.blue('🔄 AI CREW SUITE: Healing monorepo TypeScript project references...')}`);
+      console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
+      console.log(`${chalk.magenta('│ 🐳 WORKBENCH CLI: Container Compilation Sequence       │')}`);
+      console.log(`${chalk.magenta('└────────────────────────────────────────────────────────┘')}`);
 
-      syncProjectReferences();
+      await runImagesBuild({
+        target,
+        registry: options.registry,
+        imageTag: options.tag,
+      });
 
-      console.log(`${chalk.green('✅ Project reference mappings aligned perfectly!')}\n`);
       process.exitCode = 0;
     } catch (error) {
-      console.error(chalk.red('❌ Core reference sync orchestration framework error:'), error);
+      console.error(`\n${chalk.red('❌ Critical Engine Orchestration Failure:')}`, error);
       process.exitCode = 1;
     }
   });

@@ -1,5 +1,5 @@
 {
-  "name": "@ai-crew-suite/containers",
+  "name": "@ai-crew-suite/grafana-container",
   "description": "CI base harness images, deterministic testing infrastructure stacks, and mock control plane configurations for the AI Crew Suite platform",
   "version": "0.0.1",
   "license": "Apache-2.0",
@@ -18,7 +18,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ai-crew-suite/workbench",
-    "directory": "packages/deploy/containers"
+    "directory": "packages/deploy/containers/grafana"
   },
   "scripts": {
     "build": "./scripts/build.sh",

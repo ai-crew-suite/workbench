@@ -25,7 +25,7 @@ const program = new Command();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 program
-  .name('crew')
+  .name('workbench')
   .description(`\n  ${chalk.bold('Unified DevOps scripting toolkit for ai-crew-suite')}`)
   .version('1.0.0');
 
@@ -58,9 +58,9 @@ program.configureOutput({
 
 program
   .command(
-    'build',
-    'Compile all workspace targets',
-    createCommandOpts('build'),
+    'image:build',
+    'Build and package monorepo container targets',
+    createCommandOpts('images-build'),
   );
 
 program.parse(process.argv);

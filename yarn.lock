@@ -19,6 +19,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ai-crew-suite/backend-container@workspace:packages/deploy/containers/backend":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/backend-container@workspace:packages/deploy/containers/backend"
+  dependencies:
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    testcontainers: "catalog:dev"
+    vitest: "catalog:dev"
+  languageName: unknown
+  linkType: soft
+
 "@ai-crew-suite/compose@workspace:packages/deploy/compose":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/compose@workspace:packages/deploy/compose"
@@ -26,16 +36,6 @@ __metadata:
     "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
     "@ai-crew-suite/workbench-frontend": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@ai-crew-suite/containers@workspace:packages/deploy/containers":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/containers@workspace:packages/deploy/containers"
-  dependencies:
-    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
-    testcontainers: "catalog:dev"
-    vitest: "catalog:dev"
   languageName: unknown
   linkType: soft
 
@@ -237,6 +237,76 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@ai-crew-suite/frontend-container@workspace:packages/deploy/containers/frontend":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/frontend-container@workspace:packages/deploy/containers/frontend"
+  dependencies:
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    testcontainers: "catalog:dev"
+    vitest: "catalog:dev"
+  languageName: unknown
+  linkType: soft
+
+"@ai-crew-suite/grafana-container@workspace:packages/deploy/containers/grafana":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/grafana-container@workspace:packages/deploy/containers/grafana"
+  dependencies:
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    testcontainers: "catalog:dev"
+    vitest: "catalog:dev"
+  languageName: unknown
+  linkType: soft
+
+"@ai-crew-suite/mem0-container@workspace:packages/deploy/containers/mem0":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/mem0-container@workspace:packages/deploy/containers/mem0"
+  dependencies:
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    testcontainers: "catalog:dev"
+    vitest: "catalog:dev"
+  languageName: unknown
+  linkType: soft
+
+"@ai-crew-suite/otel-collector-container@workspace:packages/deploy/containers/otel-collector":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/otel-collector-container@workspace:packages/deploy/containers/otel-collector"
+  dependencies:
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    testcontainers: "catalog:dev"
+    vitest: "catalog:dev"
+  languageName: unknown
+  linkType: soft
+
+"@ai-crew-suite/prometheus-container@workspace:packages/deploy/containers/prometheus":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/prometheus-container@workspace:packages/deploy/containers/prometheus"
+  dependencies:
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    testcontainers: "catalog:dev"
+    vitest: "catalog:dev"
+  languageName: unknown
+  linkType: soft
+
+"@ai-crew-suite/tempo-container@workspace:packages/deploy/containers/tempo":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/tempo-container@workspace:packages/deploy/containers/tempo"
+  dependencies:
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    testcontainers: "catalog:dev"
+    vitest: "catalog:dev"
+  languageName: unknown
+  linkType: soft
+
+"@ai-crew-suite/temporal-container@workspace:packages/deploy/containers/temporal":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/temporal-container@workspace:packages/deploy/containers/temporal"
+  dependencies:
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    "@ai-crew-suite/workbench-cli": "workspace:^"
+    vitest: "catalog:dev"
+  languageName: unknown
+  linkType: soft
+
 "@ai-crew-suite/testpad-backend@workspace:packages/testpad/backend":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/testpad-backend@workspace:packages/testpad/backend"
@@ -280,23 +350,24 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ai-crew-suite/workbench-cli@workspace:packages/workbench-cli":
+"@ai-crew-suite/workbench-cli@workspace:^, @ai-crew-suite/workbench-cli@workspace:packages/workbench-cli":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/workbench-cli@workspace:packages/workbench-cli"
   dependencies:
+    "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
     "@rollup/plugin-node-resolve": "catalog:dev"
     "@types/node": "catalog:dev"
     chalk: "catalog:prod"
     commander: "catalog:prod"
     glob: "catalog:dev"
+    rimraf: "catalog:dev"
     rollup: "catalog:dev"
-    rollup-plugin-dts: "catalog:dev"
     rollup-plugin-esbuild: "catalog:dev"
     typescript: "catalog:dev"
     vitest: "catalog:dev"
   bin:
-    crew: ./dist/bin/workbench.js
+    workbench: ./dist/bin/workbench.js
   languageName: unknown
   linkType: soft
 
@@ -25555,7 +25626,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup-plugin-dts@npm:^6.1.0, rollup-plugin-dts@npm:^6.5.1":
+"rollup-plugin-dts@npm:^6.1.0":
   version: 6.5.1
   resolution: "rollup-plugin-dts@npm:6.5.1"
   dependencies:

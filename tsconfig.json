@@ -4,22 +4,43 @@
   "files": [],
   "references": [
     {
-      "path": "./packages/backstage/frontend"
-    },
-    {
       "path": "./packages/backstage/backend"
     },
     {
-      "path": "./packages/dependencies/frontend"
+      "path": "./packages/backstage/frontend"
     },
     {
       "path": "./packages/dependencies/backend"
     },
     {
+      "path": "./packages/dependencies/frontend"
+    },
+    {
       "path": "./packages/deploy/compose"
     },
     {
-      "path": "./packages/deploy/containers"
+      "path": "./packages/deploy/containers/backend"
+    },
+    {
+      "path": "./packages/deploy/containers/frontend"
+    },
+    {
+      "path": "./packages/deploy/containers/grafana"
+    },
+    {
+      "path": "./packages/deploy/containers/mem0"
+    },
+    {
+      "path": "./packages/deploy/containers/otel-collector"
+    },
+    {
+      "path": "./packages/deploy/containers/prometheus"
+    },
+    {
+      "path": "./packages/deploy/containers/tempo"
+    },
+    {
+      "path": "./packages/deploy/containers/temporal"
     },
     {
       "path": "./packages/deploy/kubernetes"
@@ -46,10 +67,10 @@
       "path": "./packages/fixtures/techdocs"
     },
     {
-      "path": "./packages/testpad/app"
+      "path": "./packages/testpad/backend"
     },
     {
-      "path": "./packages/testpad/backend"
+      "path": "./packages/testpad/frontend"
     },
     {
       "path": "./packages/workbench-cli"
