@@ -13,13 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { createRequire } from 'module';
 import path from 'path';
 
 /**
  * Returns the absolute filesystem resolution path pointing to the
  * pre-compiled static HTML and search_index.json assets directory.
+ *
+ * Resolution starts at the consuming workspace so this works in CommonJS,
+ * ESM, workspace links, and installed packages without relying on `__dirname`.
  */
 export function getProgrammaticTechDocsPath(): string {
-  // Resolves cleanly relative to the compiled root package layout
-  return path.resolve(__dirname, '../static-compiled');
+  const packageRequire = createRequire(path.resolve(process.cwd(), 'package.json'));
+  const packageManifest = packageRequire.resolve('@ai-crew-suite/fixtures-techdocs/package.json');
+
+  return path.resolve(path.dirname(packageManifest), 'static-compiled');
 }

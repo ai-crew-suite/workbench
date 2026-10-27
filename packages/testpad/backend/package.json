@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",
-    "@ai-crew-suite/workbench-frontend": "workspace:*",
+    "@ai-crew-suite/workbench-backend": "workspace:*",
     "@backstage/catalog-model": "backstage:^"
   },
   "devDependencies": {

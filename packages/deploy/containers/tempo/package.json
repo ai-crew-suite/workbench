@@ -1,0 +1,38 @@
+{
+  "name": "@ai-crew-suite/containers",
+  "description": "CI base harness images, deterministic testing infrastructure stacks, and mock control plane configurations for the AI Crew Suite platform",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "keywords": [
+    "agentic workflow",
+    "ai-crew-suite",
+    "docker",
+    "containers"
+  ],
+  "bugs": {
+    "url": "https://github.com/ai-crew-suite/workbench/issues",
+    "email": "support@ai-crew-suite.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai-crew-suite/workbench",
+    "directory": "packages/deploy/containers"
+  },
+  "scripts": {
+    "build": "./scripts/build.sh",
+    "image:build": "./scripts/build.sh",
+    "lint": "./scripts/lint.sh",
+    "image:lint": "./scripts/lint.sh",
+    "test": "./scripts/test-structure.sh && ./scripts/scan-security.sh && vitest run",
+    "image:test:structure": "./scripts/test-structure.sh",
+    "image:test:security": "./scripts/scan-security.sh",
+    "image:test:unit": "vitest run"
+  },
+  "devDependencies": {
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev",
+    "testcontainers": "catalog:dev",
+    "vitest": "catalog:dev"
+  }
+}

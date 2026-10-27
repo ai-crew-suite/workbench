@@ -13,3 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { defineConfig } from 'vitest/config';
+
+/**
+ * Vitest configuration for the container runtime integration suite.
+ *
+ * Every spec builds and boots real Docker images via Testcontainers, so test
+ * files run sequentially to avoid concurrent image builds, with a generous
+ * fallback timeout for tests that do not declare their own.
+ */
+export default defineConfig({
+  test: {
+    include: ['*/__tests__/*.spec.ts'],
+    environment: 'node',
+    testTimeout: 90_000,
+    hookTimeout: 90_000,
+    fileParallelism: false,
+  },
+});

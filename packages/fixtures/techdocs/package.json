@@ -34,12 +34,15 @@
     "clean": "rimraf dist static-compiled",
     "format": "crew format",
     "lint": "crew lint",
+    "test:unit": "crew test:unit",
+    "test:unit:coverage": "crew test:unit:coverage",
     "typecheck": "crew typecheck"
   },
   "devDependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",
     "@techdocs/cli": "catalog:dev",
     "rimraf": "catalog:dev",
-    "typescript": "catalog:dev"
+    "typescript": "catalog:dev",
+    "vitest": "catalog:dev"
   }
 }

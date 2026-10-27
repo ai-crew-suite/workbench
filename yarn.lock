@@ -233,6 +233,7 @@ __metadata:
     "@techdocs/cli": "catalog:dev"
     rimraf: "catalog:dev"
     typescript: "catalog:dev"
+    vitest: "catalog:dev"
   languageName: unknown
   linkType: soft
 
@@ -242,7 +243,7 @@ __metadata:
   dependencies:
     "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
-    "@ai-crew-suite/workbench-frontend": "workspace:*"
+    "@ai-crew-suite/workbench-backend": "workspace:*"
     "@backstage/catalog-model": "backstage:^"
   languageName: unknown
   linkType: soft
@@ -264,7 +265,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ai-crew-suite/workbench-backend@workspace:packages/backstage/backend":
+"@ai-crew-suite/workbench-backend@workspace:*, @ai-crew-suite/workbench-backend@workspace:packages/backstage/backend":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/workbench-backend@workspace:packages/backstage/backend"
   dependencies:
