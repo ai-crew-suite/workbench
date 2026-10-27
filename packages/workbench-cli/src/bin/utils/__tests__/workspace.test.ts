@@ -15,16 +15,25 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import fs from 'node:fs';
-import { findRepoRoot } from '../workspace';
+import { join } from 'node:path';
+
+// Hoisted mock rule to intercept child shell processes cleanly
+vi.mock('node:child_process', () => ({
+  spawnSync: vi.fn(),
+}));
+
+import { spawnSync } from 'node:child_process';
+import { findRepoRoot, discoverContainerTargets, hasBinary } from '../workspace';
 
 describe('Workspace Context Utilities Engine', () => {
   const mockCwd = '/home/user/repo/packages/my-package';
 
   beforeEach(() => {
-    // Lock process.cwd and cleanly spy on the native file system hooks
     vi.spyOn(process, 'cwd').mockReturnValue(mockCwd);
     vi.spyOn(fs, 'existsSync');
-    vi.spyOn(fs, 'readFileSync');
+    vi.spyOn(fs, 'readdirSync');
+    vi.spyOn(fs, 'statSync');
+    vi.mocked(spawnSync).mockReset();
   });
 
   afterEach(() => {
@@ -53,16 +62,90 @@ describe('Workspace Context Utilities Engine', () => {
     });
 
     it('should terminate cleanly and return the start directory when climbing hits the file system root boundary', () => {
-      // Simulate backstage.json never existing at any level of the file system
       vi.mocked(fs.existsSync).mockReturnValue(false);
 
-      // We trigger the execution from the actual host root folder ('/')
       const filesystemRoot = '/';
-
       const calculatedRoot = findRepoRoot(filesystemRoot);
 
-      // Guard assertion: It must exit immediately on the root match and safely return the fallback location context
       expect(calculatedRoot).toBe(filesystemRoot);
+    });
+  });
+
+  describe('discoverContainerTargets()', () => {
+    const fakeRepoRoot = '/home/user/repo';
+
+    it('should accurately return an empty map if search directories do not exist on the file system', () => {
+      vi.mocked(fs.existsSync).mockReturnValue(false);
+
+      const targets = discoverContainerTargets(fakeRepoRoot);
+      expect(targets.size).toBe(0);
+    });
+
+    it('should scan packages and correctly extract directories containing a Dockerfile', () => {
+      vi.mocked(fs.existsSync).mockImplementation((dirPath: unknown) => {
+        if (typeof dirPath === 'string') {
+          const normalized = dirPath.replace(/\\/g, '/');
+          return [
+            '/home/user/repo/packages',
+            '/home/user/repo/packages/auth-service',
+            '/home/user/repo/packages/deploy/containers'
+          ].some(p => normalized === p);
+        }
+        return false;
+      });
+
+      vi.mocked(fs.readdirSync).mockImplementation((dirPath: unknown) => {
+        if (typeof dirPath === 'string') {
+          const normalized = dirPath.replace(/\\/g, '/');
+          if (normalized === '/home/user/repo/packages') {
+            return ['auth-service', 'deploy'] as any;
+          }
+          if (normalized === '/home/user/repo/packages/auth-service') {
+            return ['Dockerfile', 'package.json'] as any;
+          }
+        }
+        return [] as any;
+      });
+
+      vi.mocked(fs.statSync).mockImplementation((itemPath: unknown) => {
+        if (typeof itemPath === 'string') {
+          const normalized = itemPath.replace(/\\/g, '/');
+          const isDir = [
+            '/home/user/repo/packages/auth-service',
+            '/home/user/repo/packages/packages/deploy'
+          ].some(p => normalized === p || normalized.startsWith(p));
+
+          return { isDirectory: () => isDir } as any;
+        }
+        return { isDirectory: () => false } as any;
+      });
+
+      const targets = discoverContainerTargets(fakeRepoRoot);
+
+      expect(targets.has('auth-service')).toBe(true);
+      expect(targets.get('auth-service')).toBe(join(fakeRepoRoot, 'packages/auth-service'));
+    });
+  });
+
+  describe('hasBinary()', () => {
+    it('should determine target system operating platform and leverage matching lookup selectors', () => {
+      vi.mocked(spawnSync).mockReturnValue({ status: 0 } as any);
+
+      // Explicitly forcing platform property tracking to verify command routing variables
+      Object.defineProperty(process, 'platform', { value: 'linux', writable: true });
+      expect(hasBinary('hadolint')).toBe(true);
+      expect(spawnSync).toHaveBeenCalledWith('which', ['hadolint'], { stdio: 'ignore' });
+
+      Object.defineProperty(process, 'platform', { value: 'win32', writable: true });
+      expect(hasBinary('hadolint')).toBe(true);
+      expect(spawnSync).toHaveBeenCalledWith('where', ['hadolint'], { stdio: 'ignore' });
+    });
+
+    it('should return false if the child status evaluation yields a non-zero exit state code', () => {
+      vi.mocked(spawnSync).mockReturnValue({ status: 1 } as any);
+      Object.defineProperty(process, 'platform', { value: 'linux', writable: true });
+
+      expect(hasBinary('invalid-binary')).toBe(false);
     });
   });
 });

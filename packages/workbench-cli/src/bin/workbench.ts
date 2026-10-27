@@ -60,7 +60,17 @@ program
   .command(
     'image:build',
     'Build and package monorepo container targets',
-    createCommandOpts('images-build'),
+    createCommandOpts('image-build'),
+  )
+  .command(
+    'image:lint',
+    'Perform static analysis on Dockerfile targets using hadolint',
+    createCommandOpts('image-lint'),
+  )
+  .command(
+    'image:test-structure',
+    'Execute declarative container structure tests using configuration blueprints',
+    createCommandOpts('image-test-structure'),
   );
 
 program.parse(process.argv);

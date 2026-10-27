@@ -21,10 +21,8 @@
     "directory": "packages/deploy/containers/temporal"
   },
   "scripts": {
-    "build": "./scripts/build.sh",
-    "image:build": "./scripts/build.sh",
-    "lint": "./scripts/lint.sh",
-    "image:lint": "./scripts/lint.sh",
+    "build": "workbench image:build",
+    "lint": "workbench image:lint",
     "test": "./scripts/test-structure.sh && ./scripts/scan-security.sh && vitest run",
     "image:test:structure": "./scripts/test-structure.sh",
     "image:test:security": "./scripts/scan-security.sh",

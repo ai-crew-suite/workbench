@@ -5,23 +5,18 @@
     "build": {
       "cache": true,
       "dependsOn": [],
-      "inputs": ["src/**", "package.json"],
+      "inputs": ["src/**", "package.json", "rollup.config.ts", "tsconfig.json"],
       "outputs": ["dist/**"]
     },
     /**
-     * Crew CLI's own clean removes dist/, which is where the `crew` bin shim
-     * that all sibling packages' `crew clean` scripts execute lives. It must
-     * wait until every sibling clean task has completed to avoid a race that
-     * fails them with MODULE_NOT_FOUND.
+     * No ordering constraints are needed currently: sibling packages' `crew`
+     * scripts resolve to the published @ai-crew-suite/crew-cli in node_modules,
+     * and no consumer of this package's `workbench` dist bin defines a clean
+     * task, so nothing races against `rimraf dist`.
      */
     "clean": {
       "cache": false,
-      "dependsOn": [
-        "@ai-crew-suite/backstage-config-typegen#clean",
-        "@ai-crew-suite/renovate-shared-config#clean",
-        "@ai-crew-suite/typescript-shared-config#clean",
-        "@ai-crew-suite/yarn-plugin-custom-add#clean"
-      ]
+      "dependsOn": []
     },
     "lint": {
       "cache": true,

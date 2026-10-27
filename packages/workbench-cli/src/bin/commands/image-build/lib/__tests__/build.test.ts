@@ -24,7 +24,8 @@ vi.mock('node:child_process', () => ({
 
 import { spawnSync } from 'node:child_process';
 import { setupOrchestratorTestContext } from '../../../../utils/test-utils';
-import { runImagesBuild, discoverContainerTargets } from '../build';
+import { discoverContainerTargets } from '../../../../utils/workspace';
+import { runImagesBuild } from '../build';
 
 function writeJson(filePath: string, value: unknown): void {
   writeFileSync(filePath, JSON.stringify(value, null, 2), 'utf8');

@@ -13,57 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// packages/workbench-cli/src/bin/commands/images-build/lib/build.ts
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import chalk from 'chalk';
-import { findRepoRoot } from '../../../utils/workspace';
+import { discoverContainerTargets, findRepoRoot } from '../../../utils/workspace';
 
 export interface BuildOptions {
   target?: string;
   registry: string;
   imageTag: string;
-}
-
-/**
- * Discovers container directories by looking for folders that contain a Dockerfile
- */
-export function discoverContainerTargets(repoRoot: string): Map<string, string> {
-  const targets = new Map<string, string>();
-
-  const searchPaths = [
-    path.join(repoRoot, 'packages/deploy/containers'),
-    path.join(repoRoot, 'packages'),
-  ];
-
-  function scan(dir: string) {
-    if (!fs.existsSync(dir)) return;
-    const files = fs.readdirSync(dir);
-
-    if (files.includes('Dockerfile') && !dir.includes('node_modules')) {
-      const name = path.basename(dir);
-      targets.set(name, dir);
-      return;
-    }
-
-    for (const file of files) {
-      const fullPath = path.join(dir, file);
-      if (
-        fs.statSync(fullPath).isDirectory() &&
-        !file.startsWith('.') &&
-        file !== 'node_modules' &&
-        file !== 'dist' &&
-        file !== 'scripts' &&
-        file !== '__tests__'
-      ) {
-        scan(fullPath);
-      }
-    }
-  }
-
-  searchPaths.forEach(scan);
-  return targets;
 }
 
 /**
