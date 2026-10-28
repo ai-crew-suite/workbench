@@ -11,7 +11,9 @@
     "REGISTRY",
     "IMAGE_TAG",
     "COSIGN_PASSWORD",
-    "COSIGN_PRIVATE_KEY"
+    "COSIGN_PRIVATE_KEY",
+    "DOCKER_HUB_USERNAME",
+    "DOCKER_HUB_TOKEN"
   ],
   "tasks": {
     // Global root-level task

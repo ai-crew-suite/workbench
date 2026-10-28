@@ -23,11 +23,11 @@
     "directory": "packages/containers/otel"
   },
   "scripts": {
-    "build": "workbench image:build temporal-container",
-    "lint": "workbench image:lint temporal-container",
-    "image:test:security": "workbench image:test:security temporal-container",
-    "image:test:structure": "workbench image:test:structure temporal-container",
-    "publish": "workbench image:publish temporal-container",
+    "build": "workbench image:build otel-container",
+    "lint": "workbench image:lint otel-container",
+    "image:test:security": "workbench image:test:security otel-container",
+    "image:test:structure": "workbench image:test:structure otel-container",
+    "publish": "workbench image:publish otel-container",
     "test": "yarn image:test:security && yarn image:test:structure && yarn test:unit",
     "test:unit": "vitest run"
   },

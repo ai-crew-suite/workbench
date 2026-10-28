@@ -13,11 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { describe, it, expect, vi } from 'vitest';
-import { DockerService } from '../docker-service.js';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { readFileSync } from 'node:fs';
 import type Docker from 'dockerode';
 
+vi.mock('node:os', () => ({ homedir: vi.fn(() => '/home/test-user') }));
+
+vi.mock('node:fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:fs')>();
+  return { ...actual, readFileSync: vi.fn() };
+});
+
+import { DockerService } from '../docker-service.js';
+
+const basicAuth = (pair: string) => Buffer.from(pair).toString('base64');
+
 describe('DockerService Unit Suite', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.unstubAllEnvs();
+  });
   it('tagImage should extract strings correctly and execute tag commands', async () => {
     const mockImage = {
       tag: vi.fn().mockResolvedValue(undefined),
@@ -84,6 +99,45 @@ describe('DockerService Unit Suite', () => {
     await expect(service.pushImage('localhost:32443/ai-crew-suite/grafana:latest'))
       .rejects
       .toThrow('Remote registry push stream failed');
+  });
+
+  it('pushImage should forward registry credentials from the docker CLI configuration for remote registries', async () => {
+    vi.mocked(readFileSync).mockReturnValue(
+      JSON.stringify({
+        auths: {
+          'https://index.docker.io/v1/': { auth: basicAuth('hub-user:hub-token') },
+          'ghcr.io': { auth: basicAuth('gh-bot:ghcr-token') },
+        },
+      })
+    );
+
+    const mockImage = {
+      push: vi.fn().mockResolvedValue({}),
+      inspect: vi.fn(),
+    };
+    const mockDockerInstance = {
+      getImage: vi.fn().mockReturnValue(mockImage),
+      modem: {
+        followProgress: vi.fn((stream, onFinished, onProgress) => {
+          onProgress({ status: `latest: digest: sha256:${'deadbeef'.repeat(8)} size: 2003` });
+          onFinished(null, []);
+        }),
+      },
+    } as unknown as Docker;
+
+    const service = new DockerService(mockDockerInstance);
+
+    await service.pushImage('ghcr.io/ai-crew-suite/workbench/grafana-container:latest');
+
+    expect(mockImage.push).toHaveBeenCalledWith(
+      expect.objectContaining({
+        authconfig: expect.objectContaining({
+          username: 'gh-bot',
+          password: 'ghcr-token',
+          serveraddress: 'https://ghcr.io',
+        }),
+      })
+    );
   });
 
   it('pushImage should throw a declarative error if the push stream contains no digest frame', async () => {

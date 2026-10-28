@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import Docker from 'dockerode';
+import { registryHostFromImageReference, resolveRegistryAuth } from '../../../utils/docker-auth.js';
 
 export class DockerService {
   private docker: Docker;
@@ -50,7 +51,11 @@ export class DockerService {
    */
   async pushImage(targetTag: string): Promise<string> {
     const image = this.docker.getImage(targetTag);
-    const stream = await image.push({});
+    // Forward registry credentials (docker CLI config or DOCKER_HUB_* overrides) so
+    // GHCR distribution pushes authenticate; anonymous local registries resolve no
+    // credentials and stay unauthenticated.
+    const authconfig = resolveRegistryAuth(registryHostFromImageReference(targetTag));
+    const stream = await image.push(authconfig ? { authconfig } : {});
 
     let remoteDigest: string | undefined;
     let streamError: string | undefined;
