@@ -77,6 +77,26 @@ describe('Docker Registry Authentication Resolution Suite', () => {
     });
   });
 
+  it('should never let stray Docker Desktop token entries shadow the canonical Docker Hub entry', () => {
+    vi.mocked(readFileSync).mockReturnValue(
+      JSON.stringify({
+        auths: {
+          // Stray entries normalized to a Docker Hub host; ordered FIRST to prove
+          // canonical entry selection does not depend on key ordering
+          'https://index.docker.io/v1/access-token': { auth: basicAuth('stray-token-user:stray-secret') },
+          'https://index.docker.io/v1/refresh-token': { auth: basicAuth('stray-refresh-user:stray-secret') },
+          'https://index.docker.io/v1/': { auth: basicAuth('hub-user:hub-token') },
+        },
+      })
+    );
+
+    expect(resolveRegistryAuth('docker.io')).toEqual({
+      username: 'hub-user',
+      password: 'hub-token',
+      serveraddress: 'https://index.docker.io/v1/',
+    });
+  });
+
   it('should return undefined for unauthenticated local registries', () => {
     vi.mocked(readFileSync).mockReturnValue(
       JSON.stringify({ auths: { 'ghcr.io': { auth: basicAuth('gh-bot:ghcr-token') } } })

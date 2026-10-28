@@ -70,6 +70,23 @@ function normalizeRegistryHost(entryKey: string): string {
 }
 
 /**
+ * Canonical Docker Hub API version paths accepted inside configuration `auths`
+ * entry keys. Stray Docker Desktop token entries (e.g. `.../v1/access-token`)
+ * normalize to a Docker Hub host and must never shadow the canonical entry
+ * regardless of key ordering inside the configuration file.
+ */
+const DOCKER_HUB_ENTRY_PATHS = new Set(['', 'v1']);
+
+/**
+ * Extracts the URL path segment from a configuration `auths` entry key such as
+ * `https://index.docker.io/v1/` → `v1`, or `ghcr.io` → `''`.
+ */
+function registryEntryPath(entryKey: string): string {
+  const stripped = entryKey.replace(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//, '');
+  return stripped.split('/').slice(1).join('/').replace(/\/+$/, '');
+}
+
+/**
  * Decodes a base64 `username:password` pair stored in a docker config auths entry.
  */
 function decodeBasicAuth(auth: string): { username: string; password: string } | undefined {
@@ -129,7 +146,12 @@ export function resolveRegistryAuth(
 
   for (const [entryKey, entry] of Object.entries(config.auths ?? {})) {
     const entryHost = normalizeRegistryHost(entryKey);
-    const hostMatches = isDockerHub ? DOCKER_HUB_ALIASES.has(entryHost) : entryHost === host;
+    // Docker Hub lookups accept only canonical API entry paths so stray token
+    // entries never shadow valid credentials; other hosts match exactly.
+    const entryPath = registryEntryPath(entryKey);
+    const hostMatches = isDockerHub
+      ? DOCKER_HUB_ALIASES.has(entryHost) && DOCKER_HUB_ENTRY_PATHS.has(entryPath)
+      : entryHost === host;
     if (!hostMatches) continue;
 
     if (entry.identitytoken) {
