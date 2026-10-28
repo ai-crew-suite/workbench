@@ -2,7 +2,7 @@ schemaVersion: "2.0.0"
 
 metadataTest:
   exposedPorts: ["9090"]
-  user: "65534" # Explicit numeric fallback matching the 'nobody' user ID
+  user: "nobody"
   workdir: "/prometheus"
 
 fileExistenceTests:

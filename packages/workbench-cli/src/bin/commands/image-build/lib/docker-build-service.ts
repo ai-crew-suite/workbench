@@ -18,7 +18,7 @@ import chalk from 'chalk';
 import { resolveRegistryAuth } from '../../../utils/docker-auth.js';
 
 export interface BuildEngineOptions {
-  t: string;
+  t: string; // Image tag
   dockerfile: string;
   labels: Record<string, string>;
 }
@@ -53,13 +53,15 @@ export class DockerBuildService {
     await new Promise<void>((resolve, reject) => {
       this.docker.modem.followProgress(
         outputStream,
-        (err, res) => (err ? reject(err) : resolve()),
+        (err, _) => (err ? reject(err) : resolve()),
         (event: any) => {
           if (event.errorDetail || event.error) {
             // Surface error frames as declarative build failures instead of
             // mirroring them to stderr and reporting a false success
             const message = event.errorDetail?.message ?? event.error;
+
             process.stderr.write(chalk.red(String(message)));
+
             reject(new Error(`Docker build stream failed: ${message}`));
           } else if (event.stream) {
             process.stdout.write(event.stream);
@@ -82,6 +84,7 @@ export class DockerBuildService {
   async pushImage(imageTag: string): Promise<void> {
     const image = this.docker.getImage(imageTag);
     const stream = (await image.push({})) as unknown as NodeJS.ReadableStream;
+
     await new Promise<void>((resolve, reject) => {
       this.docker.modem.followProgress(stream, (err, res) => (err ? reject(err) : resolve()));
     });

@@ -40,7 +40,7 @@ function resolveTestImageContext(): string {
 describe('Prometheus Container Structure Suite', () => {
   it('should pass all configuration file structure assertions', () => {
     const targetImage = resolveTestImageContext();
-    const configPath = path.resolve(__dirname, './prometheus.yaml');
+    const configPath = path.resolve(__dirname, './prometheus.cst.yaml');
 
     try {
       // Execute the structural structure testing harness matching the platform design pattern

@@ -2,8 +2,8 @@ schemaVersion: "2.0.0"
 
 metadataTest:
   exposedPorts: ["3200"]
-  user: "10001"
-  workdir: "/etc/tempo"
+  user: "10001:10001"
+  workdir: "/"
 
 fileExistenceTests:
   - name: "Verify Decentralized Storage Optimization Profile Present"

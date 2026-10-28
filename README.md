@@ -30,6 +30,26 @@ ai-crew-suite/infra/
 │   └── mock-service/                    # In-memory browser network traffic interceptor (MSW)
 ```
 
+## 💻 Windows Prerequisites (WSL 2 Mandatory)
+
+Native Windows (PowerShell, Command Prompt, or Git Bash) is **not supported** due to shell script compatibility and multi-container Docker volume performance. 
+
+To set up your environment:
+
+1. Open PowerShell as Administrator and install WSL 2 with Ubuntu:
+
+```powershell
+wsl --install -d Ubuntu
+```
+
+2. Restart your computer when prompted.
+3. Open the **Ubuntu** application from your Windows Start Menu and complete the Unix username/password setup.
+4. Download and install [Docker Desktop for Windows](https://docker.com).
+5. Open Docker Desktop settings, navigate to **General**, and ensure **Use the WSL 2 based engine** is checked.
+6. Navigate to **Resources > WSL Integration**, and toggle on **Ubuntu**.
+
+From this point forward, **always** clone this repository and run all commands inside your Ubuntu terminal window.
+
 ## 🚀 Local Development Quickstart
 
 ### 1. Initialize the Monorepo Workspace
@@ -172,7 +192,7 @@ test.describe('Agentic Error Resolution Interface Checks', () => {
     // 2. Drive the UI with Playwright
     await page.goto('/agents/incident-dashboard');
     const alertBanner = page.locator('[data-testid="error-alert"]');
-    
+
     await expect(alertBanner).toBeVisible();
     await expect(alertBanner).toContainText('PagerDuty link degraded');
   });

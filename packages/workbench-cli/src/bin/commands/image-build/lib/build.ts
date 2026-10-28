@@ -35,16 +35,24 @@ export class ImageBuilder {
   async executeCleanup(repoRoot: string, targetName: string): Promise<void> {
     const prunedDir = join(repoRoot, `out-${targetName}`);
 
-    console.log(chalk.gray(`\n🧹 Sweeping up temporary build directories for ${targetName}...`));
+    console.log(chalk.gray(
+      `\n🧹 Sweeping up temporary build directories for ${targetName}...`
+    ));
+
     if (existsSync(prunedDir)) {
       rmSync(prunedDir, { recursive: true, force: true });
     }
 
-    console.log(chalk.gray('✂️ Pruning dangling Docker images over Unix socket connection...'));
+    console.log(chalk.gray(
+      '✂️ Pruning dangling Docker images over Unix socket connection...'
+    ));
+
     try {
       await this.buildService.pruneImages();
     } catch (error) {
-      console.warn(chalk.yellow('⚠️ Unable to prune dangling images; continuing without image cleanup:'), error);
+      console.warn(chalk.yellow(
+        '⚠️ Unable to prune dangling images; continuing without image cleanup:'
+      ), error);
     }
   }
 
@@ -61,6 +69,7 @@ export class ImageBuilder {
       const pkgJsonPath = join(targetDir, 'package.json');
       if (existsSync(pkgJsonPath)) {
         const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
+
         if (pkg.description) pkgDescription = pkg.description;
         if (pkg.license) pkgLicense = pkg.license;
         if (pkg.name) pkgTitle = pkg.name;
@@ -95,7 +104,9 @@ export class ImageBuilder {
     const labels = this.resolveMetadataLabels(targetName, targetDir);
 
     try {
-      console.log(`\n📦 [${chalk.blue(targetName)}] Stream-packing build context to Docker Engine...`);
+      console.log(
+        `\n📦 [${chalk.blue(targetName)}] Stream-packing build context to Docker Engine...`
+      );
 
       // Compress workspace on the fly using a streaming layout to match build context conventions
       const contextStream = tar.c(
@@ -112,10 +123,15 @@ export class ImageBuilder {
         labels,
       });
 
-      console.log(chalk.green(`\n✅ ${targetName} image compiled successfully as: ${fullImageTag}`));
+      console.log(chalk.green(
+        `\n✅ ${targetName} image compiled successfully as: ${fullImageTag}`
+      ));
 
       if (isCI) {
-        console.log(chalk.blue(`🚀 CI context detected. Out-of-band streaming push triggered for: ${fullImageTag}`));
+        console.log(chalk.blue(
+          `🚀 CI context detected. Out-of-band streaming push triggered for: ${fullImageTag}`
+        ));
+
         await this.buildService.pushImage(fullImageTag);
       }
     } finally {
@@ -134,17 +150,29 @@ export class ImageBuilder {
       const targetDir = validTargets.get(options.target);
 
       if (!targetDir) {
-        console.error(chalk.red(`\n❌ Error: Invalid or unreachable target package '${options.target}'.`));
-        console.error(`👉 Available options inside workspace: ${chalk.cyan([...validTargets.keys()].join(', '))}\n`);
+        console.error(chalk.red(
+          `\n❌ Error: Invalid or unreachable target package '${options.target}'.`
+        ));
+
+        console.error(
+          `👉 Available options inside workspace: ${chalk.cyan([...validTargets.keys()].join(', '))}\n`
+        );
+
         throw new Error(`Target tracking mapping failure for ${options.target}`);
       }
 
       await this.compileImage(repoRoot, options.target, targetDir, options);
+
     } else {
-      console.log(chalk.blue('🔄 No explicit target provided. Initiating a full structural build cascade...\n'));
+      console.log(chalk.blue(
+        '🔄 No explicit target provided. Initiating a full structural build cascade...\n'
+      ));
 
       for (const [targetName, targetDir] of validTargets.entries()) {
-        console.log(chalk.bold(`\n🔨 Triggering build process for: ${chalk.yellow(targetName)}`));
+        console.log(chalk.bold(
+          `\n🔨 Triggering build process for: ${chalk.yellow(targetName)}`
+        ));
+
         await this.compileImage(repoRoot, targetName, targetDir, options);
       }
     }

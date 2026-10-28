@@ -4,13 +4,6 @@
     "check": {
       "cache": false
     },
-    "compose:up": {
-      "cache": false,
-      "persistent": true
-    },
-    "compose:down": {
-      "cache": false
-    },
     "compose:logs": {
       "cache": false
     },

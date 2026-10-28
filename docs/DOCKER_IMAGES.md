@@ -381,11 +381,37 @@ resource "helm_release" "app" {
 }
 ```
 
-## Mandate WSL 2 with Ubuntu
+## Windows Users: Mandate WSL 2 with Ubuntu
 
 To **mandate WSL 2 with Ubuntu**, you cannot programmatically lock a user's operating system, but you can configure your repository's environment check to fail immediately with a clear error message if a Windows developer attempts to run your workbench tools outside of a proper Linux environment.
 
 Here is how you can implement this barrier via **documentation, environment gating, and terminal assertions**.
+
+### Documentation Blueprint for Windows Users
+
+To make the onboarding friction as low as possible, your repository's `README.md` should have a dedicated, copy-pasteable installation block specifically for Windows users.
+
+```markdown
+## 💻 Windows Prerequisites (WSL 2 Mandatory)
+
+Native Windows (PowerShell, Command Prompt, or Git Bash) is **not supported** due to shell script compatibility and multi-container Docker volume performance. 
+
+To set up your environment:
+
+1. Open PowerShell as Administrator and install WSL 2 with Ubuntu:
+
+\`\`\`powershell
+wsl --install -d Ubuntu
+\`\`\`
+
+2. Restart your computer when prompted.
+3. Open the **Ubuntu** application from your Windows Start Menu and complete the Unix username/password setup.
+4. Download and install [Docker Desktop for Windows](https://docker.com).
+5. Open Docker Desktop settings, navigate to **General**, and ensure **Use the WSL 2 based engine** is checked.
+6. Navigate to **Resources > WSL Integration**, and toggle on **Ubuntu**.
+
+From this point forward, **always** clone this repository and run all commands inside your Ubuntu terminal window.
+```
 
 ### The Environment Gate (Fail Early in Tooling)
 
@@ -427,55 +453,6 @@ try {
 } catch (e) {
   // Not a WSL/Linux system
 }
-```
-
-### The Devcontainer Path (The Bulletproof Approach)
-
-The absolute best way to "mandate" WSL 2 seamlessly for Windows developers (while also helping Mac users) is to provide a `.devcontainer/devcontainer.json` file in your repository.
-
-When a Windows developer clones your repository using **VS Code**, VS Code will detect this file and display a prompt: *"Reopen in Container"* or *"Reopen in WSL"*.
-
-```json
-{
-  "name": "Workbench Dev Environment",
-  "image": "://microsoft.com",
-  "features": {
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {} // Connects local Docker
-  },
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-azuretools.vscode-docker"
-      ]
-    }
-  }
-}
-```
-
-**Why this works:** To use Devcontainers on Windows, VS Code natively forces the user to install WSL 2 and Ubuntu behind the scenes. It automates your environment mandate for you through IDE tooling.
-
-### Documentation Blueprint for Windows Users
-
-To make the onboarding friction as low as possible, your repository's `README.md` should have a dedicated, copy-pasteable installation block specifically for Windows users.
-
-```markdown
-## 💻 Windows Prerequisites (WSL 2 Mandatory)
-
-Native Windows (PowerShell, Command Prompt, or Git Bash) is **not supported** due to shell script compatibility and multi-container Docker volume performance. 
-
-To set up your environment:
-
-1. Open PowerShell as Administrator and install WSL 2 with Ubuntu:
-   ```powershell
-   wsl --install -d Ubuntu
-```
-2. Restart your computer when prompted.
-3. Open the **Ubuntu** application from your Windows Start Menu and complete the Unix username/password setup.
-4. Download and install [Docker Desktop for Windows](https://docker.com).
-5. Open Docker Desktop settings, navigate to **General**, and ensure **Use the WSL 2 based engine** is checked.
-6. Navigate to **Resources > WSL Integration**, and toggle on **Ubuntu**.
-
-From this point forward, **always** clone this repository and run all commands inside your Ubuntu terminal window.
 ```
 
 ### Block Execution on Native Windows
@@ -549,15 +526,19 @@ Hook this script into whichever commands the developers run locally. By prefixin
 }
 ```
 
-## The VS Code Devcontainer Setup
+### The VS Code Devcontainer Setup
 
-To remove manual friction entirely, you can supply a `.devcontainer` configuration. When a Windows developer opens the repo in VS Code, the IDE detects this directory and safely provisions an isolated Linux workspace that mounts directly into their Windows Docker engine.
+The absolute best way to "mandate" WSL 2 seamlessly for Windows developers (while also helping Mac users) is to provide a `.devcontainer/devcontainer.json` file in your repository.
 
-### Create a `.devcontainer` directory
+When a Windows developer clones your repository using **VS Code**, VS Code will detect this file and display a prompt: *"Reopen in Container"* or *"Reopen in WSL"*.
+
+**Why this works:** To use Devcontainers on Windows, VS Code natively forces the user to install WSL 2 and Ubuntu behind the scenes. It automates your environment mandate for you through IDE tooling.
+
+#### Create a `.devcontainer` directory
 
 Inside your project root, create a directory named `.devcontainer`. Inside it, create two files: `devcontainer.json` and a `Dockerfile`.
 
-### `.devcontainer/Dockerfile`
+#### `.devcontainer/Dockerfile`
 
 This ensures the environment running inside the Devcontainer has Docker installed so it can talk to the host machine's Docker engine (Docker-outside-of-Docker).
 
@@ -571,7 +552,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 ```
 
-### `.devcontainer/devcontainer.json`
+#### `.devcontainer/devcontainer.json`
 
 This instructs VS Code how to boot the environment, share the host's Docker socket daemon securely, and auto-install useful extensions.
 
@@ -608,12 +589,3 @@ This instructs VS Code how to boot the environment, share the host's Docker sock
   "remoteUser": "node"
 }
 ```
-
-## The Windows Developer Flow (End Result)
-
-1. **The Guardrail:** If they blindly pull the repo into Windows PowerShell and type `npm run dev`, the script blocks them immediately, keeping them from running into obscure, broken Docker volume or syntax errors.
-2. **The Golden Path:** If they open the repo in VS Code, a notification pops up: *"Folder contains a Dev Container configuration. Reopen in Container"*. Clicking it instantly drops them into a customized Linux shell where `my-dev-env up` runs perfectly out of the box, completely bypassing Windows host filesystem limits.
-
-To prevent developers from losing their **pgvector** data, Temporal schemas, or Redis keys when running commands like `my-dev-env down`, you need to configure **named volumes** in your centralized master `docker-compose.yml` file.
-
-The trick here is balancing **local persistence** (so data survives on a developer's laptop) with **isolated project scoping** (so that if a developer switches from `repo-a` to `repo-b`, their database states don't collide and corrupt each other).
