@@ -4,6 +4,9 @@
     "check": {
       "cache": false
     },
+    "lint": {
+      "dependsOn": ["check"]
+    },
     "compose:logs": {
       "cache": false
     },

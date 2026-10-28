@@ -42,6 +42,9 @@
     {
       "path": "./packages/deploy/containers/temporal"
     },
+      {
+      "path": "./packages/deploy/containers/wiremock"
+    },
     {
       "path": "./packages/deploy/kubernetes"
     },

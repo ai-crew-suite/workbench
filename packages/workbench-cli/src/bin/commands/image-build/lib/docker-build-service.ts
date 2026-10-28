@@ -86,7 +86,7 @@ export class DockerBuildService {
     const stream = (await image.push({})) as unknown as NodeJS.ReadableStream;
 
     await new Promise<void>((resolve, reject) => {
-      this.docker.modem.followProgress(stream, (err, res) => (err ? reject(err) : resolve()));
+      this.docker.modem.followProgress(stream, (err, _res) => (err ? reject(err) : resolve()));
     });
   }
 }

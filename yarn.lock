@@ -19,23 +19,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ai-crew-suite/backend-container@workspace:packages/deploy/containers/backend":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/backend-container@workspace:packages/deploy/containers/backend"
-  dependencies:
-    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
-    "@ai-crew-suite/workbench-cli": "workspace:^"
-    vitest: "catalog:dev"
-  languageName: unknown
-  linkType: soft
-
 "@ai-crew-suite/compose@workspace:packages/deploy/compose":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/compose@workspace:packages/deploy/compose"
   dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
-    "@ai-crew-suite/workbench-frontend": "workspace:*"
+    "@ai-crew-suite/workbench-cli": "workspace:^"
   languageName: unknown
   linkType: soft
 
@@ -237,16 +226,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ai-crew-suite/frontend-container@workspace:packages/deploy/containers/frontend":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/frontend-container@workspace:packages/deploy/containers/frontend"
-  dependencies:
-    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
-    "@ai-crew-suite/workbench-cli": "workspace:^"
-    vitest: "catalog:dev"
-  languageName: unknown
-  linkType: soft
-
 "@ai-crew-suite/grafana-container@workspace:packages/deploy/containers/grafana":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/grafana-container@workspace:packages/deploy/containers/grafana"
@@ -335,6 +314,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ai-crew-suite/wiremock-container@workspace:packages/deploy/containers/wiremock":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/wiremock-container@workspace:packages/deploy/containers/wiremock"
+  dependencies:
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    "@ai-crew-suite/workbench-cli": "workspace:^"
+    vitest: "catalog:dev"
+  languageName: unknown
+  linkType: soft
+
 "@ai-crew-suite/workbench-backend@workspace:*, @ai-crew-suite/workbench-backend@workspace:packages/backstage/backend":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/workbench-backend@workspace:packages/backstage/backend"
@@ -361,6 +350,7 @@ __metadata:
     "@types/node": "catalog:dev"
     chalk: "catalog:prod"
     commander: "catalog:prod"
+    dclint: "catalog:prod"
     dockerode: "catalog:prod"
     dotenv: "catalog:prod"
     glob: "catalog:dev"
@@ -12114,7 +12104,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8.0.0, ajv@npm:^8.0.1, ajv@npm:^8.10.0, ajv@npm:^8.11.0, ajv@npm:^8.12.0, ajv@npm:^8.18.0, ajv@npm:^8.20.0, ajv@npm:^8.9.0":
+"ajv@npm:^8.0.0, ajv@npm:^8.0.1, ajv@npm:^8.10.0, ajv@npm:^8.11.0, ajv@npm:^8.12.0, ajv@npm:^8.17.1, ajv@npm:^8.18.0, ajv@npm:^8.20.0, ajv@npm:^8.9.0":
   version: 8.20.0
   resolution: "ajv@npm:8.20.0"
   dependencies:
@@ -14208,6 +14198,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cosmiconfig@npm:^9.0.0":
+  version: 9.0.2
+  resolution: "cosmiconfig@npm:9.0.2"
+  dependencies:
+    env-paths: "npm:^2.2.1"
+    import-fresh: "npm:^3.3.0"
+    js-yaml: "npm:^4.1.0"
+    parse-json: "npm:^5.2.0"
+  peerDependencies:
+    typescript: ">=4.9.5"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10c0/132d32863c0b3d9ace7010a10011e09089532b36e3b11e02004d671dcbd8b8f2f16293b82d510d9c15890f30358baf8722127c7b1c011449c90b6a178f9c6594
+  languageName: node
+  linkType: hard
+
 "cpu-features@npm:~0.0.10":
   version: 0.0.10
   resolution: "cpu-features@npm:0.0.10"
@@ -14760,6 +14767,21 @@ __metadata:
   version: 3.0.3
   resolution: "dateformat@npm:3.0.3"
   checksum: 10c0/2effb8bef52ff912f87a05e4adbeacff46353e91313ad1ea9ed31412db26849f5a0fcc7e3ce36dbfb84fc6c881a986d5694f84838ad0da7000d5150693e78678
+  languageName: node
+  linkType: hard
+
+"dclint@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "dclint@npm:3.1.0"
+  dependencies:
+    ajv: "npm:^8.17.1"
+    cosmiconfig: "npm:^9.0.0"
+    picocolors: "npm:^1.1.1"
+    yaml: "npm:^2.8.0"
+    yargs: "npm:^18.0.0"
+  bin:
+    dclint: bin/dclint.cjs
+  checksum: 10c0/56dab99e961a36e6d30d5909e0d5b135f06fc54831432f63006f6e4865195709485c19ae24642d9bd21924729e042b5e2a38a78dbed6fb315ed8c9728af87df7
   languageName: node
   linkType: hard
 
@@ -15441,7 +15463,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"env-paths@npm:^2.2.0":
+"env-paths@npm:^2.2.0, env-paths@npm:^2.2.1":
   version: 2.2.1
   resolution: "env-paths@npm:2.2.1"
   checksum: 10c0/285325677bf00e30845e330eec32894f5105529db97496ee3f598478e50f008c5352a41a30e5e72ec9de8a542b5a570b85699cd63bd2bc646dbcb9f311d83bc4
@@ -29576,7 +29598,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yaml@npm:^2.0.0, yaml@npm:^2.2.2, yaml@npm:^2.3.1, yaml@npm:^2.9.0":
+"yaml@npm:^2.0.0, yaml@npm:^2.2.2, yaml@npm:^2.3.1, yaml@npm:^2.8.0, yaml@npm:^2.9.0":
   version: 2.9.1
   resolution: "yaml@npm:2.9.1"
   bin:
@@ -29636,7 +29658,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs@npm:^18.2.0":
+"yargs@npm:^18.0.0, yargs@npm:^18.2.0":
   version: 18.2.0
   resolution: "yargs@npm:18.2.0"
   dependencies:

@@ -1,5 +1,11 @@
 name: workbench
 
+x-healthcheck: &healthcheck
+  interval: 5s
+  timeout: 3s
+  retries: 12
+  start_period: 10s
+
 x-postgres-credentials: &postgres-credentials
   POSTGRES_DB: "${POSTGRES_DB:-postgres_workbench}"
   POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-postgres_secret_pass}"
@@ -10,17 +16,9 @@ x-postgres-env: &postgres-env
   POSTGRES_HOST: pgvector
   POSTGRES_PORT: "5432"
 
-x-healthcheck: &healthcheck
-  interval: 5s
-  timeout: 3s
-  retries: 12
-  start_period: 10s
-
 services:
   grafana:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-grafana:${IMAGE_TAG:-latest}
-    ports:
-      - "127.0.0.1:${GRAFANA_PORT:-3001}:3000"
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/grafana-container:${IMAGE_TAG:-latest}
     depends_on:
       prometheus:
         condition: service_healthy
@@ -31,27 +29,17 @@ services:
     environment:
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3001}:3000"
     healthcheck:
       <<: *healthcheck
-      test:
-        [
-          CMD,
-          curl,
-          --fail,
-          --silent,
-          --show-error,
-          http://127.0.0.1:3000/api/health,
-        ]
+      test: [CMD, curl, --fail, --silent, --show-error, http://127.0.0]
 
   mem0:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-mem0:${IMAGE_TAG:-latest}
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/mem0-container:${IMAGE_TAG:-latest}
     depends_on:
       pgvector:
         condition: service_healthy
-    networks:
-      default:
-        aliases:
-          - mem0-service
     environment:
       <<: *postgres-env
       MEM0_EMBEDDER_MODEL: "${MEM0_EMBEDDER_MODEL:-text-embedding-3-small}"
@@ -61,21 +49,25 @@ services:
       MEM0_LLM_PROVIDER: "${MEM0_LLM_PROVIDER:-openai}"
       MEM0_LLM_TEMPERATURE: "${MEM0_LLM_TEMPERATURE:-0.1}"
       MEM0_PROVIDER_API_KEY: "${MEM0_PROVIDER_API_KEY:-}"
+    networks:
+      default:
+        aliases:
+          - mem0-service
     healthcheck:
       <<: *healthcheck
       test: [CMD, nc, -z, 127.0.0.1, "8000"]
 
   otel-collector:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-otel-collector:${IMAGE_TAG:-latest}
-    command: ["--config=/etc/otel-collector-config.yaml"]
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/otel-container:${IMAGE_TAG:-latest}
     depends_on:
       tempo:
         condition: service_started
+    command: ["--config=/etc/otel-collector-config.yaml"]
 
   pgvector:
     image: pgvector/pgvector:pg18
     volumes:
-      - pgdata_volume:/var/lib/postgresql/data
+      - pgdata_volume:/var/lib/postgresql
     environment:
       <<: *postgres-credentials
     healthcheck:
@@ -84,12 +76,12 @@ services:
         [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
 
   prometheus:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-prometheus:${IMAGE_TAG:-latest}
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/prometheus-container:${IMAGE_TAG:-latest}
     ports:
       - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
     healthcheck:
       <<: *healthcheck
-      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:9090/-/healthy]
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0]
 
   redis:
     image: redis:8.10-alpine
@@ -108,10 +100,10 @@ services:
       REDIS_ADDR: redis://redis:6379
     healthcheck:
       <<: *healthcheck
-      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:9121/metrics]
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0]
 
   tempo:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-tempo:${IMAGE_TAG:-latest}
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/tempo-container:${IMAGE_TAG:-latest}
     command: ["-config.file=/etc/tempo.yaml"]
     networks:
       default:
@@ -119,16 +111,21 @@ services:
           - tempo-backend
 
   temporal:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/workbench-temporal:${IMAGE_TAG:-latest}
+    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/temporal-container:${IMAGE_TAG:-latest}
     depends_on:
       pgvector:
         condition: service_healthy
+    environment:
+      <<: *postgres-env
+      # Force Temporal to utilize the updated postgres12 driver implementation
+      SQL_PLUGIN: "postgres12"
+      # If your image uses the standard Temporal setup wrapper under the hood,
+      # ensure it uses 'postgresql' for the auto-setup engine:
+      DB: "postgresql"
     networks:
       default:
         aliases:
           - temporal-cluster
-    environment:
-      <<: *postgres-env
     healthcheck:
       <<: *healthcheck
       test: [CMD, nc, -z, 127.0.0.1, "7233"]
@@ -137,26 +134,19 @@ services:
 
   wiremock:
     image: wiremock/wiremock:3.13.2-alpine
+    depends_on:
+      otel-collector:
+        condition: service_started
+    environment:
+      JAVA_OPTS: "-Dotel.traces.exporter=otlp -Dotel.exporter.otlp.endpoint=http://otel-collector:4317 -Dotel.service.name=wiremock"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
+      OTEL_TRACES_EXPORTER: "otlp"
+    ports:
+      - "127.0.0.1:${WIREMOCK_PORT:-8080}:8080"
     command: >-
       --global-response-templating
       --async-response-enabled=true
       --enable-cors
-      --enable-extensions io.github.wiremock.extension.opentel.OpenTelemetryExtension
-    ports:
-      - "127.0.0.1:${WIREMOCK_PORT:-8080}:8080"
-    depends_on:
-      otel-collector:
-        condition: service_started
-    volumes:
-      - type: bind
-        source: ${PROJECT_DIR:-.}/wiremock/mappings
-        target: /home/wiremock/mappings
-      - type: bind
-        source: ${PROJECT_DIR:-.}/wiremock/__files
-        target: /home/wiremock/__files
-    environment:
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
-      OTEL_TRACES_EXPORTER: otlp
     healthcheck:
       <<: *healthcheck
       test: [CMD, nc, -z, 127.0.0.1, "8080"]

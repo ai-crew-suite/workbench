@@ -49,7 +49,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy the entire python environment mapping out of the builder stage
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
-COPY --from=builder /build/server /app/server
+
+COPY --from=builder /build /app
 
 # Copy your local configuration blueprint and entrypoint gatekeeper
 COPY packages/deploy/containers/mem0/src/config.yaml /app/config.yaml

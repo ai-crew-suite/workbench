@@ -28,7 +28,7 @@ program
   .action(async (target, options) => {
     try {
       console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
-      console.log(`${chalk.magenta('│ 🚀 WORKBENCH CLI: Container Distribution Pipeline       │')}`);
+      console.log(`${chalk.magenta('│ 🚀 WORKBENCH CLI: Container Distribution Pipeline      │')}`);
       console.log(`${chalk.magenta('└────────────────────────────────────────────────────────┘')}`);
 
       await runImagesPublish({

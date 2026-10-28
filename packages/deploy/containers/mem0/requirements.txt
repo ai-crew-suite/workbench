@@ -1,3 +1,3 @@
-srsly==2.4.8
+srsly==2.5.5
 thinc==8.2.5
 mem0ai[vector-stores,nlp]==2.2.1

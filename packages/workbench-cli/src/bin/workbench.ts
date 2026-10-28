@@ -29,7 +29,7 @@ try {
   if (existsSync(envFilePath) && statSync(envFilePath).isFile()) {
     dotenv.config({ path: envFilePath });
   }
-} catch (err) {
+} catch {
   console.warn('⚠️  Workbench CLI: Bypassed programmatic .env loading hook.');
 }
 
@@ -71,6 +71,11 @@ program.configureOutput({
 });
 
 program
+  .command(
+    'compose:lint',
+    'Lint Docker compose files',
+    createCommandOpts('compose-lint'),
+  )
   .command(
     'image:build',
     'Build and package monorepo container targets',

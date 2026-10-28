@@ -63,7 +63,7 @@ export class DockerService {
     await new Promise<void>((resolve, reject) => {
       this.docker.modem.followProgress(
         stream,
-        (err, res) => (err ? reject(err) : resolve()),
+        (err, _res) => (err ? reject(err) : resolve()),
         (event: any) => {
           if (event.errorDetail || event.error) {
             // Surface error frames that followProgress would otherwise swallow silently

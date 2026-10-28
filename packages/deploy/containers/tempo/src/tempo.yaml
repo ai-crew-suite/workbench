@@ -1,9 +1,8 @@
-stream_over_http: true
 server:
   http_listen_port: 3200
 
-receiver:
-  protocols:
+distributor:
+  receivers:
     otlp:
       protocols:
         grpc:
