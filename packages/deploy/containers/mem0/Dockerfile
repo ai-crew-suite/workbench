@@ -29,7 +29,7 @@ COPY packages/deploy/containers/mem0/requirements.txt ./requirements.txt
 # Install packages into the build environment so spaCy commands work instantly,
 # then download the required model assets.
 # hadolint ignore=DL3013
-RUN pip install --no-cache-dir -r requirements.txt \
+RUN pip install --no-cache-dir -r server/requirements.txt -r requirements.txt \
     && python -m spacy download en_core_web_sm
 
 # ==========================================
@@ -51,9 +51,6 @@ COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/pytho
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 COPY --from=builder /build /app
-
-# Copy your local configuration blueprint and entrypoint gatekeeper
-COPY packages/deploy/containers/mem0/src/config.yaml /app/config.yaml
 
 # hadolint ignore=DL3021
 COPY --chmod=0755 packages/deploy/containers/mem0/src/entrypoint.sh /usr/local/bin/entrypoint.sh

@@ -1,62 +1,65 @@
 log:
   stdout: true
-  level: "${TEMPORAL_LOG_LEVEL:-info}"
+  level: ${TEMPORAL_LOG_LEVEL_JSON}
 
 persistence:
   defaultStore: postgres-default
   visibilityStore: postgres-visibility
   numHistoryShards: 512
 
-  dataStores:
+  datastores:
     postgres-default:
       sql:
-        pluginName: "postgres"
-        databaseName: "${POSTGRES_DB:-backstage_plugin_catalog}"
-        user: "${POSTGRES_USER:-backstage}"
-        password: "${POSTGRES_PASSWORD:-backstage_secret_pass}"
-        host: "${POSTGRES_HOST:-postgres-store}"
-        port: ${POSTGRES_PORT:-5432}
+        pluginName: "postgres12"
+        databaseName: ${POSTGRES_DB_JSON}
+        user: ${POSTGRES_USER_JSON}
+        password: ${POSTGRES_PASSWORD_JSON}
+        connectAddr: ${POSTGRES_ADDR_JSON}
+        connectProtocol: "tcp"
         maxConns: 20
         maxIdleConns: 10
         maxConnLifetime: "1h"
     postgres-visibility:
       sql:
-        pluginName: "postgres"
-        databaseName: "${POSTGRES_DB:-backstage_plugin_catalog}"
-        user: "${POSTGRES_USER:-backstage}"
-        password: "${POSTGRES_PASSWORD:-backstage_secret_pass}"
-        host: "${POSTGRES_HOST:-postgres-store}"
-        port: ${POSTGRES_PORT:-5432}
+        pluginName: "postgres12"
+        databaseName: ${TEMPORAL_VISIBILITY_DB_JSON}
+        user: ${POSTGRES_USER_JSON}
+        password: ${POSTGRES_PASSWORD_JSON}
+        connectAddr: ${POSTGRES_ADDR_JSON}
+        connectProtocol: "tcp"
         maxConns: 10
         maxIdleConns: 5
         maxConnLifetime: "1h"
 
 global:
+  membership:
+    maxJoinDuration: 30s
+    broadcastAddress: "127.0.0.1"
   metrics:
     prometheus:
-      listenAddress: "0.0.0.0:${TEMPORAL_METRICS_PORT:-9090}"
+      listenAddress: "0.0.0.0:${TEMPORAL_METRICS_PORT}"
       handlerPath: "/metrics"
 
 services:
   frontend:
     rpc:
-      grpcPort: ${TEMPORAL_FRONTEND_PORT:-7233}
-      membershipPort: ${TEMPORAL_FRONTEND_MEMBERSHIP_PORT:-6933}
+      grpcPort: ${TEMPORAL_FRONTEND_PORT}
+      membershipPort: ${TEMPORAL_FRONTEND_MEMBERSHIP_PORT}
       bindOnIP: "0.0.0.0"
   history:
     rpc:
-      grpcPort: ${TEMPORAL_HISTORY_PORT:-7234}
-      membershipPort: ${TEMPORAL_HISTORY_MEMBERSHIP_PORT:-6934}
+      grpcPort: ${TEMPORAL_HISTORY_PORT}
+      membershipPort: ${TEMPORAL_HISTORY_MEMBERSHIP_PORT}
       bindOnIP: "0.0.0.0"
   matching:
     rpc:
-      grpcPort: ${TEMPORAL_MATCHING_PORT:-7235}
-      membershipPort: ${TEMPORAL_MATCHING_MEMBERSHIP_PORT:-6935}
+      grpcPort: ${TEMPORAL_MATCHING_PORT}
+      membershipPort: ${TEMPORAL_MATCHING_MEMBERSHIP_PORT}
       bindOnIP: "0.0.0.0"
   worker:
     rpc:
-      grpcPort: ${TEMPORAL_WORKER_PORT:-7236}
-      membershipPort: ${TEMPORAL_WORKER_MEMBERSHIP_PORT:-6936}
+      grpcPort: ${TEMPORAL_WORKER_PORT}
+      membershipPort: ${TEMPORAL_WORKER_MEMBERSHIP_PORT}
       bindOnIP: "0.0.0.0"
 
 clusterMetadata:
@@ -68,3 +71,5 @@ clusterMetadata:
     active:
       enabled: true
       initialFailoverVersion: 1
+      rpcName: "frontend"
+      rpcAddress: "127.0.0.1:${TEMPORAL_FRONTEND_PORT}"

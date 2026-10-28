@@ -44,11 +44,13 @@ services:
       <<: *postgres-env
       MEM0_EMBEDDER_MODEL: "${MEM0_EMBEDDER_MODEL:-text-embedding-3-small}"
       MEM0_EMBEDDER_PROVIDER: "${MEM0_EMBEDDER_PROVIDER:-openai}"
-      MEM0_LLM_MAX_TOKENS: "${MEM0_LLM_MAX_TOKENS:-2000}"
+      MEM0_LLM_MAX_TOKENS: "${MEM0_LLM_MAX_TOKENS:-}"
       MEM0_LLM_MODEL: "${MEM0_LLM_MODEL:-gpt-4o-mini}"
       MEM0_LLM_PROVIDER: "${MEM0_LLM_PROVIDER:-openai}"
-      MEM0_LLM_TEMPERATURE: "${MEM0_LLM_TEMPERATURE:-0.1}"
+      MEM0_LLM_TEMPERATURE: "${MEM0_LLM_TEMPERATURE:-}"
       MEM0_PROVIDER_API_KEY: "${MEM0_PROVIDER_API_KEY:-}"
+      JWT_SECRET: "${MEM0_JWT_SECRET:-}"
+      AUTH_DISABLED: "${MEM0_AUTH_DISABLED:-true}"
     networks:
       default:
         aliases:
@@ -117,11 +119,7 @@ services:
         condition: service_healthy
     environment:
       <<: *postgres-env
-      # Force Temporal to utilize the updated postgres12 driver implementation
-      SQL_PLUGIN: "postgres12"
-      # If your image uses the standard Temporal setup wrapper under the hood,
-      # ensure it uses 'postgresql' for the auto-setup engine:
-      DB: "postgresql"
+      TEMPORAL_VISIBILITY_DB: "${TEMPORAL_VISIBILITY_DB:-temporal_visibility}"
     networks:
       default:
         aliases:
@@ -143,10 +141,10 @@ services:
       OTEL_TRACES_EXPORTER: "otlp"
     ports:
       - "127.0.0.1:${WIREMOCK_PORT:-8080}:8080"
-    command: >-
-      --global-response-templating
-      --async-response-enabled=true
-      --enable-cors
+    command:
+      - --global-response-templating
+      - --async-response-enabled=true
+      - --enable-stub-cors
     healthcheck:
       <<: *healthcheck
       test: [CMD, nc, -z, 127.0.0.1, "8080"]

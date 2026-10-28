@@ -11,10 +11,6 @@ fileExistenceTests:
     path: "/app/server"
     shouldExist: true
 
-  - name: "Verify Target Configuration Manifest Present"
-    path: "/app/config.yaml"
-    shouldExist: true
-
   - name: "Assert Operational Entrypoint Script Privileges"
     path: "/usr/local/bin/entrypoint.sh"
     shouldExist: true

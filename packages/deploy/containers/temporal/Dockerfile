@@ -24,7 +24,7 @@ RUN git clone --depth 1 --branch ${ENGINE_VERSION} https://${GIT_HOST}/${ORG_NAM
 FROM alpine:3.24 AS runner
 
 # hadolint ignore=DL3018
-RUN apk add --no-cache ca-certificates libc6-compat bash netcat-openbsd
+RUN apk add --no-cache ca-certificates libc6-compat bash netcat-openbsd postgresql-client gettext-envsubst jq
 
 WORKDIR /etc/temporal
 
