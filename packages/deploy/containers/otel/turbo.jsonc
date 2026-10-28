@@ -1,0 +1,59 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "cache": false,
+      "inputs": [
+        "**/Dockerfile",
+        "**/src/**/*",
+        "**/requirements.txt",
+        "scripts/build.sh"
+      ],
+      "env": ["REGISTRY", "IMAGE_TAG", "CI"],
+      "outputs": []
+    },
+    "image:build": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["Dockerfile", "package.json"],
+      "env": ["REGISTRY", "IMAGE_TAG", "CI"],
+      "outputs": [".turbo.build.lock"]
+    },
+    "image:lint": {
+      "cache": true,
+      "inputs": ["Dockerfile"],
+      "outputs": []
+    },
+    "image:test:structure": {
+      "cache": true,
+      "dependsOn": ["image:build"],
+      "inputs": ["__tests__/**/*.cst.yaml", "Dockerfile"],
+      "outputs": []
+    },
+    "image:test:security": {
+      "cache": true,
+      "dependsOn": ["image:build"],
+      "inputs": ["Dockerfile"],
+      "env": ["TRIVY_SCAN_TIMEOUT"],
+      "outputs": []
+    },
+    "test:unit": {
+      "cache": true,
+      "dependsOn": ["image:build"],
+      "inputs": [
+        "src/**",
+        "**/__tests__/**/*.test.ts",
+        "**/__tests__/**/*.spec.ts",
+        "vitest.config.ts"
+      ],
+      "outputs": []
+    },
+    "publish": {
+      "cache": false,
+      "dependsOn": ["image:build"],
+      "inputs": ["Dockerfile"],
+      "env": ["REGISTRY", "IMAGE_TAG"],
+      "outputs": []
+    }
+  }
+}

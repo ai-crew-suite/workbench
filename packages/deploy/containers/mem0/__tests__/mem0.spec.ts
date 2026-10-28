@@ -13,30 +13,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { execSync } from 'child_process';
-import { describe, it, expect } from 'vitest';
-import path from 'path';
+import { execSync } from 'node:child_process';
+import { describe, it } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/**
+ * Dynamically resolves the exact pre-built image tag using the package namespace context.
+ * Points cleanly to the local storage target context to prevent unwanted remote registry pulling.
+ */
+function resolveTestImageContext(): string {
+  const pkgJsonPath = path.resolve(__dirname, '../package.json');
+  const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+  const cleanTargetName = pkgJson.name.split('/').pop() || ''; // Yields 'mem0' or 'workbench-mem0'
+
+  // Normalize name if the package name is explicitly prefixed
+  const normalizedName = cleanTargetName.replace(/^workbench-/, '');
+
+  const imageTag = process.env['IMAGE_TAG'] || 'latest';
+  return `local/${normalizedName}:${imageTag}`;
+}
 
 describe('Mem0 Long-Term Memory Service Structure Suite', () => {
-  const registry = process.env['REGISTRY'] || 'localhost:32443/ai-crew-suite';
-  const tag = process.env['IMAGE_TAG'] || 'latest';
-  const targetImage = `${registry}/workbench-mem0:${tag}`;
-
   it('should pass all binary placement and metadata structure assertions', () => {
-    try {
-      const configPath = path.resolve(__dirname, './mem0.cst.yaml');
+    const targetImage = resolveTestImageContext();
+    const configPath = path.resolve(__dirname, './mem0.cst.yaml');
 
-      const result = execSync(
+    try {
+      // Execute the structural structure testing harness matching the platform design pattern
+      execSync(
         `container-structure-test test \
           --image ${targetImage} \
           --config ${configPath}`,
-        { encoding: 'utf-8', stdio: 'pipe' }
+        { stdio: ['pipe', 'pipe', 'pipe'], env: process.env }
       );
-
-      expect(result).toContain('PASS');
     } catch (error: any) {
-      console.error('❌ Mem0 Structural Assertions Failed:\n', error.stdout || error.message);
-      throw error;
+      const output = error.stdout?.toString() || '';
+      const stderr = error.stderr?.toString() || '';
+
+      console.error('\n❌ --- MEM0 STRUCTURE TEST FAILURE BREAKDOWN ---');
+      if (output) console.error(output);
+      if (stderr) console.error(stderr);
+      console.error('-------------------------------------------------\n');
+
+      throw new Error(`Structure assertion failed for ${targetImage}. See breakdown above.`);
     }
   });
 });

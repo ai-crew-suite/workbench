@@ -2,6 +2,7 @@
   "extends": ["//"],
   "tasks": {
     "build": {
+      "cache": false,
       "inputs": [
         "**/Dockerfile",
         "**/src/**/*",
@@ -36,7 +37,7 @@
       "env": ["TRIVY_SCAN_TIMEOUT"],
       "outputs": []
     },
-    "image:test:unit": {
+    "test:unit": {
       "cache": true,
       "dependsOn": ["image:build"],
       "inputs": [
@@ -47,7 +48,7 @@
       ],
       "outputs": []
     },
-    "image:publish": {
+    "publish": {
       "cache": false,
       "dependsOn": ["image:build"],
       "inputs": ["Dockerfile"],

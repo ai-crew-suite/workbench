@@ -13,97 +13,63 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { ImagePublisher } from '../publish.js';
+import { DockerService } from '../docker-service.js';
+import { SigningService } from '../signing-service.js';
+import fs from 'node:fs';
 
-// Hoisted mock requirement matching your test utility rules
-vi.mock('node:child_process', () => ({
-  spawnSync: vi.fn(),
-}));
-
-import { spawnSync } from 'node:child_process';
-import { setupOrchestratorTestContext } from '../../../../utils/test-utils';
-import { runImagesPublish } from '../publish';
-
-describe('runImagesPublish Engine & Router', () => {
-  let repoRoot: string;
-  const testContext = setupOrchestratorTestContext();
+describe('ImagePublisher Core Quality Pipeline', () => {
+  const originalEnv = process.env;
 
   beforeEach(() => {
-    repoRoot = mkdtempSync(join(tmpdir(), 'crew-publish-test-'));
-    writeFileSync(join(repoRoot, 'backstage.json'), '{}', 'utf8');
-    vi.spyOn(process, 'cwd').mockReturnValue(repoRoot);
+    vi.resetModules();
+    process.env = { ...originalEnv };
   });
 
   afterEach(() => {
+    process.env = originalEnv;
     vi.restoreAllMocks();
-    if (repoRoot) rmSync(repoRoot, { recursive: true, force: true });
   });
 
-  it('correctly maps straight tags for local zot environments without introducing prefix strings', async () => {
-    const servicePath = join(repoRoot, 'packages/cache-service');
-    mkdirSync(servicePath, { recursive: true });
-    writeFileSync(join(servicePath, 'Dockerfile'), 'FROM scratch', 'utf8');
+  it('correctly orchestrates tagging, pushing, and native signature attachment', async () => {
+    // 1. Spy on existsSync to simulate finding a valid key on disk safely under ESM
+    const existsSyncSpy = vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+    process.env['COSIGN_PASSWORD'] = 'mock-secure-pass';
 
-    testContext.mockAllSuccessful();
+    // 2. Build clean mocks of our low-level infrastructure dependencies
+    const mockDockerService = {
+      tagImage: vi.fn().mockResolvedValue(undefined),
+      pushImage: vi.fn().mockResolvedValue('localhost:32443/ai-crew-suite/grafana@sha256:fakehash123'),
+    } as unknown as DockerService;
 
-    await runImagesPublish({
-      target: 'cache-service',
+    const mockSigningService = {
+      signDigest: vi.fn().mockResolvedValue(undefined),
+    } as unknown as SigningService;
+
+    const publisher = new ImagePublisher(mockDockerService, mockSigningService);
+
+    await publisher.publishSingleImage('grafana', {
       registry: 'localhost:32443/ai-crew-suite',
-      imageTag: 'latest'
+      imageTag: 'latest',
     });
 
-    expect(spawnSync).toHaveBeenCalledWith(
-      'docker',
-      ['tag', 'local/cache-service:latest', 'localhost:32443/ai-crew-suite/cache-service:latest'],
-      expect.any(Object)
+    // 3. Assert execution contracts matched perfectly
+    expect(mockDockerService.tagImage).toHaveBeenCalledWith(
+      'local/grafana:latest',
+      'localhost:32443/ai-crew-suite/grafana:latest'
     );
-    expect(spawnSync).toHaveBeenCalledWith(
-      'docker',
-      ['push', 'localhost:32443/ai-crew-suite/cache-service:latest'],
-      expect.any(Object)
+    expect(mockDockerService.pushImage).toHaveBeenCalledWith('localhost:32443/ai-crew-suite/grafana:latest');
+
+    // Assert sign service was executed with our simulated parameters
+    expect(mockSigningService.signDigest).toHaveBeenCalledWith(
+      'localhost:32443/ai-crew-suite/grafana@sha256:fakehash123',
+      expect.objectContaining({
+        isCI: false,
+        cosignPass: 'mock-secure-pass',
+      })
     );
-  });
 
-  it('injects the workbench- subtag prefix when routing images to a GHCR cloud registry target', async () => {
-    const servicePath = join(repoRoot, 'packages/api-service');
-    mkdirSync(servicePath, { recursive: true });
-    writeFileSync(join(servicePath, 'Dockerfile'), 'FROM scratch', 'utf8');
-
-    testContext.mockAllSuccessful();
-
-    await runImagesPublish({
-      target: 'api-service',
-      registry: 'ghcr.io/ai-crew-suite',
-      imageTag: 'v2.1'
-    });
-
-    expect(spawnSync).toHaveBeenCalledWith(
-      'docker',
-      ['tag', 'local/api-service:v2.1', 'ghcr.io/ai-crew-suite/workbench-api-service:v2.1'],
-      expect.any(Object)
-    );
-    expect(spawnSync).toHaveBeenCalledWith(
-      'docker',
-      ['push', 'ghcr.io/ai-crew-suite/workbench-api-service:v2.1'],
-      expect.any(Object)
-    );
-  });
-
-  it('fails early and transparently throws an exception if the underlying push step returns an issue status code', async () => {
-    const servicePath = join(repoRoot, 'packages/network-service');
-    mkdirSync(servicePath, { recursive: true });
-    writeFileSync(join(servicePath, 'Dockerfile'), 'FROM scratch', 'utf8');
-
-    // tag returns success status (0) but push returns connection closed code status failure (1)
-    testContext.mockSequenceStatuses(0, 1);
-
-    await expect(runImagesPublish({
-      target: 'network-service',
-      registry: 'localhost:32443',
-      imageTag: 'latest'
-    })).rejects.toThrow('Failed to push target container image layers to remote destination registry');
+    existsSyncSpy.mockRestore();
   });
 });

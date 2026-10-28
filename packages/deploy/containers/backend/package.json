@@ -20,15 +20,16 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ai-crew-suite/workbench",
-    "directory": "packages/backend-container"
+    "directory": "packages/containers/backend"
   },
   "scripts": {
-    "build": "workbench image:build backend-container",
-    "lint": "workbench image:lint backend-container",
-    "image:test:structure": "workbench image:test-structure backend-container",
-    "image:test:security": "workbench image:security-scanner backend-container",
-    "publish": "workbench image:publish backend-container",
-    "test": "yarn image:test:structure && yarn image:test:security"
+    "build": "workbench image:build temporal-container",
+    "lint": "workbench image:lint temporal-container",
+    "image:test:security": "workbench image:test:security temporal-container",
+    "image:test:structure": "workbench image:test:structure temporal-container",
+    "publish": "workbench image:publish temporal-container",
+    "test": "yarn image:test:security && yarn image:test:structure && yarn test:unit",
+    "test:unit": "vitest run"
   },
   "devDependencies": {
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",

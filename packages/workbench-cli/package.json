@@ -44,12 +44,16 @@
   "dependencies": {
     "chalk": "catalog:prod",
     "commander": "catalog:prod",
-    "dotenv": "catalog:prod"
+    "dockerode": "catalog:prod",
+    "dotenv": "catalog:prod",
+    "sigstore": "catalog:prod",
+    "tar": "catalog:prod"
   },
   "devDependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
     "@rollup/plugin-node-resolve": "catalog:dev",
+    "@types/dockerode": "catalog:dev",
     "@types/node": "catalog:dev",
     "glob": "catalog:dev",
     "rimraf": "catalog:dev",

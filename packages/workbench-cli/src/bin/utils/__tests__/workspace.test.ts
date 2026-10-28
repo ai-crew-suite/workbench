@@ -14,38 +14,55 @@
  * limitations under the License.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import fs from 'node:fs';
 import { join } from 'node:path';
 
-// Hoisted mock rule to intercept child shell processes cleanly
+// Virtualize filesystem checks completely to preserve hermetic test isolation
+vi.mock('node:fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:fs')>();
+  return {
+    ...actual,
+    existsSync: vi.fn(),
+    readdirSync: vi.fn(),
+    statSync: vi.fn(),
+    readFileSync: vi.fn(),
+    default: {
+      ...actual,
+      existsSync: vi.fn(),
+      readdirSync: vi.fn(),
+      statSync: vi.fn(),
+      readFileSync: vi.fn(),
+    }
+  };
+});
+
 vi.mock('node:child_process', () => ({
   spawnSync: vi.fn(),
 }));
 
+import fs from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { findRepoRoot, discoverContainerTargets, hasBinary } from '../workspace';
+import { findRepoRoot, discoverContainerTargets, hasBinary } from '../workspace.js';
 
 describe('Workspace Context Utilities Engine', () => {
   const mockCwd = '/home/user/repo/packages/my-package';
+  const originalPlatform = process.platform;
 
   beforeEach(() => {
     vi.spyOn(process, 'cwd').mockReturnValue(mockCwd);
-    vi.spyOn(fs, 'existsSync');
-    vi.spyOn(fs, 'readdirSync');
-    vi.spyOn(fs, 'statSync');
-    vi.mocked(spawnSync).mockReset();
+    vi.resetAllMocks();
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+    Object.defineProperty(process, 'platform', { value: originalPlatform });
   });
 
   describe('findRepoRoot()', () => {
     it('should successfully climb the tree until it finds backstage.json', () => {
-      vi.mocked(fs.existsSync).mockImplementation((targetPath: unknown) => {
+      vi.mocked(fs.existsSync).mockImplementation((targetPath: any) => {
         if (typeof targetPath === 'string') {
           const normalized = targetPath.replace(/\\/g, '/');
-          return normalized === '/home/user/repo/backstage.json';
+          return normalized.endsWith('backstage.json') && normalized.includes('/home/user/repo');
         }
         return false;
       });
@@ -82,19 +99,20 @@ describe('Workspace Context Utilities Engine', () => {
     });
 
     it('should scan packages and correctly extract directories containing a Dockerfile', () => {
-      vi.mocked(fs.existsSync).mockImplementation((dirPath: unknown) => {
+      vi.mocked(fs.existsSync).mockImplementation((dirPath: any) => {
         if (typeof dirPath === 'string') {
           const normalized = dirPath.replace(/\\/g, '/');
           return [
             '/home/user/repo/packages',
             '/home/user/repo/packages/auth-service',
-            '/home/user/repo/packages/deploy/containers'
+            '/home/user/repo/packages/deploy/containers',
+            '/home/user/repo/packages/auth-service/package.json'
           ].some(p => normalized === p);
         }
         return false;
       });
 
-      vi.mocked(fs.readdirSync).mockImplementation((dirPath: unknown) => {
+      vi.mocked(fs.readdirSync).mockImplementation((dirPath: any) => {
         if (typeof dirPath === 'string') {
           const normalized = dirPath.replace(/\\/g, '/');
           if (normalized === '/home/user/repo/packages') {
@@ -107,18 +125,20 @@ describe('Workspace Context Utilities Engine', () => {
         return [] as any;
       });
 
-      vi.mocked(fs.statSync).mockImplementation((itemPath: unknown) => {
+      vi.mocked(fs.statSync).mockImplementation((itemPath: any) => {
         if (typeof itemPath === 'string') {
           const normalized = itemPath.replace(/\\/g, '/');
           const isDir = [
             '/home/user/repo/packages/auth-service',
-            '/home/user/repo/packages/packages/deploy'
+            '/home/user/repo/packages/deploy'
           ].some(p => normalized === p || normalized.startsWith(p));
 
           return { isDirectory: () => isDir } as any;
         }
         return { isDirectory: () => false } as any;
       });
+
+      vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({ name: '@ai-crew-suite/auth-service' }));
 
       const targets = discoverContainerTargets(fakeRepoRoot);
 
@@ -131,19 +151,18 @@ describe('Workspace Context Utilities Engine', () => {
     it('should determine target system operating platform and leverage matching lookup selectors', () => {
       vi.mocked(spawnSync).mockReturnValue({ status: 0 } as any);
 
-      // Explicitly forcing platform property tracking to verify command routing variables
-      Object.defineProperty(process, 'platform', { value: 'linux', writable: true });
+      Object.defineProperty(process, 'platform', { value: 'linux', configurable: true });
       expect(hasBinary('hadolint')).toBe(true);
       expect(spawnSync).toHaveBeenCalledWith('which', ['hadolint'], { stdio: 'ignore' });
 
-      Object.defineProperty(process, 'platform', { value: 'win32', writable: true });
+      Object.defineProperty(process, 'platform', { value: 'win32', configurable: true });
       expect(hasBinary('hadolint')).toBe(true);
-      expect(spawnSync).toHaveBeenCalledWith('where', ['hadolint'], { stdio: 'ignore' });
+      expect(spawnSync).toHaveBeenLastCalledWith('where', ['hadolint'], { stdio: 'ignore' });
     });
 
     it('should return false if the child status evaluation yields a non-zero exit state code', () => {
       vi.mocked(spawnSync).mockReturnValue({ status: 1 } as any);
-      Object.defineProperty(process, 'platform', { value: 'linux', writable: true });
+      Object.defineProperty(process, 'platform', { value: 'linux', configurable: true });
 
       expect(hasBinary('invalid-binary')).toBe(false);
     });

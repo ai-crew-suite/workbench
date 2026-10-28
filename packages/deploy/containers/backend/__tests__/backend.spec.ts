@@ -13,19 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import path from 'path';
-import { GenericContainer, Wait } from 'testcontainers';
 import { describe, expect, it } from 'vitest';
+import { GenericContainer, Wait } from 'testcontainers';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/**
+ * Dynamically resolves the exact pre-built image tag using the package namespace context.
+ * Eliminates fragile relative folder references to the monorepo root.
+ */
+function resolveTestImageContext(): string {
+  const pkgJsonPath = path.resolve(__dirname, '../package.json');
+  const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+  const cleanTargetName = pkgJson.name.split('/').pop() || ''; // Yields 'backend'
+
+  const imageTag = process.env['IMAGE_TAG'] || 'latest';
+  return `local/${cleanTargetName}:${imageTag}`;
+}
 
 describe('Backend Development Runner Integration Suite', () => {
-  it('builds without workbench artifacts and executes the Node runtime', async () => {
-    const monorepoRootPath = path.resolve(__dirname, '../../../../../');
-    const dockerfilePath = 'packages/deploy/containers/backend/Dockerfile';
-    const image = await GenericContainer.fromDockerfile(
-      monorepoRootPath,
-      dockerfilePath,
-    ).build();
-    const container = await image
+  it('executes the Node runtime within the pre-built distribution artifact', async () => {
+    const targetImage = resolveTestImageContext();
+
+    // Consume the pre-built image from the local Docker engine storage context
+    const container = await new GenericContainer(targetImage)
       .withCommand([
         'node',
         '-e',
@@ -36,8 +50,14 @@ describe('Backend Development Runner Integration Suite', () => {
 
     try {
       expect(container.getId()).toBeDefined();
+
+      // Optional Quality Control Assertion: Ensure no temporary workbench files leaked into root
+      const execResult = await container.exec(['ls', '-a']);
+      expect(execResult.stdout).not.toContain('.workbench-cache');
+
     } finally {
+      // Guaranteed resource teardown to prevent trailing orphaned containers
       await container.stop();
     }
-  }, 90000);
+  }, 30000); // Reduced timeout from 90000ms to 30000ms because there is no heavy compile layer phase
 });

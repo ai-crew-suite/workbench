@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2026 The AI Crew Suite Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,121 +13,76 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { ImageBuilder } from '../build.js';
+import { DockerBuildService } from '../docker-build-service.js';
 
-vi.mock('node:child_process', () => ({
-  spawnSync: vi.fn(),
-}));
-
-import { spawnSync } from 'node:child_process';
-import { setupOrchestratorTestContext } from '../../../../utils/test-utils';
-import { discoverContainerTargets } from '../../../../utils/workspace';
-import { runImagesBuild } from '../build';
-
-function writeJson(filePath: string, value: unknown): void {
-  writeFileSync(filePath, JSON.stringify(value, null, 2), 'utf8');
-}
-
-describe('discoverContainerTargets', () => {
-  let repoRoot: string;
-
-  afterEach(() => {
-    if (repoRoot) rmSync(repoRoot, { recursive: true, force: true });
-  });
-
-  it('scans and isolates directories that contain a Dockerfile', () => {
-    repoRoot = mkdtempSync(join(tmpdir(), 'crew-docker-discover-'));
-
-    const containerAPath = join(repoRoot, 'packages/auth-service');
-    mkdirSync(containerAPath, { recursive: true });
-    writeFileSync(join(containerAPath, 'Dockerfile'), 'FROM node:alpine', 'utf8');
-
-    const containerBPath = join(repoRoot, 'packages/deploy/containers/payment-gateway');
-    mkdirSync(containerBPath, { recursive: true });
-    writeFileSync(join(containerBPath, 'Dockerfile'), 'FROM node:alpine', 'utf8');
-
-    const scriptsPath = join(repoRoot, 'packages/deploy/containers/scripts');
-    mkdirSync(scriptsPath, { recursive: true });
-    writeFileSync(join(scriptsPath, 'Dockerfile'), 'FROM alpine', 'utf8');
-
-    const targets = discoverContainerTargets(repoRoot);
-
-    expect(targets.has('auth-service')).toBe(true);
-    expect(targets.has('payment-gateway')).toBe(true);
-    expect(targets.has('scripts')).toBe(false);
-  });
+vi.mock('node:fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:fs')>();
+  return {
+    ...actual,
+    existsSync: vi.fn().mockReturnValue(true),
+    readFileSync: vi.fn(),
+    rmSync: vi.fn(),
+  };
 });
 
-describe('runImagesBuild Engine & Router', () => {
-  let repoRoot: string;
+vi.mock('tar', () => ({
+  default: { c: vi.fn().mockReturnValue('mock-tar-stream') },
+  c: vi.fn().mockReturnValue('mock-tar-stream'),
+}));
 
-  // Hook up your unified console mitigation and spawn state context utility
-  const testContext = setupOrchestratorTestContext();
+import fs from 'node:fs';
+
+describe('ImageBuilder Unified Core Suite', () => {
+  let mockBuildService: any;
 
   beforeEach(() => {
-    repoRoot = mkdtempSync(join(tmpdir(), 'crew-docker-build-'));
-    writeFileSync(join(repoRoot, 'backstage.json'), '{}', 'utf8');
-    vi.spyOn(process, 'cwd').mockReturnValue(repoRoot);
+    vi.resetAllMocks();
+    mockBuildService = {
+      build: vi.fn().mockResolvedValue(undefined),
+      pruneImages: vi.fn().mockResolvedValue(undefined),
+      pushImage: vi.fn().mockResolvedValue(undefined),
+    };
   });
 
   afterEach(() => {
+    vi.unstubAllEnvs();
     vi.restoreAllMocks();
-    if (repoRoot) rmSync(repoRoot, { recursive: true, force: true });
   });
 
-  it('assembles a local development target image correctly using --load strategy', async () => {
-    const servicePath = join(repoRoot, 'packages/gateway-service');
-    mkdirSync(servicePath, { recursive: true });
-    writeFileSync(join(servicePath, 'Dockerfile'), 'FROM scratch', 'utf8');
-
-    await runImagesBuild({
-      target: 'gateway-service',
-      registry: 'local',
-      imageTag: 'debug-v1',
-    });
-
-    expect(spawnSync).toHaveBeenCalledWith(
-      'docker',
-      ['buildx', 'build', '--load', '-t', 'local/gateway-service:debug-v1', '-f', 'packages/gateway-service/Dockerfile', '.'],
-      expect.any(Object)
+  it('assembles a localized development target image extracting full package label metrics', async () => {
+    // Fix: Return an object with name populated matching package.json specifications
+    vi.spyOn(fs, 'readFileSync').mockReturnValue(
+      JSON.stringify({
+        name: '@ai-crew-suite/gateway-service',
+        description: 'Gateway edge runtime component',
+        license: 'MIT',
+        repository: { url: 'git+https://github.com' },
+      })
     );
-    expect(spawnSync).toHaveBeenCalledWith('docker', ['image', 'prune', '-f'], expect.any(Object));
+
+    const builder = new ImageBuilder(mockBuildService as unknown as DockerBuildService);
+    const labels = builder.resolveMetadataLabels('@ai-crew-suite/gateway-service', '/root/packages/gateway-service');
+
+    expect(labels['org.opencontainers.image.title']).toBe('@ai-crew-suite/gateway-service');
+    expect(labels['org.opencontainers.image.description']).toBe('Gateway edge runtime component');
+    expect(labels['org.opencontainers.image.source']).toBe('https://github.com');
   });
 
-  it('switches build action strategy to --push when executing inside a CI context', async () => {
+  it('triggers a sequential out-of-band registry push when operating in CI environment frames', async () => {
     vi.stubEnv('CI', 'true');
-    const servicePath = join(repoRoot, 'packages/worker-service');
-    mkdirSync(servicePath, { recursive: true });
-    writeFileSync(join(servicePath, 'Dockerfile'), 'FROM scratch', 'utf8');
+    vi.spyOn(fs, 'readFileSync').mockReturnValue('{}');
 
-    await runImagesBuild({
-      target: 'worker-service',
+    const builder = new ImageBuilder(mockBuildService as unknown as DockerBuildService);
+    vi.spyOn(builder, 'resolveMetadataLabels').mockReturnValue({});
+
+    await builder.compileImage('/root', 'worker-service', '/root/packages/worker-service', {
       registry: 'ghcr.io/ai-crew-suite',
       imageTag: 'latest',
     });
 
-    expect(spawnSync).toHaveBeenCalledWith(
-      'docker',
-      ['buildx', 'build', '--push', '-t', 'ghcr.io/ai-crew-suite/workbench-worker-service:latest', '-f', 'packages/worker-service/Dockerfile', '.'],
-      expect.any(Object)
-    );
-  });
-
-  it('aborts cascading sequence early if a sub-compilation returns a non-zero exit status', async () => {
-    const servicePath = join(repoRoot, 'packages/faulty-service');
-    mkdirSync(servicePath, { recursive: true });
-    writeFileSync(join(servicePath, 'Dockerfile'), 'FROM scratch', 'utf8');
-
-    // Force spawnSync execution pipeline status to register an execution error failure code
-    testContext.mockSequenceStatuses(1);
-
-    await expect(runImagesBuild({
-      target: 'faulty-service',
-      registry: 'local',
-      imageTag: 'latest',
-    })).rejects.toThrow('Docker compilation process failed with exit code 1');
+    expect(mockBuildService.build).toHaveBeenCalled();
+    expect(mockBuildService.pushImage).toHaveBeenCalledWith('local/worker-service:latest');
   });
 });

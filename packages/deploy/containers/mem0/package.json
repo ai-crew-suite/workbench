@@ -20,15 +20,16 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ai-crew-suite/workbench",
-    "directory": "packages/mem0-container"
+    "directory": "packages/containers/mem0"
   },
   "scripts": {
-    "build": "workbench image:build mem0-container",
-    "lint": "workbench image:lint mem0-container",
-    "image:test:structure": "workbench image:test-structure mem0-container",
-    "image:test:security": "workbench image:security-scanner mem0-container",
-    "publish": "workbench image:publish mem0-container",
-    "test": "yarn image:test:structure && yarn image:test:security"
+    "build": "workbench image:build temporal-container",
+    "lint": "workbench image:lint temporal-container",
+    "image:test:security": "workbench image:test:security temporal-container",
+    "image:test:structure": "workbench image:test:structure temporal-container",
+    "publish": "workbench image:publish temporal-container",
+    "test": "yarn image:test:security && yarn image:test:structure && yarn test:unit",
+    "test:unit": "vitest run"
   },
   "devDependencies": {
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",

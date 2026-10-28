@@ -18,23 +18,26 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-// Hoisted mock requirement matching your test utility rules
 vi.mock('node:child_process', () => ({
   spawnSync: vi.fn(),
 }));
 
 import { spawnSync } from 'node:child_process';
-import { setupOrchestratorTestContext } from '../../../../utils/test-utils';
-import { runImagesLint } from '../lint';
+import { runImagesLint } from '../lint.js';
+
+function writeJson(filePath: string, value: unknown): void {
+  writeFileSync(filePath, JSON.stringify(value, null, 2), 'utf8');
+}
 
 describe('runImagesLint Engine & Router', () => {
   let repoRoot: string;
-  const testContext = setupOrchestratorTestContext();
 
   beforeEach(() => {
     repoRoot = mkdtempSync(join(tmpdir(), 'crew-docker-lint-'));
+    // Fix: Placing backstage.json at the exact folder level root ensures workspace discovery runs cleanly
     writeFileSync(join(repoRoot, 'backstage.json'), '{}', 'utf8');
     vi.spyOn(process, 'cwd').mockReturnValue(repoRoot);
+    vi.resetAllMocks();
   });
 
   afterEach(() => {
@@ -46,32 +49,39 @@ describe('runImagesLint Engine & Router', () => {
     const servicePath = join(repoRoot, 'packages/identity-service');
     mkdirSync(servicePath, { recursive: true });
     writeFileSync(join(servicePath, 'Dockerfile'), 'FROM node:alpine', 'utf8');
+    writeJson(join(servicePath, 'package.json'), { name: '@ai-crew-suite/identity-service' });
 
-    // First call for `which hadolint` / `where hadolint` returning success (0)
-    // Second call for the actual execution output run returning success (0)
-    testContext.mockSequenceStatuses(0, 0);
+    vi.mocked(spawnSync)
+      .mockReturnValueOnce({ status: 0 } as any)
+      .mockReturnValueOnce({ status: 0, stdout: '', stderr: '' } as any);
 
     await runImagesLint({ target: 'identity-service' });
 
-    expect(spawnSync).toHaveBeenCalledWith('hadolint', [join(servicePath, 'Dockerfile')], expect.any(Object));
+    expect(spawnSync).toHaveBeenLastCalledWith(
+      'hadolint',
+      [join(servicePath, 'Dockerfile')],
+      expect.objectContaining({ stdio: ['pipe', 'pipe', 'pipe'] })
+    );
   });
 
   it('falls back seamlessly to docker streaming execution buffer if hadolint is missing from path', async () => {
     const servicePath = join(repoRoot, 'packages/payment-service');
     mkdirSync(servicePath, { recursive: true });
     writeFileSync(join(servicePath, 'Dockerfile'), 'FROM node:alpine', 'utf8');
+    writeJson(join(servicePath, 'package.json'), { name: '@ai-crew-suite/payment-service' });
 
-    // First call for host binary lookup returns failure (1), second call for fallback docker execution passes (0)
-    testContext.mockSequenceStatuses(1, 0);
+    vi.mocked(spawnSync)
+      .mockReturnValueOnce({ status: 1 } as any)
+      .mockReturnValueOnce({ status: 0, stdout: '', stderr: '' } as any);
 
     await runImagesLint({ target: 'payment-service' });
 
-    expect(spawnSync).toHaveBeenCalledWith(
+    expect(spawnSync).toHaveBeenLastCalledWith(
       'docker',
       ['run', '--rm', '-i', 'hadolint/hadolint'],
       expect.objectContaining({
         input: expect.any(Buffer),
-        stdio: ['pipe', 'inherit', 'inherit']
+        stdio: ['pipe', 'pipe', 'pipe']
       })
     );
   });
@@ -80,9 +90,15 @@ describe('runImagesLint Engine & Router', () => {
     const servicePath = join(repoRoot, 'packages/broken-service');
     mkdirSync(servicePath, { recursive: true });
     writeFileSync(join(servicePath, 'Dockerfile'), 'FROM node:alpine\nRUN apt-get update', 'utf8');
+    writeJson(join(servicePath, 'package.json'), { name: '@ai-crew-suite/broken-service' });
 
-    // host check passes (0), but linter output returns violation rule code (1)
-    testContext.mockSequenceStatuses(0, 1);
+    vi.mocked(spawnSync)
+      .mockReturnValueOnce({ status: 0 } as any)
+      .mockReturnValueOnce({
+        status: 1,
+        stdout: 'Dockerfile:2 DL3009 error: Info message',
+        stderr: ''
+      } as any);
 
     await expect(runImagesLint({ target: 'broken-service' })).rejects.toThrow(
       'Lint verification failed on target broken-service'
