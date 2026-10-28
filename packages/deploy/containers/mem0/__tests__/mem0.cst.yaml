@@ -11,6 +11,10 @@ fileExistenceTests:
     path: "/app/server"
     shouldExist: true
 
+  - name: "Verify Workbench Provider Configuration Present"
+    path: "/app/server/workbench_config.py"
+    shouldExist: true
+
   - name: "Assert Operational Entrypoint Script Privileges"
     path: "/usr/local/bin/entrypoint.sh"
     shouldExist: true

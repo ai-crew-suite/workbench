@@ -104,3 +104,9 @@ cypress/screenshots/
 playwright-report/
 test-results/
 **/.vitest-cache
+
+# ==========================================
+# 7. Local scripts
+# ==========================================
+
+start_models.sh

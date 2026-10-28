@@ -117,10 +117,10 @@ class EntrypointTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse(any(call[0] == "uvicorn" for call in self.calls()))
 
-    def test_mem0_rejects_unsupported_startup_provider(self):
-        result = self.mem0(MEM0_LLM_PROVIDER="anthropic")
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("configure other providers through its API", result.stderr)
+    def test_mem0_allows_ollama_startup(self):
+        result = self.mem0(MEM0_LLM_PROVIDER="ollama", MEM0_EMBEDDER_PROVIDER="ollama")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.calls()[-1][0], "uvicorn")
 
 
 if __name__ == "__main__":

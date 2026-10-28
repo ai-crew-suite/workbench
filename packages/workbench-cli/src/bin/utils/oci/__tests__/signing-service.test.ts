@@ -16,13 +16,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
-import { SigningService } from '../signing-service.js';
+import { SigningService } from '../signing-service';
 
 // Intercept native cosign invocations while preserving remaining child_process exports
 vi.mock('node:child_process', async (importOriginal) => {
   const actual = await importOriginal<typeof import('node:child_process')>();
-  const mockedSpawnSync = vi.fn().mockReturnValue({ status: 0 }); // Renamed to avoid shadowing
-  return { ...actual, spawnSync: mockedSpawnSync, default: { ...actual, spawnSync: mockedSpawnSync } };
+  const mockedSpawnSync = vi.fn().mockReturnValue({ status: 0 });
+  return {
+    ...actual,
+    spawnSync: mockedSpawnSync,
+    default: { ...actual, spawnSync: mockedSpawnSync }
+  };
 });
 
 const imageDigest = 'localhost:32443/ai-crew-suite/grafana@sha256:e743b0e413d4d59dba9d2bff26b65476306b875e93fe278a57f4a4377ff0a41a';

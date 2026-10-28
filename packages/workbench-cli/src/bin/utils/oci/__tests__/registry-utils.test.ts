@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { describe, it, expect } from 'vitest';
-import { normalizeTargetName, resolveTargetTags } from '../registry-utils.js';
+import { normalizeTargetName, resolveTargetTags } from '../registry-utils';
 
 describe('Registry Utilities Unit Suite', () => {
   describe('normalizeTargetName', () => {

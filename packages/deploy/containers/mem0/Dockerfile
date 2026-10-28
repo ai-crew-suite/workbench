@@ -23,6 +23,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Clone using dynamic string tokens to prevent URL filter parsing errors
 RUN git clone --depth 1 --branch ${ENGINE_VERSION} https://${GIT_HOST}/${ORG_NAME}/${PROJECT_NAME}.git .
 
+COPY packages/deploy/containers/mem0/src/server-config.patch /tmp/server-config.patch
+COPY packages/deploy/containers/mem0/src/workbench_config.py /build/server/workbench_config.py
+RUN git apply --check /tmp/server-config.patch && git apply /tmp/server-config.patch
+
 # Inject and process your decoupled python dependencies
 COPY packages/deploy/containers/mem0/requirements.txt ./requirements.txt
 

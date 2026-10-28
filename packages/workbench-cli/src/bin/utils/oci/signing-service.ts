@@ -26,23 +26,16 @@ export class SigningService {
   /**
    * Cryptographically signs a specific OCI manifest digest reference and publishes
    * the resulting signature artifact to the target registry via the native Cosign
-   * client. The Cosign binary is the only component that implements the registry
-   * signature upload flow (`sha256-<digest>.sig` OCI artifact) that `cosign verify`
-   * consumes, so it is invoked directly.
+   * client.
    */
   async signDigest(imageDigest: string, options: SignerOptions): Promise<void> {
     const { isCI, keyPath, cosignPass } = options;
-
     const cosignArgs = ['sign', '--yes', imageDigest];
     let spawnEnv: NodeJS.ProcessEnv | undefined;
 
     if (isCI) {
-      // Keyless profile: Cosign exchanges the ambient GitHub OIDC identity token for a
-      // short-lived Fulcio certificate (requires the id-token: write workflow permission)
-      // and publishes the certificate-bound signature to the registry transparency log.
+      // Keyless profile: Cosign exchanges ambient identity tokens for short-lived certificates
     } else {
-      // Prefer the repo-root key file; fall back to the COSIGN_PRIVATE_KEY env parameter
-      // (GitHub Actions repository secret) so CI never materializes the key on disk
       const keyRef = fs.existsSync(keyPath)
         ? keyPath
         : process.env['COSIGN_PRIVATE_KEY']
@@ -60,7 +53,6 @@ export class SigningService {
       cosignArgs.push(
         '--key', keyRef,
         '--allow-http-registry=true',
-        // cosign v3 defaults to the TUF signing config; both flags are required to skip the public transparency log
         '--use-signing-config=false',
         '--tlog-upload=false',
       );

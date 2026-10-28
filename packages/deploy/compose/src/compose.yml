@@ -33,7 +33,7 @@ services:
       - "127.0.0.1:${GRAFANA_PORT:-3001}:3000"
     healthcheck:
       <<: *healthcheck
-      test: [CMD, curl, --fail, --silent, --show-error, http://127.0.0]
+      test: [CMD, curl, --fail, --silent, --show-error, http://127.0.0.1:3000]
 
   mem0:
     image: ${REGISTRY:-localhost:32443/ai-crew-suite}/mem0-container:${IMAGE_TAG:-latest}
@@ -44,13 +44,19 @@ services:
       <<: *postgres-env
       MEM0_EMBEDDER_MODEL: "${MEM0_EMBEDDER_MODEL:-text-embedding-3-small}"
       MEM0_EMBEDDER_PROVIDER: "${MEM0_EMBEDDER_PROVIDER:-openai}"
+      MEM0_EMBEDDING_DIMENSIONS: "${MEM0_EMBEDDING_DIMENSIONS:-}"
       MEM0_LLM_MAX_TOKENS: "${MEM0_LLM_MAX_TOKENS:-}"
       MEM0_LLM_MODEL: "${MEM0_LLM_MODEL:-gpt-4o-mini}"
       MEM0_LLM_PROVIDER: "${MEM0_LLM_PROVIDER:-openai}"
       MEM0_LLM_TEMPERATURE: "${MEM0_LLM_TEMPERATURE:-}"
       MEM0_PROVIDER_API_KEY: "${MEM0_PROVIDER_API_KEY:-}"
+      MEM0_TELEMETRY: "${MEM0_TELEMETRY:-true}"
+      OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-http://host.docker.internal:11434}"
+      POSTGRES_COLLECTION_NAME: "${POSTGRES_COLLECTION_NAME:-memories}"
       JWT_SECRET: "${MEM0_JWT_SECRET:-}"
       AUTH_DISABLED: "${MEM0_AUTH_DISABLED:-true}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       default:
         aliases:
@@ -83,7 +89,7 @@ services:
       - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
     healthcheck:
       <<: *healthcheck
-      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0]
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:9090]
 
   redis:
     image: redis:8.10-alpine
@@ -102,7 +108,7 @@ services:
       REDIS_ADDR: redis://redis:6379
     healthcheck:
       <<: *healthcheck
-      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0]
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:9121]
 
   tempo:
     image: ${REGISTRY:-localhost:32443/ai-crew-suite}/tempo-container:${IMAGE_TAG:-latest}
