@@ -95,6 +95,11 @@ program
     'image:test:structure',
     'Execute declarative container structure tests using configuration blueprints',
     createCommandOpts('image-test-structure'),
+  )
+  .command(
+    'wiremock:seeder',
+    'Seed running WireMock instances with programmatic vendor mock blueprints or localized rule files',
+    createCommandOpts('wiremock-seeder'),
   );
 
 program.parse(process.argv);

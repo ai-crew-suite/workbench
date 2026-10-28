@@ -30,7 +30,7 @@ export class ImageBuilder {
   constructor(private buildService = new DockerBuildService()) {}
 
   /**
-   * Sweeps up temporary artifacts and prunes dangling system layers safely
+   * Removes temporary artifacts and attempts to prune dangling images.
    */
   async executeCleanup(repoRoot: string, targetName: string): Promise<void> {
     const prunedDir = join(repoRoot, `out-${targetName}`);
@@ -41,7 +41,11 @@ export class ImageBuilder {
     }
 
     console.log(chalk.gray('✂️ Pruning dangling Docker images over Unix socket connection...'));
-    await this.buildService.pruneImages();
+    try {
+      await this.buildService.pruneImages();
+    } catch (error) {
+      console.warn(chalk.yellow('⚠️ Unable to prune dangling images; continuing without image cleanup:'), error);
+    }
   }
 
   /**

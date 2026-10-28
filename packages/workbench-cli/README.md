@@ -69,6 +69,11 @@ workbench lint --fix
 | **`workbench build`**              | Wraps backstage-cli package compilation rules.                                | Cacheable (`dist/**`)     |
 | **`workbench format`**             | Run automated text style formatting across the workspace layout via Prettier. | Cacheable                 |
 
+`workbench image:build` removes temporary build directories and attempts to prune
+dangling images after each build. Image-prune failures, including images in use
+by containers, are reported as warnings and do not change the build or push
+result. Images and containers are not force-removed.
+
 ## 💻 Local CLI Development Workflow
 
 When actively refactoring or changing the CLI package itself, Vitest and `tsx` bypass the `dist/` compilation loop entirely to let you validate source files instantly from the live, raw `src/` tree with no stale cache leakage:

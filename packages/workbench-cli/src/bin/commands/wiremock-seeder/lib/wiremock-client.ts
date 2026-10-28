@@ -13,34 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 export class WireMockClient {
   private readonly adminUrl: string;
   private readonly timeoutMs: number;
 
   constructor(
-    baseUrl = process.env['MOCK_PROXY_URL'] || 'http://localhost:8080',
+    baseUrl = 'http://localhost:8080',
     options?: { timeoutMs?: number }
   ) {
     this.adminUrl = `${baseUrl.replace(/\/$/, '')}/__admin`;
-    this.timeoutMs = options?.timeoutMs || 5000; // Safe default timeout prevents hanging processes
+    this.timeoutMs = options?.timeoutMs || 5000;
   }
 
-  /**
-   * Helper utility to handle fetch requests safely with a strict request timeout window
-   */
   private async safeFetch(url: string, init?: RequestInit): Promise<Response> {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), this.timeoutMs);
 
     try {
-      const response = await fetch(url, {
+      return await fetch(url, {
         ...init,
         signal: controller.signal,
       });
-      return response;
     } catch (error: any) {
       if (error.name === 'AbortError') {
         throw new Error(`[WireMock] Network request timed out after ${this.timeoutMs}ms targeting: ${url}`);
@@ -73,24 +69,6 @@ export class WireMockClient {
     }
   }
 
-  async verifyRequestEmitted(method: string, urlPattern: string): Promise<boolean> {
-    const res = await this.safeFetch(`${this.adminUrl}/requests/count`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ method, urlPattern }),
-    });
-
-    if (!res.ok) {
-      throw new Error(`[WireMock] Failed request count verification: ${await res.text()}`);
-    }
-
-    const data = (await res.json()) as { count: number };
-    return data.count > 0;
-  }
-
-  /**
-   * Reads a folder containing WireMock JSON mappings and pushes them directly into the API plane
-   */
   async uploadDirectory(directoryPath: string): Promise<void> {
     if (!fs.existsSync(directoryPath)) {
       console.warn(`[WireMock Bootstrapper] Target directory not found at path: ${directoryPath}`);
@@ -116,4 +94,3 @@ export class WireMockClient {
     }
   }
 }
-

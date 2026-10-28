@@ -16,8 +16,6 @@
 import { paymentServiceAnnotations } from './fixtures/paymentService';
 import type { EntityAnnotationFixture } from './types';
 
-export type { EntityAnnotationFixture } from './types';
-
 export const annotationsFixtureRegistry: EntityAnnotationFixture[] = [
   paymentServiceAnnotations
 ];

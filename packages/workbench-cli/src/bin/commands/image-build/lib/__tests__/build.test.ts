@@ -38,7 +38,7 @@ vi.mock('tar', () => ({
   c: vi.fn().mockReturnValue('mock-tar-stream'),
 }));
 
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync } from 'node:fs';
 
 describe('ImageBuilder Unified Core Suite', () => {
   let mockBuildService: any;
@@ -93,4 +93,48 @@ describe('ImageBuilder Unified Core Suite', () => {
     expect(mockBuildService.build).toHaveBeenCalled();
     expect(mockBuildService.pushImage).toHaveBeenCalledWith('local/worker-service:latest');
   });
+
+  it('warns without failing a successful build when pruning encounters an image in use', async () => {
+    vi.stubEnv('CI', 'false');
+    const pruneError = new Error('image is in use by a container');
+    mockBuildService.pruneImages.mockRejectedValue(pruneError);
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const builder = new ImageBuilder(mockBuildService as unknown as DockerBuildService);
+    vi.spyOn(builder, 'resolveMetadataLabels').mockReturnValue({});
+
+    await expect(
+      builder.compileImage('/root', 'mem0-container', '/root/packages/mem0', {
+        registry: 'local',
+        imageTag: 'latest',
+      })
+    ).resolves.toBeUndefined();
+
+    expect(vi.mocked(rmSync)).toHaveBeenCalledWith('/root/out-mem0-container', { recursive: true, force: true });
+    expect(mockBuildService.pruneImages).toHaveBeenCalledOnce();
+    expect(warning).toHaveBeenCalledWith(expect.stringContaining('Unable to prune dangling images'), pruneError);
+  });
+
+  it.each(['build', 'pushImage'] as const)(
+    'preserves a %s failure when image pruning also fails',
+    async (operation) => {
+      vi.stubEnv('CI', 'true');
+      const operationError = new Error(`${operation} failed`);
+      const pruneError = new Error('daemon unavailable');
+      mockBuildService[operation].mockRejectedValue(operationError);
+      mockBuildService.pruneImages.mockRejectedValue(pruneError);
+      const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const builder = new ImageBuilder(mockBuildService as unknown as DockerBuildService);
+      vi.spyOn(builder, 'resolveMetadataLabels').mockReturnValue({});
+
+      await expect(
+        builder.compileImage('/root', 'mem0-container', '/root/packages/mem0', {
+          registry: 'local',
+          imageTag: 'latest',
+        })
+      ).rejects.toBe(operationError);
+
+      expect(mockBuildService.pruneImages).toHaveBeenCalledOnce();
+      expect(warning).toHaveBeenCalledWith(expect.stringContaining('Unable to prune dangling images'), pruneError);
+    }
+  );
 });

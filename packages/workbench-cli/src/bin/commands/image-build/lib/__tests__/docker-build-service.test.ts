@@ -102,4 +102,13 @@ describe('Docker Build Service Unit Suite', () => {
 
     await expect(service.build({} as NodeJS.ReadableStream, buildOptions)).rejects.toThrow('daemon exploded');
   });
+
+  it('prunes only dangling images without forcing removal', async () => {
+    const pruneImages = vi.fn().mockResolvedValue({});
+    const service = new DockerBuildService({ pruneImages } as unknown as Docker);
+
+    await service.pruneImages();
+
+    expect(pruneImages).toHaveBeenCalledWith({ filters: JSON.stringify({ dangling: ['true'] }) });
+  });
 });

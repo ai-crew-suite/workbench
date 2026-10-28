@@ -53,11 +53,12 @@ COPY --from=builder /build/server /app/server
 
 # Copy your local configuration blueprint and entrypoint gatekeeper
 COPY packages/deploy/containers/mem0/src/config.yaml /app/config.yaml
-COPY packages/deploy/containers/mem0/src/entrypoint.sh /usr/local/bin/entrypoint.sh
 
-RUN chmod +x /usr/local/bin/entrypoint.sh \
-    && groupadd --system --gid 1001 mem0group \
-    && useradd --system --uid 1001 --gid mem0group --create-home mem0user \
+# hadolint ignore=DL3021
+COPY --chmod=0755 packages/deploy/containers/mem0/src/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+RUN groupadd -g 1001 mem0group \
+    && useradd -u 1001 --gid mem0group --create-home --shell /bin/bash mem0user \
     && chown -R mem0user:mem0group /app
 
 USER 1001
