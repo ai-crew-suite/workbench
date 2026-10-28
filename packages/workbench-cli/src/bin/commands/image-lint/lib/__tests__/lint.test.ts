@@ -33,11 +33,13 @@ describe('runImagesLint Engine & Router', () => {
   let repoRoot: string;
 
   beforeEach(() => {
+    // Reset before installing spies: vi.resetAllMocks() also resets implementations
+    // installed by vi.spyOn, which would otherwise neutralize the cwd stub below
+    vi.resetAllMocks();
     repoRoot = mkdtempSync(join(tmpdir(), 'crew-docker-lint-'));
     // Fix: Placing backstage.json at the exact folder level root ensures workspace discovery runs cleanly
     writeFileSync(join(repoRoot, 'backstage.json'), '{}', 'utf8');
     vi.spyOn(process, 'cwd').mockReturnValue(repoRoot);
-    vi.resetAllMocks();
   });
 
   afterEach(() => {

@@ -36,24 +36,21 @@ describe('DockerService Unit Suite', () => {
     });
   });
 
-  it('pushImage should pull the exact remote RepoDigest string matching the destination registry path', async () => {
+  it('pushImage should resolve the exact remote digest from the terminal push status frame', async () => {
     const mockStream = {};
     const mockImage = {
       push: vi.fn().mockResolvedValue(mockStream),
-      inspect: vi.fn().mockResolvedValue({
-        RepoDigests: [
-          // Simulate the typical Docker engine output containing both storage keys
-          'docker.io/local/grafana@sha256:localhashxxx',
-          'localhost:32443/ai-crew-suite/grafana@sha256:true-remote-digest-hash-abc'
-        ],
-      }),
     };
 
     const mockDockerInstance = {
       getImage: vi.fn().mockReturnValue(mockImage),
       modem: {
-        // Automatically mock streaming loop completions successfully
-        followProgress: vi.fn((stream, cb) => cb(null, [])),
+        // Simulate the daemon's terminal push status frame, mirroring docker CLI output
+        followProgress: vi.fn((stream, onFinished, onProgress) => {
+          onProgress({ status: 'The push refers to repository [localhost:32443/ai-crew-suite/grafana]' });
+          onProgress({ status: `latest: digest: sha256:${'deadbeef'.repeat(8)} size: 2003` });
+          onFinished(null, []);
+        }),
       },
     } as unknown as Docker;
 
@@ -63,18 +60,40 @@ describe('DockerService Unit Suite', () => {
     const digestResult = await service.pushImage(targetTag);
 
     expect(mockImage.push).toHaveBeenCalled();
-    // Verify it ignored the local storage digest and extracted the absolute Zot reference path
-    expect(digestResult).toBe('localhost:32443/ai-crew-suite/grafana@sha256:true-remote-digest-hash-abc');
+    // Verify it composed the absolute registry reference from the pushed manifest digest
+    expect(digestResult).toBe(`localhost:32443/ai-crew-suite/grafana@sha256:${'deadbeef'.repeat(8)}`);
   });
 
-  it('pushImage should throw a declarative error if no matching distribution registry digest exists', async () => {
+  it('pushImage should surface push stream error frames as declarative failures', async () => {
     const mockImage = {
       push: vi.fn().mockResolvedValue({}),
-      inspect: vi.fn().mockResolvedValue({ RepoDigests: [] }),
     };
+
     const mockDockerInstance = {
       getImage: vi.fn().mockReturnValue(mockImage),
-      modem: { followProgress: vi.fn((stream, cb) => cb(null, [])) },
+      modem: {
+        followProgress: vi.fn((stream, onFinished, onProgress) => {
+          onProgress({ errorDetail: { message: 'denied: requested access to the resource is denied' } });
+          onFinished(null, []);
+        }),
+      },
+    } as unknown as Docker;
+
+    const service = new DockerService(mockDockerInstance);
+
+    await expect(service.pushImage('localhost:32443/ai-crew-suite/grafana:latest'))
+      .rejects
+      .toThrow('Remote registry push stream failed');
+  });
+
+  it('pushImage should throw a declarative error if the push stream contains no digest frame', async () => {
+    const mockImage = {
+      push: vi.fn().mockResolvedValue({}),
+    };
+
+    const mockDockerInstance = {
+      getImage: vi.fn().mockReturnValue(mockImage),
+      modem: { followProgress: vi.fn((stream, onFinished) => onFinished(null, [])) },
     } as unknown as Docker;
 
     const service = new DockerService(mockDockerInstance);

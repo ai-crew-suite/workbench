@@ -46,7 +46,6 @@
     "commander": "catalog:prod",
     "dockerode": "catalog:prod",
     "dotenv": "catalog:prod",
-    "sigstore": "catalog:prod",
     "tar": "catalog:prod"
   },
   "devDependencies": {

@@ -19,11 +19,17 @@ import { DockerBuildService } from '../docker-build-service.js';
 
 vi.mock('node:fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('node:fs')>();
-  return {
-    ...actual,
-    existsSync: vi.fn().mockReturnValue(true),
+  // Shared mock instances guarantee the named export bindings observed by the
+  // module under test reference the exact same test doubles as the test file
+  const mocked = {
+    existsSync: vi.fn(),
     readFileSync: vi.fn(),
     rmSync: vi.fn(),
+  };
+  return {
+    ...actual,
+    ...mocked,
+    default: { ...actual, ...mocked },
   };
 });
 
@@ -32,13 +38,15 @@ vi.mock('tar', () => ({
   c: vi.fn().mockReturnValue('mock-tar-stream'),
 }));
 
-import fs from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 describe('ImageBuilder Unified Core Suite', () => {
   let mockBuildService: any;
 
   beforeEach(() => {
     vi.resetAllMocks();
+    // Re-establish baseline filesystem presence after the reset clears factory implementations
+    vi.mocked(existsSync).mockReturnValue(true);
     mockBuildService = {
       build: vi.fn().mockResolvedValue(undefined),
       pruneImages: vi.fn().mockResolvedValue(undefined),
@@ -53,7 +61,7 @@ describe('ImageBuilder Unified Core Suite', () => {
 
   it('assembles a localized development target image extracting full package label metrics', async () => {
     // Fix: Return an object with name populated matching package.json specifications
-    vi.spyOn(fs, 'readFileSync').mockReturnValue(
+    vi.mocked(readFileSync).mockReturnValue(
       JSON.stringify({
         name: '@ai-crew-suite/gateway-service',
         description: 'Gateway edge runtime component',
@@ -72,7 +80,7 @@ describe('ImageBuilder Unified Core Suite', () => {
 
   it('triggers a sequential out-of-band registry push when operating in CI environment frames', async () => {
     vi.stubEnv('CI', 'true');
-    vi.spyOn(fs, 'readFileSync').mockReturnValue('{}');
+    vi.mocked(readFileSync).mockReturnValue('{}');
 
     const builder = new ImageBuilder(mockBuildService as unknown as DockerBuildService);
     vi.spyOn(builder, 'resolveMetadataLabels').mockReturnValue({});

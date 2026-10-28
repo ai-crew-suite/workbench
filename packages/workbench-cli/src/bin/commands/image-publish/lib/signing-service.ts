@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import sign from 'sigstore';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 
 export interface SignerOptions {
@@ -24,31 +24,54 @@ export interface SignerOptions {
 
 export class SigningService {
   /**
-   * Cryptographically locks a specific OCI manifest digest using the native Sigstore client.
+   * Cryptographically signs a specific OCI manifest digest reference and publishes
+   * the resulting signature artifact to the target registry via the native Cosign
+   * client. The Cosign binary is the only component that implements the registry
+   * signature upload flow (`sha256-<digest>.sig` OCI artifact) that `cosign verify`
+   * consumes, so it is invoked directly.
    */
   async signDigest(imageDigest: string, options: SignerOptions): Promise<void> {
     const { isCI, keyPath, cosignPass } = options;
 
-    // Convert the image digest format (repo@sha256:xxxx) into a raw buffer payload for sigstore processing
-    const payloadToSign = Buffer.from(imageDigest);
+    const cosignArgs = ['sign', '--yes', imageDigest];
+    let spawnEnv: NodeJS.ProcessEnv | undefined;
 
     if (isCI) {
-      // Keyless Configuration Profile via GitHub OIDC native fulfillment loop
-      await sign.sign(payloadToSign);
+      // Keyless profile: Cosign exchanges the ambient GitHub OIDC identity token for a
+      // short-lived Fulcio certificate (requires the id-token: write workflow permission)
+      // and publishes the certificate-bound signature to the registry transparency log.
     } else {
-      // Local Key-Based profile leveraging your secure passphrase context
-      if (!fs.existsSync(keyPath)) {
-        throw new Error(`Local static keypair missing at path: ${keyPath}`);
+      // Prefer the repo-root key file; fall back to the COSIGN_PRIVATE_KEY env parameter
+      // (GitHub Actions repository secret) so CI never materializes the key on disk
+      const keyRef = fs.existsSync(keyPath)
+        ? keyPath
+        : process.env['COSIGN_PRIVATE_KEY']
+          ? 'env://COSIGN_PRIVATE_KEY'
+          : undefined;
+
+      if (!keyRef) {
+        throw new Error(`No cosign private key found at '${keyPath}' or via COSIGN_PRIVATE_KEY env parameter`);
       }
 
-      const privateKey = fs.readFileSync(keyPath, 'utf8');
+      if (!cosignPass) {
+        throw new Error('COSIGN_PASSWORD env parameter missing');
+      }
 
-      // Native library invocation bypasses all CLI argument/deprecation barriers completely
-      await sign.sign(payloadToSign, {
-        rekorURL: '', // Completely mutes public log handshakes for air-gapped/local registry states
-        fulcioURL: '',
-        identityToken: undefined,
-      });
+      cosignArgs.push(
+        '--key', keyRef,
+        '--allow-http-registry=true',
+        // cosign v3 defaults to the TUF signing config; both flags are required to skip the public transparency log
+        '--use-signing-config=false',
+        '--tlog-upload=false',
+      );
+
+      spawnEnv = { ...process.env, COSIGN_PASSWORD: cosignPass };
+    }
+
+    const result = spawnSync('cosign', cosignArgs, { stdio: 'inherit', env: spawnEnv });
+
+    if (result.status !== 0) {
+      throw new Error(`Cosign signature pipeline exited with failure status code ${result.status}`);
     }
   }
 }

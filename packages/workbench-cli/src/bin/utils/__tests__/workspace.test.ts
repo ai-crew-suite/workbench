@@ -19,19 +19,18 @@ import { join } from 'node:path';
 // Virtualize filesystem checks completely to preserve hermetic test isolation
 vi.mock('node:fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('node:fs')>();
-  return {
-    ...actual,
+  // Shared mock instances guarantee the default export view and the named export
+  // bindings observed by the module under test reference the exact same test doubles
+  const mocked = {
     existsSync: vi.fn(),
     readdirSync: vi.fn(),
     statSync: vi.fn(),
     readFileSync: vi.fn(),
-    default: {
-      ...actual,
-      existsSync: vi.fn(),
-      readdirSync: vi.fn(),
-      statSync: vi.fn(),
-      readFileSync: vi.fn(),
-    }
+  };
+  return {
+    ...actual,
+    ...mocked,
+    default: { ...actual, ...mocked },
   };
 });
 
@@ -48,8 +47,8 @@ describe('Workspace Context Utilities Engine', () => {
   const originalPlatform = process.platform;
 
   beforeEach(() => {
-    vi.spyOn(process, 'cwd').mockReturnValue(mockCwd);
     vi.resetAllMocks();
+    vi.spyOn(process, 'cwd').mockReturnValue(mockCwd);
   });
 
   afterEach(() => {
@@ -62,7 +61,8 @@ describe('Workspace Context Utilities Engine', () => {
       vi.mocked(fs.existsSync).mockImplementation((targetPath: any) => {
         if (typeof targetPath === 'string') {
           const normalized = targetPath.replace(/\\/g, '/');
-          return normalized.endsWith('backstage.json') && normalized.includes('/home/user/repo');
+          // Only the exact repo root anchor resolves; nested directories must miss
+          return normalized === '/home/user/repo/backstage.json';
         }
         return false;
       });

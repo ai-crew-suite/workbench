@@ -14,74 +14,119 @@
  * limitations under the License.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { SigningService } from '../signing-service.js';
-import sign from 'sigstore';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import { SigningService } from '../signing-service.js';
 
-// Intercept sigstore binary calls out-of-band
-vi.mock('sigstore', () => ({
-  default: {
-    sign: vi.fn().mockResolvedValue({}),
-  },
-  sign: vi.fn().mockResolvedValue({}),
-}));
+// Intercept native cosign invocations while preserving remaining child_process exports
+vi.mock('node:child_process', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:child_process')>();
+  const spawnSync = vi.fn().mockReturnValue({ status: 0 });
+  return { ...actual, spawnSync, default: { ...actual, spawnSync } };
+});
+
+const imageDigest = 'localhost:32443/ai-crew-suite/grafana@sha256:e743b0e413d4d59dba9d2bff26b65476306b875e93fe278a57f4a4377ff0a41a';
 
 describe('SigningService Unit Suite', () => {
   beforeEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
-  it('should run a keyless OIDC sign sequence when executing in CI contexts', async () => {
-    const service = new SigningService();
-    const digest = 'localhost:32443/ai-crew-suite/grafana@sha256:e743b0e413d4d59dba9d2bff26b65476306b875e93fe278a57f4a4377ff0a41a';
-
-    await service.signDigest(digest, {
-      isCI: true,
-      keyPath: '/fake/root/cosign.key',
-    });
-
-    // Keyless triggers minimal sigstore parameters allowing ambient OIDC fulfillment
-    expect(sign.sign).toHaveBeenCalledWith(Buffer.from(digest));
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllEnvs();
   });
 
   it('should run an offline local static key-pair sequence when on a local workstation', async () => {
-    // Intercept fs calls to cleanly trick key validation checks
     const existsSpy = vi.spyOn(fs, 'existsSync').mockReturnValue(true);
-    const readSpy = vi.spyOn(fs, 'readFileSync').mockReturnValue('-----BEGIN RSA PRIVATE KEY-----\nmock\n-----END RSA PRIVATE KEY-----');
 
     const service = new SigningService();
-    const digest = 'localhost:32443/ai-crew-suite/grafana@sha256:e743b0e413d4d59dba9d2bff26b65476306b875e93fe278a57f4a4377ff0a41a';
-
-    await service.signDigest(digest, {
+    await service.signDigest(imageDigest, {
       isCI: false,
       keyPath: '/fake/root/cosign.key',
       cosignPass: 'secure-workbench-password',
     });
 
-    // Verifies it completely blanked out transparency log endpoints to force a local offline signing workflow
-    expect(sign.sign).toHaveBeenCalledWith(
-      Buffer.from(digest),
+    expect(spawnSync).toHaveBeenCalledWith(
+      'cosign',
+      expect.arrayContaining([
+        'sign',
+        '--yes',
+        '--key',
+        '/fake/root/cosign.key',
+        '--allow-http-registry=true',
+        '--use-signing-config=false',
+        '--tlog-upload=false',
+        imageDigest,
+      ]),
       expect.objectContaining({
-        rekorURL: '',
-        fulcioURL: '',
-        identityToken: undefined,
+        env: expect.objectContaining({ COSIGN_PASSWORD: 'secure-workbench-password' }),
       })
     );
 
     existsSpy.mockRestore();
-    readSpy.mockRestore();
   });
 
-  it('should throw an error if a local key-based profile runs without a keyfile on disk', async () => {
+  it('should fall back to the COSIGN_PRIVATE_KEY env parameter when no key file exists', async () => {
     const existsSpy = vi.spyOn(fs, 'existsSync').mockReturnValue(false);
+    vi.stubEnv('COSIGN_PRIVATE_KEY', '-----BEGIN ENCRYPTED COSIGN PRIVATE KEY-----mock');
+
+    const service = new SigningService();
+    await service.signDigest(imageDigest, {
+      isCI: false,
+      keyPath: '/fake/root/cosign.key',
+      cosignPass: 'secure-workbench-password',
+    });
+
+    expect(spawnSync).toHaveBeenCalledWith(
+      'cosign',
+      expect.arrayContaining(['--key', 'env://COSIGN_PRIVATE_KEY']),
+      expect.objectContaining({
+        env: expect.objectContaining({ COSIGN_PASSWORD: 'secure-workbench-password' }),
+      })
+    );
+
+    existsSpy.mockRestore();
+  });
+
+  it('should run a keyless OIDC sign sequence when executing in CI contexts', async () => {
     const service = new SigningService();
 
+    await service.signDigest(imageDigest, {
+      isCI: true,
+      keyPath: '/fake/root/cosign.key',
+    });
+
+    // Keyless profile triggers minimal cosign parameters allowing ambient OIDC fulfillment
+    expect(spawnSync).toHaveBeenCalledWith('cosign', ['sign', '--yes', imageDigest], {
+      stdio: 'inherit',
+      env: undefined,
+    });
+  });
+
+  it('should throw an error if a local key-based profile runs without any key material', async () => {
+    const existsSpy = vi.spyOn(fs, 'existsSync').mockReturnValue(false);
+
+    const service = new SigningService();
     await expect(
-      service.signDigest('localhost:32443/ai-crew-suite/grafana@sha256:123', {
+      service.signDigest(imageDigest, { isCI: false, keyPath: '/non-existent/cosign.key' })
+    ).rejects.toThrow('No cosign private key found');
+
+    existsSpy.mockRestore();
+  });
+
+  it('should throw an error if the cosign child process exits with a failure status', async () => {
+    vi.mocked(spawnSync).mockReturnValueOnce({ status: 1 } as any);
+    const existsSpy = vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+
+    const service = new SigningService();
+    await expect(
+      service.signDigest(imageDigest, {
         isCI: false,
-        keyPath: '/non-existent/cosign.key',
+        keyPath: '/fake/root/cosign.key',
+        cosignPass: 'secure-workbench-password',
       })
-    ).rejects.toThrow('Local static keypair missing at path');
+    ).rejects.toThrow('Cosign signature pipeline exited with failure status code 1');
 
     existsSpy.mockRestore();
   });

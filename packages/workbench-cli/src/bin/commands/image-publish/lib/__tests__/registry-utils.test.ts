@@ -18,14 +18,14 @@ import { normalizeTargetName, resolveTargetTags } from '../registry-utils.js';
 
 describe('Registry Utilities Unit Suite', () => {
   describe('normalizeTargetName', () => {
-    it('should strip scoped namespaces and container suffixes cleanly', () => {
-      expect(normalizeTargetName('@ai-crew-suite/grafana-container')).toBe('grafana');
-      expect(normalizeTargetName('workbench-temporal-container')).toBe('temporal');
-      expect(normalizeTargetName('backend')).toBe('backend');
+    it('should strip scoped package namespaces while preserving the full name tail', () => {
+      expect(normalizeTargetName('@ai-crew-suite/grafana-container')).toBe('grafana-container');
+      expect(normalizeTargetName('temporal-container')).toBe('temporal-container');
     });
 
-    it('should handle un-scoped container names gracefully', () => {
-      expect(normalizeTargetName('frontend-container')).toBe('frontend');
+    it('should pass un-scoped names through verbatim without suffix mutation', () => {
+      expect(normalizeTargetName('frontend-container')).toBe('frontend-container');
+      expect(normalizeTargetName('backend')).toBe('backend');
     });
   });
 
@@ -34,18 +34,19 @@ describe('Registry Utilities Unit Suite', () => {
       const registry = 'localhost:32443/ai-crew-suite';
       const result = resolveTargetTags('@ai-crew-suite/temporal-container', registry, 'v1.0.0');
 
-      expect(result.localSourceTag).toBe('local/temporal:v1.0.0');
+      // Local tags must mirror the exact names emitted by the image:build pipeline
+      expect(result.localSourceTag).toBe('local/temporal-container:v1.0.0');
       // Zot uses un-prefixed namespaces natively
-      expect(result.remoteTargetTag).toBe('localhost:32443/ai-crew-suite/temporal:v1.0.0');
+      expect(result.remoteTargetTag).toBe('localhost:32443/ai-crew-suite/temporal-container:v1.0.0');
     });
 
     it('should append the workbench prefix for remote distribution clouds like GHCR', () => {
       const registry = 'ghcr.io/ai-crew-suite';
       const result = resolveTargetTags('mem0-container', registry, 'latest');
 
-      expect(result.localSourceTag).toBe('local/mem0:latest');
+      expect(result.localSourceTag).toBe('local/mem0-container:latest');
       // Non-Zot registries require standard repository structural naming prefixes
-      expect(result.remoteTargetTag).toBe('ghcr.io/ai-crew-suite/workbench-mem0:latest');
+      expect(result.remoteTargetTag).toBe('ghcr.io/ai-crew-suite/workbench-mem0-container:latest');
     });
   });
 });

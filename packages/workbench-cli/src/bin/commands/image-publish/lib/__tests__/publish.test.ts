@@ -19,6 +19,13 @@ import { DockerService } from '../docker-service.js';
 import { SigningService } from '../signing-service.js';
 import fs from 'node:fs';
 
+// Intercept host binary discovery checks (hasBinary) while preserving remaining exports
+vi.mock('node:child_process', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:child_process')>();
+  const spawnSync = vi.fn().mockReturnValue({ status: 0 });
+  return { ...actual, spawnSync, default: { ...actual, spawnSync } };
+});
+
 describe('ImagePublisher Core Quality Pipeline', () => {
   const originalEnv = process.env;
 
@@ -69,7 +76,6 @@ describe('ImagePublisher Core Quality Pipeline', () => {
         cosignPass: 'mock-secure-pass',
       })
     );
-
     existsSyncSpy.mockRestore();
   });
 });

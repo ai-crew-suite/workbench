@@ -16,7 +16,7 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import chalk from 'chalk';
-import { findRepoRoot, discoverContainerTargets } from '../../../utils/workspace';
+import { findRepoRoot, discoverContainerTargets, hasBinary } from '../../../utils/workspace';
 import { resolveTargetTags, normalizeTargetName } from './registry-utils';
 import { DockerService } from './docker-service';
 import { SigningService } from './signing-service';
@@ -50,20 +50,40 @@ export class ImagePublisher {
     const keyPath = path.resolve(repoRoot, 'cosign.key');
     const cosignPass = process.env['COSIGN_PASSWORD'];
 
-    if (isCI || (fs.existsSync(keyPath) && cosignPass)) {
-      console.log(chalk.cyan(`\n🔏 Cryptographically signing image via Native Sigstore SDK...`));
-      console.log(chalk.gray(`   Identity strategy: ${isCI ? 'Keyless OIDC Token Exchange' : 'Local Static Keypair'}`));
-
-      await this.signingService.signDigest(remoteTargetDigest, {
-        isCI,
-        keyPath,
-        cosignPass,
-      });
-
-      console.log(chalk.green(`🔑 Cryptographic signature verified and attached to Zot container context!`));
-    } else {
-      console.log(chalk.gray(`\nℹ️  Skipping image signing: Sign conditions not met.`));
+    // Cryptographically sign the published digest via the native Cosign client
+    if (!hasBinary('cosign')) {
+      console.log(chalk.gray(`\nℹ️  Skipping image signing: cosign binary not found on host PATH.`));
+      return;
     }
+
+    if (isCI) {
+      // Keyless profile: Cosign exchanges the ambient GitHub OIDC identity token for a
+      // short-lived Fulcio certificate and publishes the signature to the registry
+      console.log(chalk.cyan(`\n🔏 Cryptographically signing image via Cosign keyless OIDC identity...`));
+
+      await this.signingService.signDigest(remoteTargetDigest, { isCI: true, keyPath });
+
+      console.log(chalk.green(`🔑 Cryptographic signature verified and attached to registry context!`));
+      return;
+    }
+
+    // Local profile: prefer the repo-root key file; fall back to the COSIGN_PRIVATE_KEY
+    // env parameter (GitHub Actions repository secret) via cosign's env:// key reference
+    const hasKey = fs.existsSync(keyPath) || Boolean(process.env['COSIGN_PRIVATE_KEY']);
+
+    if (!hasKey || !cosignPass) {
+      const reason = !hasKey
+        ? `no cosign private key found at '${keyPath}' or via COSIGN_PRIVATE_KEY env parameter`
+        : 'COSIGN_PASSWORD env parameter missing';
+      console.log(chalk.gray(`\nℹ️  Skipping image signing: ${reason}.`));
+      return;
+    }
+
+    console.log(chalk.cyan(`\n🔏 Cryptographically signing image via Cosign static keypair...`));
+
+    await this.signingService.signDigest(remoteTargetDigest, { isCI: false, keyPath, cosignPass });
+
+    console.log(chalk.green(`🔑 Cryptographic signature verified and attached to registry context!`));
   }
 }
 

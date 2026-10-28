@@ -19,12 +19,14 @@ export interface TargetTags {
 }
 
 /**
- * Normalizes user-supplied or Turborepo filter strings into a clean image name.
- * Handles targets like "@ai-crew-suite/grafana-container", "grafana-container", etc.
+ * Normalizes user-supplied or Turborepo filter strings into a clean target name.
+ * Strips scoped package namespaces only: "@ai-crew-suite/temporal-container"
+ * becomes "temporal-container". The full name tail is preserved verbatim because
+ * `discoverContainerTargets` indexes targets and `image:build` emits local tags
+ * using the exact package name tail (e.g. `local/temporal-container:latest`).
  */
 export function normalizeTargetName(target: string): string {
-  const base = target.split('/').pop() || target;
-  return base.replace(/^workbench-/, '').replace(/-container$/, '');
+  return target.split('/').pop() || target;
 }
 
 /**

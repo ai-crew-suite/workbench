@@ -43,31 +43,48 @@ export class DockerService {
 
   /**
    * Streams layer blobs to the target registry and returns the definitive RepoDigest.
+   *
+   * The digest is captured from the daemon's terminal push status frame ("latest:
+   * digest: sha256:...") instead of `image.inspect().RepoDigests`, which can hold
+   * stale digests from previous pushes of different image content.
    */
   async pushImage(targetTag: string): Promise<string> {
     const image = this.docker.getImage(targetTag);
     const stream = await image.push({});
 
-    // Await stream completion via a clean event promise wrapper
+    let remoteDigest: string | undefined;
+    let streamError: string | undefined;
+
     await new Promise<void>((resolve, reject) => {
-      this.docker.modem.followProgress(stream, (err, res) => (err ? reject(err) : resolve()));
+      this.docker.modem.followProgress(
+        stream,
+        (err, res) => (err ? reject(err) : resolve()),
+        (event: any) => {
+          if (event.errorDetail || event.error) {
+            // Surface error frames that followProgress would otherwise swallow silently
+            streamError = event.errorDetail?.message ?? event.error;
+          } else if (typeof event.status === 'string') {
+            const digestMatch = event.status.match(/digest: (sha256:[a-f0-9]+)/);
+            if (digestMatch) {
+              remoteDigest = digestMatch[1];
+            }
+          }
+        }
+      );
     });
 
-    // Inspect image metadata directly via socket JSON to find the remote RepoDigest entry
-    const info = await image.inspect();
-    const repoDigests: string[] = info.RepoDigests || [];
+    if (streamError) {
+      throw new Error(`Remote registry push stream failed: ${streamError}`);
+    }
+
+    if (!remoteDigest) {
+      throw new Error(`Failed to isolate a remote distribution digest for target package reference: ${targetTag}`);
+    }
 
     // Isolate the base remote registry endpoint name before the tag colon as a guaranteed string
     const lastColonIndex = targetTag.lastIndexOf(':');
     const targetRepoBase = lastColonIndex !== -1 ? targetTag.substring(0, lastColonIndex) : targetTag;
 
-    // Find the specific string array element pointing strictly to your Zot path entry
-    const accurateDigest = repoDigests.find((digest) => digest.startsWith(targetRepoBase));
-
-    if (!accurateDigest) {
-      throw new Error(`Failed to isolate a remote distribution digest for target package reference: ${targetTag}`);
-    }
-
-    return accurateDigest;
+    return `${targetRepoBase}@${remoteDigest}`;
   }
 }
