@@ -12,6 +12,9 @@
     },
     "compose:ps": {
       "cache": false
+    },
+    "publish": {
+      "cache": false
     }
   }
 }

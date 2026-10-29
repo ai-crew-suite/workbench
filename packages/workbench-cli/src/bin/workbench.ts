@@ -77,6 +77,11 @@ program
     createCommandOpts('compose-lint'),
   )
   .command(
+    'compose:publish',
+    'Publish Docker compose services',
+    createCommandOpts('compose-publish'),
+  )
+  .command(
     'image:build',
     'Build and package monorepo container targets',
     createCommandOpts('image-build'),

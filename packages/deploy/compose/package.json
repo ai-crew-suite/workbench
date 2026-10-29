@@ -31,7 +31,7 @@
     "compose:logs": "docker compose logs -f",
     "compose:ps": "docker compose ps",
     "lint": "workbench compose:lint",
-    "publish:artifact": "workbench-cli compose:publish"
+    "publish": "workbench compose:publish"
   },
   "devDependencies": {
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
