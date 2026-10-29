@@ -78,6 +78,21 @@ To evaluate whether your compose files are syntactically valid and confirm that 
 yarn turbo run lint --filter=@ai-crew-suite/compose
 ```
 
+### Publishing the Compose artifact
+
+Install the ORAS CLI (version 1.2 or newer) and authenticate with the registry
+as needed. The publisher pushes the original Compose YAML as a Compose OCI
+artifact, without interpolating or including the local `.env` file. Review
+the YAML itself for hard-coded secrets before publishing. The default local
+registry uses HTTP; other registries use HTTPS unless `--plain-http` is passed.
+
+```bash
+yarn turbo run publish --filter=@ai-crew-suite/compose
+```
+
+For a non-loopback HTTP registry, run the CLI with `--plain-http` explicitly.
+Signing remains optional and uses Cosign when configured.
+
 ### Starting the Local Container Stack
 
 To spin up all backend, frontend, and mocking containers in a detached background state, execute:

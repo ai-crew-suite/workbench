@@ -24,6 +24,7 @@ program
   .description('Package and push the deploy compose configuration to Zot or GHCR as an OCI artifact')
   .addOption(new Option('-r, --registry <registry>', 'Target registry destination override').env('REGISTRY').default('localhost:32443/ai-crew-suite'))
   .addOption(new Option('-t, --tag <tag>', 'Artifact version tag').env('IMAGE_TAG').default('latest'))
+  .option('--plain-http', 'Use HTTP for an insecure registry (automatic for localhost)')
   .action(async (options) => {
     try {
       console.log(`\n${chalk.cyan('┌────────────────────────────────────────────────────────┐')}`);
@@ -33,6 +34,7 @@ program
       await runComposePublish({
         registry: options.registry,
         imageTag: options.tag,
+        plainHttp: options.plainHttp,
       });
 
       process.exitCode = 0;
