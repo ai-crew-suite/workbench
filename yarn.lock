@@ -246,6 +246,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@ai-crew-suite/ollama-container@workspace:packages/deploy/containers/ollama":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/ollama-container@workspace:packages/deploy/containers/ollama"
+  dependencies:
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    "@ai-crew-suite/workbench-cli": "workspace:^"
+    vitest: "catalog:dev"
+  languageName: unknown
+  linkType: soft
+
 "@ai-crew-suite/otel-container@workspace:packages/deploy/containers/otel":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/otel-container@workspace:packages/deploy/containers/otel"
@@ -313,16 +323,6 @@ __metadata:
   checksum: 10c0/24cd5ee953f803eecfd2e0cbbfaceb4749e1e77697e1653b1476031809b03c91e8e75c31f38bd83b0b0b9c551e5e21e7f800ef318660df02b4d10e8558ef84ba
   languageName: node
   linkType: hard
-
-"@ai-crew-suite/wiremock-container@workspace:packages/deploy/containers/wiremock":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/wiremock-container@workspace:packages/deploy/containers/wiremock"
-  dependencies:
-    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
-    "@ai-crew-suite/workbench-cli": "workspace:^"
-    vitest: "catalog:dev"
-  languageName: unknown
-  linkType: soft
 
 "@ai-crew-suite/workbench-backend@workspace:*, @ai-crew-suite/workbench-backend@workspace:packages/backstage/backend":
   version: 0.0.0-use.local

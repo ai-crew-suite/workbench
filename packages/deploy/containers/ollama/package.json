@@ -1,0 +1,36 @@
+{
+  "name": "@ai-crew-suite/ollama-container",
+  "description": "Ollama container for the AI Crew Suite platform",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "keywords": [
+    "ollama",
+    "ai-crew-suite",
+    "docker"
+  ],
+  "bugs": {
+    "url": "https://github.com/ai-crew-suite/workbench/issues",
+    "email": "support@ai-crew-suite.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai-crew-suite/workbench",
+    "directory": "packages/deploy/containers/ollama"
+  },
+  "scripts": {
+    "build": "workbench image:build ollama-container",
+    "lint": "workbench image:lint ollama-container",
+    "image:test:security": "workbench image:test:security ollama-container",
+    "image:test:structure": "workbench image:test:structure ollama-container",
+    "publish": "workbench image:publish ollama-container",
+    "test": "yarn image:test:security && yarn image:test:structure && yarn test:unit ollama-container",
+    "test:unit": "vitest run"
+  },
+  "devDependencies": {
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev",
+    "@ai-crew-suite/workbench-cli": "workspace:^",
+    "vitest": "catalog:dev"
+  }
+}

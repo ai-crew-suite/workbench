@@ -1,0 +1,35 @@
+schemaVersion: "2.0.0"
+
+metadataTest:
+  exposedPorts: ["11434"]
+
+commandTests:
+  - name: "Verify all baked-in models"
+    command: "bash"
+    args:
+      - "-c"
+      - |
+        set -eu
+        export OLLAMA_HOST=127.0.0.1:39431
+        ollama serve >/tmp/ollama-structure-test.log 2>&1 &
+        for attempt in {1..60}; do
+          if ollama list >/dev/null 2>&1; then
+            break
+          fi
+          sleep 1
+        done
+        if ! ollama list >/dev/null 2>&1; then
+          echo "Timed out waiting for the Ollama test server" >&2
+          cat /tmp/ollama-structure-test.log >&2
+          exit 1
+        fi
+        ollama show llama3.2:latest --modelfile >/dev/null
+        echo "Verified llama3.2:latest"
+        ollama show bge-m3:latest --modelfile >/dev/null
+        echo "Verified bge-m3:latest"
+        ollama show llama-guard3:1b --modelfile >/dev/null
+        echo "Verified llama-guard3:1b"
+    expectedOutput:
+      - "Verified llama3\\.2:latest"
+      - "Verified bge-m3:latest"
+      - "Verified llama-guard3:1b"
