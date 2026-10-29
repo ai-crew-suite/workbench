@@ -34,8 +34,6 @@ export class ComposeArtifactPublisher {
   async publishArtifact(options: ComposePublishOptions): Promise<void> {
     const { registry, imageTag, plainHttp } = options;
     const repoRoot = findRepoRoot(process.cwd());
-
-    // Resolve location of target workspace configuration
     const composeDir = path.resolve(repoRoot, 'packages/deploy/compose');
     const composeFile = path.resolve(composeDir, 'src/compose.yml');
 
@@ -48,7 +46,6 @@ export class ComposeArtifactPublisher {
     const isLoopback = registryHost === 'localhost' || registryHost.startsWith('localhost:')
       || registryHost === '127.0.0.1' || registryHost.startsWith('127.0.0.1:');
 
-    // Determine if we need to fall back to plain HTTP / insecure registries
     const useInsecure = plainHttp || isLoopback;
 
     console.log(`\n📦 Packaging compose manifest for [${chalk.yellow(remoteTargetTag)}]...`);
@@ -59,20 +56,23 @@ export class ComposeArtifactPublisher {
 
     console.log(chalk.blue(`🚀 Publishing the uninterpolated Compose file with ORAS...`));
 
-    // FIX: The working directory context is the parent folder of `compose.yml`.
-    // The target file inside `path.dirname(composeFile)` is exactly 'compose.yml'.
-    const pushResult = spawnSync('oras', [
+    const orasArgs: string[] = [
       'push',
       ...(useInsecure ? ['--plain-http'] : []),
       '--artifact-type', 'application/vnd.docker.compose.project',
       '--format', 'json',
+      '--annotation', 'org.opencontainers.image.title=AI Crew Suite Compose Deployment',
+      '--annotation', 'org.opencontainers.image.description=OCI Artifact bundle containing the official uninterpolated docker-compose.yml suite infrastructure configuration.',
+      '--annotation', 'org.opencontainers.image.vendor=AI Crew Suite',
       remoteTargetTag,
       'compose.yml:application/vnd.docker.compose.file+yaml',
-    ], { cwd: path.dirname(composeFile), stdio: 'pipe', encoding: 'utf-8' });
+    ];
 
-    if (pushResult.status !== 0) {
-      throw new Error(`Compose artifact push failed: ${pushResult.error?.message || pushResult.stderr || `exit status ${pushResult.status}`}`);
-    }
+    const pushResult = spawnSync('oras', orasArgs, {
+      cwd: path.dirname(composeFile),
+      stdio: 'pipe',
+      encoding: 'utf-8'
+    });
 
     let result: { digest?: unknown };
     try {
