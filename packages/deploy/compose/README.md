@@ -26,15 +26,23 @@ These commands are for maintaining and verifying the internal configuration stab
   `MEM0_LLM_PROVIDER`, `MEM0_EMBEDDER_PROVIDER`, their model variables, and
   optionally `MEM0_LLM_TEMPERATURE` and `MEM0_LLM_MAX_TOKENS`. Startup
   environment settings take precedence over saved API configuration on restart.
-- For a host Ollama server, `OLLAMA_BASE_URL` defaults to
-  `http://host.docker.internal:11434`; Compose maps that name to the host
-  gateway. On Linux, Ollama must listen on an address reachable from the Docker
-  bridge: a listener bound only to `127.0.0.1` cannot be reached this way.
-  Configure Ollama's `OLLAMA_HOST` and restart Ollama as needed. Binding to
-  `0.0.0.0` can expose the unauthenticated API to other networks, so restrict
-  access with a firewall or an appropriately scoped bind address.
+- Compose starts the Ollama image and waits for it to be healthy before
+  starting Mem0. `OLLAMA_BASE_URL` defaults to `http://ollama:11434`, using
+  Compose service discovery; Ollama's port is not published to the host.
+  The service uses `local/ollama-container:${IMAGE_TAG:-latest}` by default,
+  matching the local image build. Set `OLLAMA_IMAGE_REPOSITORY` to use a
+  published repository instead. Models baked into the image are available
+  without a volume; models pulled into a running container are lost when it
+  is recreated.
+- To use a host Ollama server instead, override `OLLAMA_BASE_URL` with a
+  reachable address such as `http://host.docker.internal:11434`. The name is
+  mapped to the host gateway, but a host listener bound only to `127.0.0.1`
+  cannot be reached this way. Exposing Ollama beyond loopback can make its
+  unauthenticated API accessible to other networks. The Compose Ollama service
+  is still started and required to be healthy even with a custom URL or OpenAI.
 - Set `MEM0_EMBEDDING_DIMENSIONS` to the actual output size of the Ollama
-  embedding model (4096 for `qwen3-embedding:8b`). For dimensions above 2000,
+  embedding model (1024 for `bge-m3`, or 4096 for `qwen3-embedding:8b`).
+  For dimensions above 2000,
   pgvector uses exact search rather than an HNSW vector index. Use a distinct
   `POSTGRES_COLLECTION_NAME` when changing embedding models or dimensions;
   existing collections are not migrated or deleted.
@@ -53,6 +61,13 @@ start containers. They require Python 3, Bash, `jq`, and `envsubst`:
 ```bash
 python3 -m unittest discover -s packages/deploy/compose/__tests__ -p 'test_service_entrypoints.py'
 python3 -m unittest discover -s packages/deploy/containers/mem0/__tests__ -p 'test_workbench_config.py'
+```
+
+The Compose configuration regression tests require Docker Compose, but do not
+start containers:
+
+```bash
+python3 -m unittest discover -s packages/deploy/compose/__tests__ -p 'test_compose_config.py'
 ```
 
 ### Validating Configuration Schemas and Variables

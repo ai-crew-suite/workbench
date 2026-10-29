@@ -38,6 +38,8 @@ services:
   mem0:
     image: ${REGISTRY:-localhost:32443/ai-crew-suite}/mem0-container:${IMAGE_TAG:-latest}
     depends_on:
+      ollama:
+        condition: service_healthy
       pgvector:
         condition: service_healthy
     environment:
@@ -51,7 +53,7 @@ services:
       MEM0_LLM_TEMPERATURE: "${MEM0_LLM_TEMPERATURE:-}"
       MEM0_PROVIDER_API_KEY: "${MEM0_PROVIDER_API_KEY:-}"
       MEM0_TELEMETRY: "${MEM0_TELEMETRY:-true}"
-      OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-http://host.docker.internal:11434}"
+      OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-http://ollama:11434}"
       POSTGRES_COLLECTION_NAME: "${POSTGRES_COLLECTION_NAME:-memories}"
       JWT_SECRET: "${MEM0_JWT_SECRET:-}"
       AUTH_DISABLED: "${MEM0_AUTH_DISABLED:-true}"
@@ -71,6 +73,14 @@ services:
       tempo:
         condition: service_started
     command: ["--config=/etc/otel-collector-config.yaml"]
+
+  ollama:
+    image: ${OLLAMA_IMAGE_REPOSITORY:-local/ollama-container}:${IMAGE_TAG:-latest}
+    environment:
+      OLLAMA_HOST: "0.0.0.0:11434"
+    healthcheck:
+      <<: *healthcheck
+      test: [CMD-SHELL, "OLLAMA_HOST=127.0.0.1:11434 ollama list >/dev/null"]
 
   pgvector:
     image: pgvector/pgvector:pg18
