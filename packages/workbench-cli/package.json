@@ -42,6 +42,7 @@
     "typecheck": "crew typecheck"
   },
   "dependencies": {
+    "@snyk/docker-registry-v2-client": "catalog:prod",
     "chalk": "catalog:prod",
     "commander": "catalog:prod",
     "dclint": "catalog:prod",
