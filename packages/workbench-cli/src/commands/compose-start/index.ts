@@ -13,28 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Command } from 'commander';
-import chalk from 'chalk';
-import { runComposeLint } from './src/runner';
+import { Command, Option } from 'commander';
+import type { CliCommandContext } from '@backstage/cli-node';
+import { startCompose } from './src/runner';
 
-const program = new Command();
-
-program
-  .name('compose:lint')
-  .description('Perform static analysis on workspace Docker Compose configurations')
-  .argument('[target]', 'Specific compose directory or file to lint (omitting lints all discovered compose files)')
-  .action(async (target) => {
-    try {
-      console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
-      console.log(`${chalk.magenta('│ 🔎 WORKBENCH CLI: Compose Static Analysis Lint Sequence│')}`);
-      console.log(`${chalk.magenta('└────────────────────────────────────────────────────────┘')}`);
-
-      await runComposeLint({ target });
-      process.exitCode = 0;
-    } catch (error) {
-      console.error(`\n${chalk.red('❌ Critical Compose Validation Engine Failure:')}`, error);
-      process.exitCode = 1;
-    }
-  });
-
-program.parse(process.argv);
+/** Starts the requested foreground development server and its shared stack. */
+export default async function execute({ args, info }: CliCommandContext): Promise<void> {
+  const program = new Command();
+  program
+    .name(info.usage)
+    .description('Start the shared Compose stack and an app or backend development server')
+    .argument('<target>', 'Development server: app or backend')
+    .addOption(new Option('-r, --registry <registry>', 'OCI registry and namespace').env('REGISTRY').default('ghcr.io/ai-crew-suite'))
+    .addOption(new Option('-t, --tag <tag>', 'Compose artifact tag').env('IMAGE_TAG').default('latest'))
+    .option('--plain-http', 'Use HTTP for an insecure registry (automatic for localhost)')
+    .action(async (target: string, options: { registry: string; tag: string; plainHttp?: boolean }) => {
+      if (target !== 'app' && target !== 'backend') throw new Error('Target must be app or backend.');
+      await startCompose({ target, ...options });
+    });
+  await program.parseAsync(args, { from: 'user' });
+}

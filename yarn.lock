@@ -53,11 +53,13 @@ __metadata:
     "@snyk/docker-registry-v2-client": "catalog:prod"
     "@types/dockerode": "catalog:dev"
     "@types/node": "catalog:dev"
+    "@types/proper-lockfile": "npm:^4.1.4"
     chalk: "catalog:prod"
     commander: "catalog:prod"
     dclint: "catalog:prod"
     dockerode: "catalog:prod"
     dotenv: "catalog:prod"
+    proper-lockfile: "npm:^4.1.2"
     rimraf: "catalog:dev"
     tar: "catalog:prod"
     typescript: "catalog:dev"
@@ -10892,6 +10894,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/proper-lockfile@npm:^4.1.4":
+  version: 4.1.4
+  resolution: "@types/proper-lockfile@npm:4.1.4"
+  dependencies:
+    "@types/retry": "npm:*"
+  checksum: 10c0/d597846d6f7860da2470623d3f11b6e5b39864719c3c18b5a5e55f783c5e432fe49dcdcf6341b3903428fdf103f2bdc68eba263ce1ce3cbe8070cbcb54bbf230
+  languageName: node
+  linkType: hard
+
 "@types/protocol-buffers-schema@npm:^3.4.3":
   version: 3.4.3
   resolution: "@types/protocol-buffers-schema@npm:3.4.3"
@@ -11005,6 +11016,13 @@ __metadata:
   version: 1.20.6
   resolution: "@types/resolve@npm:1.20.6"
   checksum: 10c0/a9b0549d816ff2c353077365d865a33655a141d066d0f5a3ba6fd4b28bc2f4188a510079f7c1f715b3e7af505a27374adce2a5140a3ece2a059aab3d6e1a4244
+  languageName: node
+  linkType: hard
+
+"@types/retry@npm:*":
+  version: 0.12.5
+  resolution: "@types/retry@npm:0.12.5"
+  checksum: 10c0/eaaca483cc62f2f02c0b8486847ee70986ca7f97afd7363037247dbe3e98df8bd56a5b50d58b1e96768a5a1be0307010d86e9991bd458d72e8df88be471bd720
   languageName: node
   linkType: hard
 

@@ -58,6 +58,7 @@
     "dclint": "catalog:prod",
     "dockerode": "catalog:prod",
     "dotenv": "catalog:prod",
+    "proper-lockfile": "^4.1.2",
     "tar": "catalog:prod"
   },
   "devDependencies": {
@@ -66,6 +67,7 @@
     "@backstage/cli": "backstage:^",
     "@types/dockerode": "catalog:dev",
     "@types/node": "catalog:dev",
+    "@types/proper-lockfile": "^4.1.4",
     "rimraf": "catalog:dev",
     "typescript": "catalog:dev",
     "vitest": "catalog:dev"

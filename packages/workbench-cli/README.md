@@ -35,6 +35,8 @@ group.
 | --- | --- |
 | `workbench compose lint [target]` | Lint Compose files. |
 | `workbench compose publish` | Publish the Compose configuration as an OCI artifact. |
+| `workbench compose start <app\|backend>` | Start the shared Compose stack and one foreground dev server. |
+| `workbench compose stop` | Stop the managed dev servers and shared Compose stack. |
 | `workbench image build [target]` | Build container images. |
 | `workbench image lint [target]` | Lint Dockerfiles. |
 | `workbench image publish [target]` | Publish container images. |
@@ -50,9 +52,39 @@ Image builds clean temporary build directories and attempt to prune dangling
 images. Prune failures are reported as warnings and do not change the build
 result. Images and containers are not force-removed.
 
-The code generator and Compose start/stop implementations are unfinished and
-are not registered as commands. The generator and Compose start sources are
-excluded from this package's TypeScript build until they are complete.
+## Compose development stack
+
+Docker with Compose support and Yarn must be available on `PATH`. The consuming
+repository must have `backstage.json`, `packages/app`, and
+`packages/backend`. Each package needs a `start:dev` script that runs its
+actual development server. To start the infrastructure automatically, its
+`start` script can invoke `yarn run -T backstage-cli workbench compose start
+app` (or `backend`). The orchestrator calls `start:dev`, avoiding recursion.
+
+The first start retrieves the Compose artifact from
+`ghcr.io/ai-crew-suite/workbench-compose:latest` by default, then runs
+`docker compose up -d --wait`. Use `--registry` and `--tag` (or `REGISTRY` and
+`IMAGE_TAG`) to select another artifact; loopback registries use HTTP
+automatically, and `--plain-http` enables HTTP for other registries. OCI pulls
+use username/password entries in Docker's config (`DOCKER_CONFIG` or
+`~/.docker/config.json`); Docker credential helpers and identity tokens are
+not supported. Layer digests are checked, but artifact signatures are not
+verified. Published Compose configuration is executed by Docker: only use
+artifacts from registries and publishers you trust.
+
+App and backend can be started independently. They share a repository-specific
+Compose project and inherit the caller's environment. Stopping either foreground
+server does not stop the stack. Run `yarn backstage-cli workbench compose stop`
+from the repository to stop both managed servers and the stack; named volumes
+are retained. If teardown fails, fix the error and retry the command.
+
+The cached Compose file and fixed-name `workbench.pid` state file are stored in
+a private, repository-specific temporary directory. They contain process
+identities and the artifact reference, not registry credentials. The state must
+remain available until teardown completes. To change the artifact reference
+or registry transport, stop the existing stack first.
+
+The code generator is unfinished and is not registered as a command.
 
 ## Development and publishing
 

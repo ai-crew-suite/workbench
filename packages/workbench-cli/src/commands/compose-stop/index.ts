@@ -13,3 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { Command } from 'commander';
+import type { CliCommandContext } from '@backstage/cli-node';
+import { stopCompose } from './src/stop';
+
+/** Stops managed development servers and the shared Compose stack. */
+export default async function execute({ args, info }: CliCommandContext): Promise<void> {
+  const program = new Command();
+  program.name(info.usage)
+    .description('Stop managed development servers and the shared Compose stack')
+    .action(stopCompose);
+  await program.parseAsync(args, { from: 'user' });
+}

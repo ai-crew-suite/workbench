@@ -3,7 +3,6 @@
   "extends": "@ai-crew-suite/typescript-shared-config/node",
   "include": ["src/**/*", "package.json"],
   "exclude": [
-    "src/commands/code-generator",
-    "src/commands/compose-start"
+    "src/commands/code-generator"
   ]
 }

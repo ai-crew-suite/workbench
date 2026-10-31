@@ -43,6 +43,8 @@ describe('Backstage CLI module integration', () => {
   it.each([
     ['compose lint', ['compose', 'lint']],
     ['compose publish', ['compose', 'publish']],
+    ['compose start', ['compose', 'start']],
+    ['compose stop', ['compose', 'stop']],
     ['image build', ['image', 'build']],
     ['image lint', ['image', 'lint']],
     ['image publish', ['image', 'publish']],

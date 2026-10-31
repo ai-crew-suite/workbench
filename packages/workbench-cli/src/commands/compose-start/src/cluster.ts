@@ -13,22 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { spawn } from 'node:child_process';
 
+/** Compose paths and project identity for a single consuming repository. */
 export interface ClusterOptions {
   composeFile: string;
-  projectDirectory: string; // The consumer repo's root directory context
+  projectDirectory: string;
+  projectName: string;
 }
 
+/** Controls the isolated Compose project without removing named volumes. */
 export class ComposeClusterController {
-  constructor(private options: ClusterOptions) {}
+  constructor(private readonly options: ClusterOptions) {}
 
-  /**
-   * Spawns: docker compose -f /tmp/workbench-compose/compose.yaml --project-directory <cwd> up -d --wait
-   */
-  async up(): Promise<void>;
+  private async run(command: string[]): Promise<void> {
+    const { composeFile, projectDirectory, projectName } = this.options;
+    const args = ['compose', '--project-name', projectName, '--project-directory', projectDirectory, '-f', composeFile, ...command];
+    const child = spawn('docker', args, { cwd: projectDirectory, stdio: 'inherit' });
+    await new Promise<void>((resolve, reject) => {
+      child.once('error', error => reject(new Error('Failed to launch Docker Compose.', { cause: error })));
+      child.once('close', (code, signal) => {
+        if (code === 0) resolve();
+        else reject(new Error(`Docker Compose ${command[0]} failed${signal ? ` with signal ${signal}` : ` with status ${code}`}.`));
+      });
+    });
+  }
 
-  /**
-   * Spawns: docker compose -f /tmp/workbench-compose/compose.yaml --project-directory <cwd> down
-   */
-  async down(): Promise<void>;
+  /** Starts or reconciles the stack and waits for health checks. */
+  async up(): Promise<void> {
+    await this.run(['up', '-d', '--wait']);
+  }
+
+  /** Stops the isolated project, retaining its named volumes. */
+  async down(): Promise<void> {
+    await this.run(['down']);
+  }
 }

@@ -10,6 +10,13 @@ CSpell is adding new words to `.vscode/settings.json` CSpell key instead of the 
 
 ## Architecture Blueprint: OCI-Driven Smart Orchestrator
 
+> Historical design notes: the Compose lifecycle implementation differs from
+> this blueprint. It starts `packages/app` and `packages/backend` independently
+> without topology detection, retains the shared stack until an explicit stop,
+> and stores state in a repository-specific temporary directory. See the
+> [Workbench CLI README](../packages/workbench-cli/README.md#compose-development-stack)
+> for the current interface and behavior.
+
 ### 1. Directory & File Topology
 
 The architecture isolates the core execution tracks into clean, single-responsibility files inside the existing `workbench-cli` command domain:
@@ -364,4 +371,3 @@ export function computeChildEnvironment(topology: TopologyContext): Record<strin
 ```
 
 This ensures that the child process receives precisely the infrastructure layout parameters it needs to bootstrap its communication paths without cluttering the logging framework or risking supply chain exposure.
-
