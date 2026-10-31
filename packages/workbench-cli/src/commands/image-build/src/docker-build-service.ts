@@ -15,7 +15,7 @@
  */
 import Docker from 'dockerode';
 import chalk from 'chalk';
-import { resolveRegistryAuth } from '../../../utils/docker-auth.js';
+import { resolveRegistryAuth } from '../../../utils/docker-auth';
 
 export interface BuildEngineOptions {
   t: string; // Image tag

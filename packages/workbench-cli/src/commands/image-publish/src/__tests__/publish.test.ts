@@ -16,7 +16,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ImagePublisher } from '../publish.js';
 import { DockerService } from '../docker-service.js';
-import { SigningService } from '../signing-service.js';
+import { SigningService } from '../../../../utils/oci';
 import fs from 'node:fs';
 
 // Intercept host binary discovery checks (hasBinary) while preserving remaining exports

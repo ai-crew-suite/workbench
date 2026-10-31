@@ -16,35 +16,38 @@
 // packages/workbench-cli/src/bin/commands/seed-wiremock/index.ts
 import { Command, Option } from 'commander';
 import chalk from 'chalk';
-import { runWiremockSeeder } from './lib/seeder';
+import type { CliCommandContext } from '@backstage/cli-node';
+import { runWiremockSeeder } from './src/seeder';
 
-const program = new Command();
+/** Execute this command using arguments supplied by the Backstage CLI. */
+export default async function execute({ args, info }: CliCommandContext): Promise<void> {
+  const program = new Command();
 
-program
-  .name('seed:wiremock')
-  .description('Seed running WireMock instances with programmatic vendor mock blueprints or localized rule files')
-  .argument('[source]', 'Target workspace fixture group ("external", "kubernetes") or a local filesystem pathway to a JSON mapping file')
-  .addOption(new Option('-p, --port <port>', 'Target port destination for the WireMock admin service API').env('WIREMOCK_PORT').default('8080'))
-  .addOption(new Option('-h, --host <host>', 'Host networking resolution destination for the execution context').env('WIREMOCK_HOST').default('localhost'))
-  .addOption(new Option('--clear', 'Completely reset and sweep away all active dynamic mock definitions prior to executing the seed ingestion payload').default(false))
-  .action(async (source, options) => {
-    try {
-      console.log(`\n${chalk.cyan('┌────────────────────────────────────────────────────────┐')}`);
-      console.log(`${chalk.cyan('│ 🤖 WORKBENCH CLI: WireMock Fixture Seeding Engine      │')}`);
-      console.log(`${chalk.cyan('└────────────────────────────────────────────────────────┘')}`);
+  program
+    .name(info.usage)
+    .description('Seed running WireMock instances with programmatic vendor mock blueprints or localized rule files')
+    .argument('[source]', 'Target workspace fixture group ("external", "kubernetes") or a local filesystem pathway to a JSON mapping file')
+    .addOption(new Option('-p, --port <port>', 'Target port destination for the WireMock admin service API').env('WIREMOCK_PORT').default('8080'))
+    .addOption(new Option('-h, --host <host>', 'Host networking resolution destination for the execution context').env('WIREMOCK_HOST').default('localhost'))
+    .addOption(new Option('--clear', 'Completely reset and sweep away all active dynamic mock definitions prior to executing the seed ingestion payload').default(false))
+    .action(async (source, options) => {
+      try {
+        console.log(`\n${chalk.cyan('┌────────────────────────────────────────────────────────┐')}`);
+        console.log(`${chalk.cyan('│ 🤖 WORKBENCH CLI: WireMock Fixture Seeding Engine      │')}`);
+        console.log(`${chalk.cyan('└────────────────────────────────────────────────────────┘')}`);
 
-      await runWiremockSeeder({
-        source: source || 'external',
-        port: options.port,
-        host: options.host,
-        clear: options.clear,
-      });
+        await runWiremockSeeder({
+          source: source || 'external',
+          port: options.port,
+          host: options.host,
+          clear: options.clear,
+        });
 
-      process.exitCode = 0;
-    } catch (error) {
-      console.error(`\n${chalk.red('❌ Critical Seeding Execution Context Failure:')}`, error);
-      process.exitCode = 1;
-    }
-  });
+      } catch (error) {
+        console.error(`\n${chalk.red('❌ Critical Seeding Execution Context Failure:')}`, error);
+        throw error;
+      }
+    });
 
-program.parse(process.argv);
+  await program.parseAsync(args, { from: 'user' });
+}

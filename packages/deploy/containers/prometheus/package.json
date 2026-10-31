@@ -23,17 +23,16 @@
     "directory": "packages/deploy/containers/prometheus"
   },
   "scripts": {
-    "build": "workbench image:build prometheus-container",
-    "lint": "workbench image:lint prometheus-container",
-    "image:test:security": "workbench image:test:security prometheus-container",
-    "image:test:structure": "workbench image:test:structure prometheus-container",
-    "publish": "workbench image:publish prometheus-container",
+    "build": "yarn run -T backstage-cli workbench image build prometheus-container",
+    "lint": "yarn run -T backstage-cli workbench image lint prometheus-container",
+    "image:test:security": "yarn run -T backstage-cli workbench image test security prometheus-container",
+    "image:test:structure": "yarn run -T backstage-cli workbench image test structure prometheus-container",
+    "publish": "yarn run -T backstage-cli workbench image publish prometheus-container",
     "test": "yarn image:test:security && yarn image:test:structure && yarn test:unit",
     "test:unit": "vitest run"
   },
   "devDependencies": {
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
-    "@ai-crew-suite/workbench-cli": "workspace:^",
     "vitest": "catalog:dev"
   }
 }

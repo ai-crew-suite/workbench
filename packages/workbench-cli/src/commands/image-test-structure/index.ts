@@ -15,31 +15,34 @@
  */
 import { Command, Option } from 'commander';
 import chalk from 'chalk';
-import { runStructureTests } from './lib/test-structure';
+import type { CliCommandContext } from '@backstage/cli-node';
+import { runStructureTests } from './src/test-structure';
 
-const program = new Command();
+/** Execute this command using arguments supplied by the Backstage CLI. */
+export default async function execute({ args, info }: CliCommandContext): Promise<void> {
+  const program = new Command();
 
-program
-  .name('image:test-structure')
-  .description('Validate built image compliance profiles against declarative .cst.yaml tests')
-  .argument('[target]', 'Specific container directory package to validate (omitting runs all targets sequentially)')
-  .addOption(new Option('-r, --registry <registry>', 'Container registry path source').env('REGISTRY').default('localhost:32443/ai-crew-suite'))
-  .action(async (target, options) => {
-    try {
-      console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
-      console.log(`${chalk.magenta('│ 🧱 WORKBENCH CLI: Container Structure Assertions       │')}`);
-      console.log(`${chalk.magenta('└────────────────────────────────────────────────────────┘')}`);
+  program
+    .name(info.usage)
+    .description('Validate built image compliance profiles against declarative .cst.yaml tests')
+    .argument('[target]', 'Specific container directory package to validate (omitting runs all targets sequentially)')
+    .addOption(new Option('-r, --registry <registry>', 'Container registry path source').env('REGISTRY').default('localhost:32443/ai-crew-suite'))
+    .action(async (target, options) => {
+      try {
+        console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
+        console.log(`${chalk.magenta('│ 🧱 WORKBENCH CLI: Container Structure Assertions       │')}`);
+        console.log(`${chalk.magenta('└────────────────────────────────────────────────────────┘')}`);
 
-      await runStructureTests({
-        target,
-        registry: options.registry,
-      });
+        await runStructureTests({
+          target,
+          registry: options.registry,
+        });
 
-      process.exitCode = 0;
-    } catch (error) {
-      console.error(`\n${chalk.red('❌ Critical Engine Orchestration Failure:')}`, error);
-      process.exitCode = 1;
-    }
-  });
+      } catch (error) {
+        console.error(`\n${chalk.red('❌ Critical Engine Orchestration Failure:')}`, error);
+        throw error;
+      }
+    });
 
-program.parse(process.argv);
+  await program.parseAsync(args, { from: 'user' });
+}

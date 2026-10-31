@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import Docker from 'dockerode';
-import { registryHostFromImageReference, resolveRegistryAuth } from '../../../utils/docker-auth.js';
+import { registryHostFromImageReference, resolveRegistryAuth } from '../../../utils/docker-auth';
 
 export class DockerService {
   private docker: Docker;

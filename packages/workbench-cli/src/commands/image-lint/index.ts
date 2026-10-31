@@ -15,26 +15,29 @@
  */
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { runImagesLint } from './lib/lint';
+import type { CliCommandContext } from '@backstage/cli-node';
+import { runImagesLint } from './src/lint';
 
-const program = new Command();
+/** Execute this command using arguments supplied by the Backstage CLI. */
+export default async function execute({ args, info }: CliCommandContext): Promise<void> {
+  const program = new Command();
 
-program
-  .name('image:lint')
-  .description('Perform static analysis on workspace Dockerfile targets')
-  .argument('[target]', 'Specific container directory to lint (omitting lints all discovered Dockerfiles)')
-  .action(async (target) => {
-    try {
-      console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
-      console.log(`${chalk.magenta('│ 🔎 WORKBENCH CLI: Static Analysis Linting Sequence     │')}`);
-      console.log(`${chalk.magenta('└────────────────────────────────────────────────────────┘')}`);
+  program
+    .name(info.usage)
+    .description('Perform static analysis on workspace Dockerfile targets')
+    .argument('[target]', 'Specific container directory to lint (omitting lints all discovered Dockerfiles)')
+    .action(async (target) => {
+      try {
+        console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
+        console.log(`${chalk.magenta('│ 🔎 WORKBENCH CLI: Static Analysis Linting Sequence     │')}`);
+        console.log(`${chalk.magenta('└────────────────────────────────────────────────────────┘')}`);
 
-      await runImagesLint({ target });
-      process.exitCode = 0;
-    } catch (error) {
-      console.error(`\n${chalk.red('❌ Critical Engine Orchestration Failure:')}`, error);
-      process.exitCode = 1;
-    }
-  });
+        await runImagesLint({ target });
+      } catch (error) {
+        console.error(`\n${chalk.red('❌ Critical Engine Orchestration Failure:')}`, error);
+        throw error;
+      }
+    });
 
-program.parse(process.argv);
+  await program.parseAsync(args, { from: 'user' });
+}

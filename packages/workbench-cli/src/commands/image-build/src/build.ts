@@ -17,8 +17,8 @@ import { existsSync, rmSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import chalk from 'chalk';
 import * as tar from 'tar';
-import { discoverContainerTargets, findRepoRoot } from '../../../utils/workspace.js';
-import { DockerBuildService } from './docker-build-service.js';
+import { discoverContainerTargets, findRepoRoot } from '../../../utils/workspace';
+import { DockerBuildService } from './docker-build-service';
 
 export interface BuildOptions {
   target?: string;

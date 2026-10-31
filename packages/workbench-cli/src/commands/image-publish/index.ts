@@ -15,33 +15,36 @@
  */
 import { Command, Option } from 'commander';
 import chalk from 'chalk';
-import { runImagesPublish } from './lib/publish';
+import type { CliCommandContext } from '@backstage/cli-node';
+import { runImagesPublish } from './src/publish';
 
-const program = new Command();
+/** Execute this command using arguments supplied by the Backstage CLI. */
+export default async function execute({ args, info }: CliCommandContext): Promise<void> {
+  const program = new Command();
 
-program
-  .name('image:publish')
-  .description('Manually tag and push built container images to Zot or GHCR distribution registries')
-  .argument('[target]', 'Specific container package directory to push (omitting pushes all targets sequentially)')
-  .addOption(new Option('-r, --registry <registry>', 'Target registry destination override').env('REGISTRY').default('localhost:32443/ai-crew-suite'))
-  .addOption(new Option('-t, --tag <tag>', 'Docker image tag version').env('IMAGE_TAG').default('latest'))
-  .action(async (target, options) => {
-    try {
-      console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
-      console.log(`${chalk.magenta('│ 🚀 WORKBENCH CLI: Container Distribution Pipeline      │')}`);
-      console.log(`${chalk.magenta('└────────────────────────────────────────────────────────┘')}`);
+  program
+    .name(info.usage)
+    .description('Manually tag and push built container images to Zot or GHCR distribution registries')
+    .argument('[target]', 'Specific container package directory to push (omitting pushes all targets sequentially)')
+    .addOption(new Option('-r, --registry <registry>', 'Target registry destination override').env('REGISTRY').default('localhost:32443/ai-crew-suite'))
+    .addOption(new Option('-t, --tag <tag>', 'Docker image tag version').env('IMAGE_TAG').default('latest'))
+    .action(async (target, options) => {
+      try {
+        console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
+        console.log(`${chalk.magenta('│ 🚀 WORKBENCH CLI: Container Distribution Pipeline      │')}`);
+        console.log(`${chalk.magenta('└────────────────────────────────────────────────────────┘')}`);
 
-      await runImagesPublish({
-        target,
-        registry: options.registry,
-        imageTag: options.tag,
-      });
+        await runImagesPublish({
+          target,
+          registry: options.registry,
+          imageTag: options.tag,
+        });
 
-      process.exitCode = 0;
-    } catch (error) {
-      console.error(`\n${chalk.red('❌ Critical Engine Publishing Failure:')}`, error);
-      process.exitCode = 1;
-    }
-  });
+      } catch (error) {
+        console.error(`\n${chalk.red('❌ Critical Engine Publishing Failure:')}`, error);
+        throw error;
+      }
+    });
 
-program.parse(process.argv);
+  await program.parseAsync(args, { from: 'user' });
+}

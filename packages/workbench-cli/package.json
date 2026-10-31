@@ -1,6 +1,6 @@
 {
-  "name": "@ai-crew-suite/workbench-cli",
-  "description": "CLI for workbench tasks",
+  "name": "@ai-crew-suite/cli-module-workbench",
+  "description": "Backstage CLI module for workbench tasks",
   "version": "0.0.1",
   "license": "Apache-2.0",
   "engines": {
@@ -14,9 +14,13 @@
   "packageManager": "yarn@4.18.1",
   "publishConfig": {
     "access": "public",
-    "provenance": true
+    "provenance": true,
+    "main": "dist/index.cjs.js",
+    "types": "dist/index.d.ts"
   },
-  "type": "module",
+  "backstage": {
+    "role": "cli-module"
+  },
   "bugs": {
     "url": "https://github.com/ai-crew-suite/workbench/issues",
     "email": "support@ai-crew-suite.dev"
@@ -26,14 +30,17 @@
     "url": "https://github.com/ai-crew-suite/workbench",
     "directory": "packages/workbench-cli"
   },
+  "main": "bin/module.cjs",
+  "types": "src/index.ts",
   "bin": {
-    "workbench": "./dist/bin/workbench.js"
+    "backstage-cli-module-workbench": "bin/backstage-cli-module-workbench"
   },
   "files": [
-    "dist"
+    "dist",
+    "bin"
   ],
   "scripts": {
-    "build": "yarn clean && rollup --config rollup.config.ts --configPlugin esbuild",
+    "build": "tsc --emitDeclarationOnly --outDir ../../dist-types/packages/workbench-cli && backstage-cli package build",
     "clean": "rimraf dist",
     "lint": "crew lint",
     "test:e2e": "crew test:e2e",
@@ -42,6 +49,9 @@
     "typecheck": "crew typecheck"
   },
   "dependencies": {
+    "@ai-crew-suite/fixtures-external": "workspace:^",
+    "@ai-crew-suite/fixtures-kubernetes": "workspace:^",
+    "@backstage/cli-node": "backstage:^",
     "@snyk/docker-registry-v2-client": "catalog:prod",
     "chalk": "catalog:prod",
     "commander": "catalog:prod",
@@ -53,13 +63,10 @@
   "devDependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
-    "@rollup/plugin-node-resolve": "catalog:dev",
+    "@backstage/cli": "backstage:^",
     "@types/dockerode": "catalog:dev",
     "@types/node": "catalog:dev",
-    "glob": "catalog:dev",
     "rimraf": "catalog:dev",
-    "rollup": "catalog:dev",
-    "rollup-plugin-esbuild": "catalog:dev",
     "typescript": "catalog:dev",
     "vitest": "catalog:dev"
   }

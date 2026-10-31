@@ -15,31 +15,34 @@
  */
 import { Command, Option } from 'commander';
 import chalk from 'chalk';
-import { runSecurityScanner } from './lib/scanner';
+import type { CliCommandContext } from '@backstage/cli-node';
+import { runSecurityScanner } from './src/scanner';
 
-const program = new Command();
+/** Execute this command using arguments supplied by the Backstage CLI. */
+export default async function execute({ args, info }: CliCommandContext): Promise<void> {
+  const program = new Command();
 
-program
-  .name('image:security-scanner')
-  .description('Audit container image layers for high/critical security vulnerability contexts')
-  .argument('[target]', 'Specific container directory package to scan (omitting runs all targets sequentially)')
-  .addOption(new Option('-t, --timeout <timeout>', 'Global query execution time limit before aborting').env('TRIVY_SCAN_TIMEOUT').default('15m'))
-  .action(async (target, options) => {
-    try {
-      console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
-      console.log(`${chalk.magenta('│ 🛡️  WORKBENCH CLI: Security Vulnerability Audit        │')}`);
-      console.log(`${chalk.magenta('└────────────────────────────────────────────────────────┘')}`);
+  program
+    .name(info.usage)
+    .description('Audit container image layers for high/critical security vulnerability contexts')
+    .argument('[target]', 'Specific container directory package to scan (omitting runs all targets sequentially)')
+    .addOption(new Option('-t, --timeout <timeout>', 'Global query execution time limit before aborting').env('TRIVY_SCAN_TIMEOUT').default('15m'))
+    .action(async (target, options) => {
+      try {
+        console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
+        console.log(`${chalk.magenta('│ 🛡️  WORKBENCH CLI: Security Vulnerability Audit        │')}`);
+        console.log(`${chalk.magenta('└────────────────────────────────────────────────────────┘')}`);
 
-      await runSecurityScanner({
-        target,
-        scanTimeout: options.timeout,
-      });
+        await runSecurityScanner({
+          target,
+          scanTimeout: options.timeout,
+        });
 
-      process.exitCode = 0;
-    } catch (error) {
-      console.error(`\n${chalk.red('❌ Critical Engine Orchestration Failure:')}`, error);
-      process.exitCode = 1;
-    }
-  });
+      } catch (error) {
+        console.error(`\n${chalk.red('❌ Critical Engine Orchestration Failure:')}`, error);
+        throw error;
+      }
+    });
 
-program.parse(process.argv);
+  await program.parseAsync(args, { from: 'user' });
+}

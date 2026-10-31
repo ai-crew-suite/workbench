@@ -27,6 +27,7 @@
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
+    "@ai-crew-suite/cli-module-workbench": "workspace:^",
     "@ai-crew-suite/crew-cli": "catalog:dev",
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
     "@backstage/cli": "backstage:^",

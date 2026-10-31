@@ -15,7 +15,7 @@
  */
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { runComposeLint } from './lib/runner';
+import { runComposeLint } from './src/runner';
 
 const program = new Command();
 

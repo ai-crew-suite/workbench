@@ -36,7 +36,7 @@ vi.mock('dclint', () => {
   };
 });
 
-vi.mock('../../../utils/workspace', () => ({
+vi.mock('../../../../utils/workspace', () => ({
   findRepoRoot: () => process.cwd(),
 }));
 

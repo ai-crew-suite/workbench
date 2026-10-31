@@ -5,15 +5,9 @@
     "build": {
       "cache": true,
       "dependsOn": [],
-      "inputs": ["src/**", "package.json", "rollup.config.ts", "tsconfig.json"],
+      "inputs": ["src/**", "package.json", "tsconfig.json"],
       "outputs": ["dist/**"]
     },
-    /**
-     * No ordering constraints are needed currently: sibling packages' `crew`
-     * scripts resolve to the published @ai-crew-suite/crew-cli in node_modules,
-     * and no consumer of this package's `workbench` dist bin defines a clean
-     * task, so nothing races against `rimraf dist`.
-     */
     "clean": {
       "cache": false,
       "dependsOn": []

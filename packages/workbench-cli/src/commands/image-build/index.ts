@@ -15,33 +15,36 @@
  */
 import { Command, Option } from 'commander';
 import chalk from 'chalk';
-import { runImagesBuild } from './lib/build';
+import type { CliCommandContext } from '@backstage/cli-node';
+import { runImagesBuild } from './src/build';
 
-const program = new Command();
+/** Execute this command using arguments supplied by the Backstage CLI. */
+export default async function execute({ args, info }: CliCommandContext): Promise<void> {
+  const program = new Command();
 
-program
-  .name('image:build')
-  .description('Build workspace container images via Docker Buildx')
-  .argument('[target]', 'Specific container directory to build (omitting builds all targets sequentially)')
-  .addOption(new Option('-r, --registry <registry>', 'Target container registry').env('REGISTRY').default('local'))
-  .addOption(new Option('-t, --tag <tag>', 'Docker image tag version').env('IMAGE_TAG').default('latest'))
-  .action(async (target, options) => {
-    try {
-      console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
-      console.log(`${chalk.magenta('│ 🐳 WORKBENCH CLI: Container Compilation Sequence       │')}`);
-      console.log(`${chalk.magenta('└────────────────────────────────────────────────────────┘')}`);
+  program
+    .name(info.usage)
+    .description('Build workspace container images via Docker Buildx')
+    .argument('[target]', 'Specific container directory to build (omitting builds all targets sequentially)')
+    .addOption(new Option('-r, --registry <registry>', 'Target container registry').env('REGISTRY').default('local'))
+    .addOption(new Option('-t, --tag <tag>', 'Docker image tag version').env('IMAGE_TAG').default('latest'))
+    .action(async (target, options) => {
+      try {
+        console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
+        console.log(`${chalk.magenta('│ 🐳 WORKBENCH CLI: Container Compilation Sequence       │')}`);
+        console.log(`${chalk.magenta('└────────────────────────────────────────────────────────┘')}`);
 
-      await runImagesBuild({
-        target,
-        registry: options.registry,
-        imageTag: options.tag,
-      });
+        await runImagesBuild({
+          target,
+          registry: options.registry,
+          imageTag: options.tag,
+        });
 
-      process.exitCode = 0;
-    } catch (error) {
-      console.error(`\n${chalk.red('❌ Critical Engine Orchestration Failure:')}`, error);
-      process.exitCode = 1;
-    }
-  });
+      } catch (error) {
+        console.error(`\n${chalk.red('❌ Critical Engine Orchestration Failure:')}`, error);
+        throw error;
+      }
+    });
 
-program.parse(process.argv);
+  await program.parseAsync(args, { from: 'user' });
+}
