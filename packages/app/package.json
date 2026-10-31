@@ -1,22 +1,25 @@
 {
-  "name": "@ai-crew-suite/testpad-backend",
-  "description": "An isolated, non-published local validation sandbox and testpad for testing the workbench backend dev server.",
-  "private": true,
+  "name": "@ai-crew-suite/app",
+  "description": "An isolated, non-published local validation workspace and browser testpad executing UI/UX integration runs, visual sweeps, and hot-reloading diagnostics against the Backstage frontend application shell.",
+  "version": "0.0.1",
   "license": "Apache-2.0",
+  "private": true,
+  "backstage": {
+    "role": "frontend-plugin"
+  },
   "keywords": [
     "agentic workflow",
     "ai-crew-suite",
+    "app",
     "backstage",
-    "backstage-backend",
+    "backstage-frontend",
     "testpad",
     "sandbox",
-    "integration-testing",
-    "code-coverage",
-    "hermetic-testing"
+    "ui-testing",
+    "component-playground",
+    "hot-reload",
+    "visual-regression"
   ],
-  "backstage": {
-    "role": "backend-plugin"
-  },
   "bugs": {
     "url": "https://github.com/ai-crew-suite/workbench/issues",
     "email": "support@ai-crew-suite.dev"
@@ -24,7 +27,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ai-crew-suite/workbench",
-    "directory": "packages/testpad/backend"
+    "directory": "packages/app"
   },
   "scripts": {
     "format": "crew format",
@@ -32,13 +35,12 @@
     "test:e2e": "crew test:e2e",
     "test:unit": "crew test:unit",
     "test:unit:coverage": "crew test:unit:coverage",
-    "start": "backstage-dev-server",
+    "start": "backstage-dev-frontend",
     "typecheck": "crew typecheck"
   },
   "dependencies": {
     "@ai-crew-suite/crew-cli": "catalog:dev",
-    "@ai-crew-suite/workbench-backend": "workspace:*",
-    "@backstage/catalog-model": "backstage:^"
+    "@ai-crew-suite/workbench-app": "workspace:*"
   },
   "devDependencies": {
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"

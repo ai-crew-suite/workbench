@@ -8,15 +8,6 @@ Move seeder CLI commands into Crew CLI.
 
 CSpell is adding new words to `.vscode/settings.json` CSpell key instead of the root `cspell.json` file. This is probably a common issue across all repos.
 
-## `compose-publish`
-
-1. **Incorrect Context Working Directory (`cwd`)**:
-   When using `oras push`, files passed to the CLI command (e.g., `compose.yml:application/vnd.docker.compose.file+yaml`) must exist relative to the working directory you supply to `spawnSync`. Your script correctly navigates to `cwd: path.dirname(composeFile)` (`packages/deploy/compose/src`), but the file name inside the source directory is actually `src/compose.yml`. Inside `src/`, the file is just `compose.yml`, so your media type definition mapping must be changed from `compose.yml:...` to match the exact file name in that folder.
-2. **Local Registry Authentication Failure**:
-   When pushing to a local Zot registry running on a loopback address (e.g., `localhost:5000`), Cosign will fail to sign the artifact because it defaults to HTTPS. You check for loopback addresses to apply `--plain-http` to the `oras` command, but you do **not** pass down an equivalent flag to your `SigningService`. Cosign requires `--allow-insecure-registry` to talk to plain HTTP registries.
-3. **Cosign Keyless OIDC Execution Check**:
-   You check `isCI` to trigger keyless OIDC signing. However, Cosign keyless signing will still fail in CI if the target repository requires credentials (like GHCR) and `cosign` doesn't have permissions, or if it isn't running inside a supported OIDC environment (GitHub Actions, GitLab CI, etc.). Your `SigningService` must be ready to catch or expect those environments.
-
 ## Architecture Blueprint: OCI-Driven Smart Orchestrator
 
 ### 1. Directory & File Topology

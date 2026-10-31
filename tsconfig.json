@@ -4,25 +4,25 @@
   "files": [],
   "references": [
     {
+      "path": "./packages/app"
+    },
+    {
+      "path": "./packages/backend"
+    },
+    {
+      "path": "./packages/backstage/app"
+    },
+    {
       "path": "./packages/backstage/backend"
     },
     {
-      "path": "./packages/backstage/frontend"
+      "path": "./packages/dependencies/app"
     },
     {
       "path": "./packages/dependencies/backend"
     },
     {
-      "path": "./packages/dependencies/frontend"
-    },
-    {
       "path": "./packages/deploy/compose"
-    },
-    {
-      "path": "./packages/deploy/containers/backend"
-    },
-    {
-      "path": "./packages/deploy/containers/frontend"
     },
     {
       "path": "./packages/deploy/containers/grafana"
@@ -44,9 +44,6 @@
     },
     {
       "path": "./packages/deploy/containers/temporal"
-    },
-      {
-      "path": "./packages/deploy/containers/wiremock"
     },
     {
       "path": "./packages/deploy/kubernetes"
@@ -71,12 +68,6 @@
     },
     {
       "path": "./packages/fixtures/techdocs"
-    },
-    {
-      "path": "./packages/testpad/backend"
-    },
-    {
-      "path": "./packages/testpad/frontend"
     },
     {
       "path": "./packages/workbench-cli"

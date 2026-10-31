@@ -19,6 +19,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ai-crew-suite/app@workspace:packages/app":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/app@workspace:packages/app"
+  dependencies:
+    "@ai-crew-suite/crew-cli": "catalog:dev"
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    "@ai-crew-suite/workbench-app": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@ai-crew-suite/backend@workspace:packages/backend":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/backend@workspace:packages/backend"
+  dependencies:
+    "@ai-crew-suite/crew-cli": "catalog:dev"
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    "@ai-crew-suite/workbench-backend": "workspace:*"
+    "@backstage/catalog-model": "backstage:^"
+  languageName: unknown
+  linkType: soft
+
 "@ai-crew-suite/cli-module-workbench@workspace:^, @ai-crew-suite/cli-module-workbench@workspace:packages/workbench-cli":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/cli-module-workbench@workspace:packages/workbench-cli"
@@ -137,9 +158,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ai-crew-suite/dependencies-frontend@workspace:^, @ai-crew-suite/dependencies-frontend@workspace:packages/dependencies/frontend":
+"@ai-crew-suite/dependencies-frontend@workspace:^, @ai-crew-suite/dependencies-frontend@workspace:packages/dependencies/app":
   version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/dependencies-frontend@workspace:packages/dependencies/frontend"
+  resolution: "@ai-crew-suite/dependencies-frontend@workspace:packages/dependencies/app"
   dependencies:
     "@backstage/frontend-defaults": "backstage:^"
     "@backstage/frontend-plugin-api": "backstage:^"
@@ -317,33 +338,30 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ai-crew-suite/testpad-backend@workspace:packages/testpad/backend":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/testpad-backend@workspace:packages/testpad/backend"
-  dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
-    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
-    "@ai-crew-suite/workbench-backend": "workspace:*"
-    "@backstage/catalog-model": "backstage:^"
-  languageName: unknown
-  linkType: soft
-
-"@ai-crew-suite/testpad-frontend@workspace:packages/testpad/frontend":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/testpad-frontend@workspace:packages/testpad/frontend"
-  dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
-    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
-    "@ai-crew-suite/workbench-frontend": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
 "@ai-crew-suite/typescript-shared-config@npm:^0.0.4":
   version: 0.0.4
   resolution: "@ai-crew-suite/typescript-shared-config@npm:0.0.4"
   checksum: 10c0/24cd5ee953f803eecfd2e0cbbfaceb4749e1e77697e1653b1476031809b03c91e8e75c31f38bd83b0b0b9c551e5e21e7f800ef318660df02b4d10e8558ef84ba
   languageName: node
   linkType: hard
+
+"@ai-crew-suite/workbench-app@workspace:*, @ai-crew-suite/workbench-app@workspace:packages/backstage/app":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/workbench-app@workspace:packages/backstage/app"
+  dependencies:
+    "@ai-crew-suite/crew-cli": "catalog:dev"
+    "@ai-crew-suite/dependencies-frontend": "workspace:^"
+    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    "@playwright/test": "catalog:dev"
+    "@types/react": "catalog:dev"
+    "@types/react-dom": "catalog:dev"
+    jsdom: "catalog:dev"
+    typescript: "catalog:dev"
+    vitest: "catalog:dev"
+  bin:
+    backstage-dev-frontend: ./launcher.js
+  languageName: unknown
+  linkType: soft
 
 "@ai-crew-suite/workbench-backend@workspace:*, @ai-crew-suite/workbench-backend@workspace:packages/backstage/backend":
   version: 0.0.0-use.local
@@ -357,24 +375,6 @@ __metadata:
     vitest: "catalog:dev"
   bin:
     backstage-dev-server: ./launcher.js
-  languageName: unknown
-  linkType: soft
-
-"@ai-crew-suite/workbench-frontend@workspace:*, @ai-crew-suite/workbench-frontend@workspace:packages/backstage/frontend":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/workbench-frontend@workspace:packages/backstage/frontend"
-  dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
-    "@ai-crew-suite/dependencies-frontend": "workspace:^"
-    "@ai-crew-suite/typescript-shared-config": "catalog:dev"
-    "@playwright/test": "catalog:dev"
-    "@types/react": "catalog:dev"
-    "@types/react-dom": "catalog:dev"
-    jsdom: "catalog:dev"
-    typescript: "catalog:dev"
-    vitest: "catalog:dev"
-  bin:
-    backstage-dev-frontend: ./launcher.js
   languageName: unknown
   linkType: soft
 
