@@ -20,6 +20,7 @@ export interface SignerOptions {
   isCI: boolean;
   keyPath: string;
   cosignPass?: string;
+  allowHttpRegistry?: boolean;
 }
 
 export class SigningService {
@@ -29,13 +30,15 @@ export class SigningService {
    * client.
    */
   async signDigest(imageDigest: string, options: SignerOptions): Promise<void> {
-    const { isCI, keyPath, cosignPass } = options;
+    const { isCI, keyPath, cosignPass, allowHttpRegistry = false } = options;
     const cosignArgs = ['sign', '--yes', imageDigest];
     let spawnEnv: NodeJS.ProcessEnv | undefined;
 
-    if (isCI) {
-      // Keyless profile: Cosign exchanges ambient identity tokens for short-lived certificates
-    } else {
+    if (allowHttpRegistry) {
+      cosignArgs.push('--allow-http-registry=true');
+    }
+
+    if (!isCI) {
       const keyRef = fs.existsSync(keyPath)
         ? keyPath
         : process.env['COSIGN_PRIVATE_KEY']
@@ -52,7 +55,6 @@ export class SigningService {
 
       cosignArgs.push(
         '--key', keyRef,
-        '--allow-http-registry=true',
         '--use-signing-config=false',
         '--tlog-upload=false',
       );
@@ -62,8 +64,17 @@ export class SigningService {
 
     const result = spawnSync('cosign', cosignArgs, { stdio: 'inherit', env: spawnEnv });
 
+    const guidance = isCI
+      ? ' Check that Cosign has a supported non-interactive OIDC identity and registry write credentials (for GitHub Actions, grant id-token: write and packages: write).'
+      : '';
+    if (result.error) {
+      throw new Error(`Failed to start Cosign.${guidance}`, { cause: result.error });
+    }
+    if (result.signal) {
+      throw new Error(`Cosign signature pipeline was terminated by signal ${result.signal}.${guidance}`);
+    }
     if (result.status !== 0) {
-      throw new Error(`Cosign signature pipeline exited with failure status code ${result.status}`);
+      throw new Error(`Cosign signature pipeline exited with failure status code ${result.status}.${guidance}`);
     }
   }
 }

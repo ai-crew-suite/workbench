@@ -91,7 +91,14 @@ yarn turbo run publish --filter=@ai-crew-suite/compose
 ```
 
 For a non-loopback HTTP registry, run the CLI with `--plain-http` explicitly.
-Signing remains optional and uses Cosign when configured.
+The same HTTP setting is passed to Cosign; it does not disable TLS certificate
+verification for HTTPS registries. Signing is skipped when Cosign is absent,
+or outside CI when no signing key or password is configured. With `CI=true`
+and Cosign installed, publishing uses keyless signing and fails if signing
+fails. Configure a Cosign-supported non-interactive OIDC identity and registry
+write credentials. For GitHub Actions, grant `id-token: write` and
+`packages: write`, and authenticate to the registry before publishing. The OCI
+artifact may already have been pushed when a signing failure is reported.
 
 ### Starting the Local Container Stack
 

@@ -26,8 +26,6 @@ export interface ComposePublishOptions {
   plainHttp?: boolean;
 }
 
-const isCI = process.env['CI'] === 'true';
-
 export class ComposeArtifactPublisher {
   constructor(private signingService = new SigningService()) {}
 
@@ -65,7 +63,7 @@ export class ComposeArtifactPublisher {
       '--annotation', 'org.opencontainers.image.description=OCI Artifact bundle containing the official uninterpolated docker-compose.yml suite infrastructure configuration.',
       '--annotation', 'org.opencontainers.image.vendor=AI Crew Suite',
       remoteTargetTag,
-      'compose.yml:application/vnd.docker.compose.file+yaml',
+      `${path.basename(composeFile)}:application/vnd.docker.compose.file+yaml`,
     ];
 
     const pushResult = spawnSync('oras', orasArgs, {
@@ -73,6 +71,17 @@ export class ComposeArtifactPublisher {
       stdio: 'pipe',
       encoding: 'utf-8'
     });
+
+    if (pushResult.error) {
+      throw new Error('Failed to start ORAS.', { cause: pushResult.error });
+    }
+    if (pushResult.signal) {
+      throw new Error(`ORAS push was terminated by signal ${pushResult.signal}.`);
+    }
+    if (pushResult.status !== 0) {
+      const detail = pushResult.stderr?.trim();
+      throw new Error(`ORAS push failed with status ${pushResult.status}${detail ? `: ${detail}` : '.'}`);
+    }
 
     let result: { digest?: unknown };
     try {
@@ -97,13 +106,12 @@ export class ComposeArtifactPublisher {
       return;
     }
 
-    // Common operational configurations for the signing service
     const signingOpts = {
       keyPath,
-      allowInsecureRegistry: useInsecure // Ensure local non-HTTPS registries don't reject signatures
+      allowHttpRegistry: Boolean(useInsecure),
     };
 
-    if (isCI) {
+    if (process.env['CI'] === 'true') {
       console.log(chalk.cyan(`\n🔏 Cryptographically signing artifact via Cosign keyless OIDC identity...`));
       await this.signingService.signDigest(remoteTargetDigest, { ...signingOpts, isCI: true });
       console.log(chalk.green(`🔑 Cryptographic signature verified and attached to registry context!`));

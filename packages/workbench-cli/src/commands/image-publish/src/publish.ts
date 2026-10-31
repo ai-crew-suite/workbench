@@ -72,7 +72,9 @@ export class ImagePublisher {
     }
 
     console.log(chalk.cyan(`\n🔏 Cryptographically signing image via Cosign static keypair...`));
-    await this.signingService.signDigest(remoteTargetDigest, { isCI: false, keyPath, cosignPass });
+    await this.signingService.signDigest(remoteTargetDigest, {
+      isCI: false, keyPath, cosignPass, allowHttpRegistry: true,
+    });
     console.log(chalk.green(`🔑 Cryptographic signature verified and attached to registry context!`));
   }
 }

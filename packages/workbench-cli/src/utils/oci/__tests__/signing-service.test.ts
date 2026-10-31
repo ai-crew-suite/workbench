@@ -49,6 +49,7 @@ describe('SigningService Unit Suite', () => {
       isCI: false,
       keyPath: '/fake/root/cosign.key',
       cosignPass: 'secure-workbench-password',
+      allowHttpRegistry: true,
     });
 
     expect(spawnSync).toHaveBeenCalledWith(
@@ -106,6 +107,59 @@ describe('SigningService Unit Suite', () => {
       stdio: 'inherit',
       env: undefined,
     });
+  });
+
+  it('passes HTTP registry access to keyless signing only when requested', async () => {
+    const service = new SigningService();
+    await service.signDigest(imageDigest, {
+      isCI: true,
+      keyPath: '/fake/root/cosign.key',
+      allowHttpRegistry: true,
+    });
+
+    expect(spawnSync).toHaveBeenCalledWith(
+      'cosign',
+      ['sign', '--yes', imageDigest, '--allow-http-registry=true'],
+      { stdio: 'inherit', env: undefined },
+    );
+  });
+
+  it('does not enable HTTP for HTTPS key-based signing', async () => {
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+    await new SigningService().signDigest(imageDigest, {
+      isCI: false,
+      keyPath: '/fake/root/cosign.key',
+      cosignPass: 'password',
+      allowHttpRegistry: false,
+    });
+    const args = vi.mocked(spawnSync).mock.calls[0]?.[1];
+    expect(args).not.toContain('--allow-http-registry=true');
+    expect(args).not.toContain('--allow-insecure-registry');
+  });
+
+  it('reports CI signing failures with OIDC and registry guidance', async () => {
+    vi.mocked(spawnSync).mockReturnValueOnce({ status: 1 } as ReturnType<typeof spawnSync>);
+    await expect(new SigningService().signDigest(imageDigest, {
+      isCI: true,
+      keyPath: '/fake/root/cosign.key',
+    })).rejects.toThrow(/status code 1.*OIDC identity and registry write credentials/);
+  });
+
+  it('reports spawn errors and termination signals', async () => {
+    const service = new SigningService();
+    vi.mocked(spawnSync).mockReturnValueOnce({
+      status: null, error: new Error('spawn failed'),
+    } as ReturnType<typeof spawnSync>);
+    await expect(service.signDigest(imageDigest, {
+      isCI: true, keyPath: '/fake/root/cosign.key',
+    })).rejects.toThrow('Failed to start Cosign');
+
+    vi.mocked(spawnSync).mockReturnValueOnce({
+      status: null, signal: 'SIGTERM',
+    } as ReturnType<typeof spawnSync>);
+    await expect(service.signDigest(imageDigest, {
+      isCI: true, keyPath: '/fake/root/cosign.key',
+    })).rejects.toThrow('terminated by signal SIGTERM');
   });
 
   it('should throw an error if a local key-based profile runs without any key material', async () => {
