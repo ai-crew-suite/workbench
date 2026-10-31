@@ -23,9 +23,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/app@workspace:packages/app"
   dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
     "@ai-crew-suite/workbench-app": "workspace:*"
+    "@backstage/cli": "backstage:^"
   languageName: unknown
   linkType: soft
 
@@ -33,10 +33,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/backend@workspace:packages/backend"
   dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
     "@ai-crew-suite/workbench-backend": "workspace:*"
     "@backstage/catalog-model": "backstage:^"
+    "@backstage/cli": "backstage:^"
   languageName: unknown
   linkType: soft
 
@@ -44,7 +44,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/cli-module-workbench@workspace:packages/workbench-cli"
   dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/fixtures-external": "workspace:^"
     "@ai-crew-suite/fixtures-kubernetes": "workspace:^"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
@@ -208,8 +207,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/fixtures-annotations@workspace:packages/fixtures/annotations"
   dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
     "@backstage/catalog-model": "backstage:^"
+    "@backstage/cli": "backstage:^"
     typescript: "catalog:dev"
     vitest: "catalog:dev"
     zod: "catalog:dev"
@@ -220,8 +219,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/fixtures-catalog@workspace:packages/fixtures/catalog"
   dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
     "@backstage/catalog-model": "backstage:^"
+    "@backstage/cli": "backstage:^"
     "@backstage/types": "backstage:^"
     typescript: "catalog:dev"
     vitest: "catalog:dev"
@@ -233,8 +232,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/fixtures-external@workspace:packages/fixtures/external"
   dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    "@backstage/cli": "backstage:^"
     typescript: "catalog:dev"
     vitest: "catalog:dev"
   languageName: unknown
@@ -244,8 +243,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/fixtures-kubernetes@workspace:packages/fixtures/kubernetes"
   dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    "@backstage/cli": "backstage:^"
     typescript: "catalog:dev"
     vitest: "catalog:dev"
   languageName: unknown
@@ -255,9 +254,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/fixtures-scaffolder@workspace:packages/fixtures/scaffolder"
   dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
     "@backstage/catalog-model": "backstage:^"
+    "@backstage/cli": "backstage:^"
     "@backstage/plugin-scaffolder-common": "backstage:^"
     typescript: "catalog:dev"
     vitest: "catalog:dev"
@@ -269,7 +268,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/fixtures-techdocs@workspace:packages/fixtures/techdocs"
   dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
+    "@backstage/cli": "backstage:^"
     "@techdocs/cli": "catalog:dev"
     rimraf: "catalog:dev"
     typescript: "catalog:dev"
@@ -351,9 +350,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/workbench-app@workspace:packages/backstage/app"
   dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/dependencies-frontend": "workspace:^"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
+    "@backstage/cli": "backstage:^"
     "@playwright/test": "catalog:dev"
     "@types/react": "catalog:dev"
     "@types/react-dom": "catalog:dev"
@@ -369,10 +368,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/workbench-backend@workspace:packages/backstage/backend"
   dependencies:
-    "@ai-crew-suite/crew-cli": "catalog:dev"
     "@ai-crew-suite/dependencies-backend": "workspace:^"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
     "@backstage/backend-test-utils": "backstage:^"
+    "@backstage/cli": "backstage:^"
     typescript: "catalog:dev"
     vitest: "catalog:dev"
   bin:

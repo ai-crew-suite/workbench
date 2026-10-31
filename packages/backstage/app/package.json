@@ -32,17 +32,17 @@
     "directory": "packages/app"
   },
   "scripts": {
-    "format": "crew format",
-    "lint": "crew lint",
-    "test:unit": "crew test:unit",
-    "typecheck": "crew typecheck"
+    "format": "backstage-cli crew format",
+    "lint": "backstage-cli crew lint",
+    "test:unit": "backstage-cli crew test:unit",
+    "typecheck": "backstage-cli crew typecheck"
   },
   "dependencies": {
     "@ai-crew-suite/dependencies-frontend": "workspace:^"
   },
   "devDependencies": {
-    "@ai-crew-suite/crew-cli": "catalog:dev",
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
+    "@backstage/cli": "backstage:^",
     "@playwright/test": "catalog:dev",
     "@types/react": "catalog:dev",
     "@types/react-dom": "catalog:dev",

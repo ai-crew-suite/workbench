@@ -24,8 +24,10 @@ yarn backstage-cli workbench image build --help
 yarn backstage-cli workbench compose lint packages/deploy/compose
 ```
 
-This repository's child workspace scripts use `yarn run -T backstage-cli`
-to resolve the root CLI. The module also provides the standalone
+This repository's Workbench-specific child workspace scripts use
+`yarn run -T backstage-cli` to resolve the root CLI. Other workspace scripts
+use `backstage-cli crew` and require the Crew CLI module in the root manifest.
+The module also provides the standalone
 `backstage-cli-module-workbench` binary, with the same `workbench` command
 group.
 
