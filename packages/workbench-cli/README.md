@@ -35,6 +35,7 @@ group.
 
 | Command | Purpose |
 | --- | --- |
+| `workbench code-generator <plugin-id>` | Generate and register a Backstage plugin or module. |
 | `workbench compose lint [target]` | Lint Compose files. |
 | `workbench compose publish` | Publish the Compose configuration as an OCI artifact. |
 | `workbench compose start <app\|backend>` | Start the shared Compose stack and one foreground dev server. |
@@ -86,7 +87,41 @@ identities and the artifact reference, not registry credentials. The state must
 remain available until teardown completes. To change the artifact reference
 or registry transport, stop the existing stack first.
 
-The code generator is unfinished and is not registered as a command.
+## Plugin generator
+
+The generator supports `frontend-plugin`, `frontend-plugin-module`,
+`backend-plugin`, and `backend-plugin-module`:
+
+```sh
+yarn backstage-cli workbench code-generator example --type frontend-plugin
+yarn backstage-cli workbench code-generator example --type backend-plugin-module \
+  --module-id extra --plugin-package @example/plugin-example-backend \
+  --scope @example --path plugins/backend/example-extra
+```
+
+`--type` is required. Module templates also require `--module-id` and
+`--plugin-package`, the parent plugin's package name. IDs must be lowercase
+and dash-separated. `--scope` defaults to `@ai-crew-suite`; `--path` selects
+an output directory inside the repository. Without `--path`, frontend
+packages are placed under `plugins/frontend` and backend packages under
+`plugins/backend`. `--dry-run` renders the template and validates registration
+without changing the consumer repository.
+
+The repository must have `backstage.json`, a root `package.json` with a
+workspaces array, and a JSON `tsconfig.json` with a references array. It must
+also have the relevant `packages/app` or `packages/backend` manifest and a
+conventional runtime entrypoint: the frontend uses `createApp({ features: [...] })` from
+`@backstage/frontend-defaults` in `packages/app/src/App.tsx`; the backend
+uses `const backend = createBackend()` and `backend.start()` in
+`packages/backend/src/index.ts`. Unsupported layouts fail rather than being
+rewritten.
+
+The generator adds the workspace, TypeScript reference, host dependency, and
+runtime feature registration. It does not configure repository-specific
+ESLint overrides or install dependencies; configure linting for the generated
+role as required by your repository and run `yarn install`. If a write fails,
+registration edits are rolled back where possible; generated files may remain
+and should be inspected before removal.
 
 ## Development and publishing
 

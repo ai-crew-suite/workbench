@@ -41,6 +41,7 @@ describe('Backstage CLI module integration', () => {
   });
 
   it.each([
+    ['code-generator', ['code-generator']],
     ['compose lint', ['compose', 'lint']],
     ['compose publish', ['compose', 'publish']],
     ['compose start', ['compose', 'start']],

@@ -2,7 +2,5 @@
   "$schema": "https://json.schemastore.org/tsconfig.json",
   "extends": "@ai-crew-suite/typescript-shared-config/node",
   "include": ["src/**/*", "package.json"],
-  "exclude": [
-    "src/commands/code-generator"
-  ]
+  "exclude": ["src/commands/code-generator/templates"]
 }

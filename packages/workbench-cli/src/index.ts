@@ -48,6 +48,7 @@ function command(
 export default createCliModule({
   packageJson,
   init: async registry => {
+    registry.addCommand(command(['code-generator'], 'Generate and register a plugin', () => import('./commands/code-generator')));
     registry.addCommand(command(['compose', 'lint'], 'Lint Docker Compose files', () => import('./commands/compose-lint')));
     registry.addCommand(command(['compose', 'publish'], 'Publish Docker Compose configuration', () => import('./commands/compose-publish')));
     registry.addCommand(command(['compose', 'start'], 'Start the shared stack and a dev server', () => import('./commands/compose-start')));

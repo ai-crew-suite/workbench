@@ -48,6 +48,7 @@ __metadata:
     "@ai-crew-suite/fixtures-kubernetes": "workspace:^"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
     "@backstage/cli": "backstage:^"
+    "@backstage/cli-module-new": "backstage:^"
     "@backstage/cli-node": "backstage:^"
     "@snyk/docker-registry-v2-client": "catalog:prod"
     "@types/dockerode": "catalog:dev"
@@ -1877,7 +1878,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@backstage/cli-module-new@npm:^0.1.8":
+"@backstage/cli-module-new@backstage:^::backstage=1.55.3&npm=0.1.7, @backstage/cli-module-new@npm:^0.1.7, @backstage/cli-module-new@npm:^0.1.8":
   version: 0.1.8
   resolution: "@backstage/cli-module-new@npm:0.1.8"
   dependencies:
