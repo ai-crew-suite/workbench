@@ -2,7 +2,7 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "cache": false,
+      "cache": true,
       "inputs": [
         "**/Dockerfile",
         "**/src/**/*",

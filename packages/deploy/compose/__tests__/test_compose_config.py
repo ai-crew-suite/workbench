@@ -41,6 +41,24 @@ class ComposeConfigTests(unittest.TestCase):
         self.assertEqual(mem0["depends_on"]["ollama"]["condition"], "service_healthy")
         self.assertEqual(mem0["depends_on"]["pgvector"]["condition"], "service_healthy")
         self.assertEqual(mem0["environment"]["OLLAMA_BASE_URL"], "http://ollama:11434")
+        self.assertEqual(
+            services["pgvector"]["ports"],
+            [{"mode": "ingress", "host_ip": "127.0.0.1", "target": 5432,
+              "published": "15432", "protocol": "tcp"}],
+        )
+        self.assertEqual(mem0["environment"]["POSTGRES_PORT"], "5432")
+        self.assertEqual(services["temporal"]["environment"]["POSTGRES_PORT"], "5432")
+
+    def test_custom_host_database_port_does_not_change_internal_port(self):
+        with tempfile.TemporaryDirectory() as directory:
+            empty_env = Path(directory) / "empty.env"
+            empty_env.touch()
+            services = self.config(empty_env, POSTGRES_PORT="25432")
+
+        self.assertEqual(services["pgvector"]["ports"][0]["published"], "25432")
+        self.assertEqual(services["pgvector"]["ports"][0]["target"], 5432)
+        self.assertEqual(services["mem0"]["environment"]["POSTGRES_PORT"], "5432")
+        self.assertEqual(services["temporal"]["environment"]["POSTGRES_PORT"], "5432")
 
     def test_example_models_match_image_and_embedding_dimensions(self):
         services = self.config(ROOT / ".env.example")

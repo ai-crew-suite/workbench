@@ -16,7 +16,10 @@
 import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { mockServices, startTestBackend } from '@backstage/backend-test-utils';
 import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node';
-import { catalogDynamicEntitiesModule, DynamicFixtureEntityProvider } from '../DynamicCatalogEntityProcessor';
+import {
+  catalogDynamicEntitiesModule,
+  DynamicFixtureEntityProvider,
+} from '../DynamicCatalogEntityProcessor';
 
 vi.mock('@ai-crew-suite/fixtures-catalog', () => ({
   getProgrammaticEntities: vi.fn(),

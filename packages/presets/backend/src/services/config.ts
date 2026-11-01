@@ -19,6 +19,9 @@ import { parse } from 'yaml';
 import { createServiceFactory, coreServices } from '@backstage/backend-plugin-api';
 import { ConfigReader } from '@backstage/config';
 import { JsonObject } from '@backstage/types';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 /**
  * Programmatic Configuration Factory for Sandbox Environments.
@@ -32,6 +35,11 @@ export const mockConfigServiceFactory = createServiceFactory({
     const appPort = process.env['FRONTEND_PORT'] || '3000';
     const backendHost = process.env['BACKEND_HOST'] || 'localhost';
     const backendPort = process.env['BACKEND_PORT'] || '7007';
+
+    const pgUser = process.env['POSTGRES_USER'] || 'workbench';
+    const pgPassword = process.env['POSTGRES_PASSWORD'] || 'postgres_secret_pass';
+    const pgDb = process.env['POSTGRES_DB'] || 'postgres_workbench';
+    const pgPort = parseInt(process.env['POSTGRES_PORT'] || '15432', 10);
 
     const programmaticConfig: JsonObject = {
       app: {
@@ -72,13 +80,13 @@ export const mockConfigServiceFactory = createServiceFactory({
           credentials: true,
         },
         database: {
-          client: 'better-sqlite3',
-          connection: ':memory:',
-          plugin: {
-            auth: { client: 'better-sqlite3', connection: ':memory:' },
-            notifications: { client: 'better-sqlite3', connection: ':memory:' },
-            scaffolder: { client: 'better-sqlite3', connection: ':memory:' },
-            signals: { client: 'better-sqlite3', connection: ':memory:' },
+          client: 'pg',
+          connection: {
+            host: '127.0.0.1',
+            port: pgPort,
+            user: pgUser,
+            password: pgPassword,
+            database: pgDb,
           },
         },
         reading: {

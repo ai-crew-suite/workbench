@@ -1,5 +1,5 @@
 {
-  "name": "@ai-crew-suite/workbench-app",
+  "name": "@ai-crew-suite/presets-app",
   "bundled": true,
   "license": "Apache-2.0",
   "keywords": [
@@ -34,7 +34,10 @@
   "scripts": {
     "format": "backstage-cli crew format",
     "lint": "backstage-cli crew lint",
+    "start": "backstage-cli workbench compose start app",
+    "stop": "backstage-cli workbench compose stop",
     "test:unit": "backstage-cli crew test:unit",
+    "test:unit:coverage": "backstage-cli crew test:unit:coverage",
     "typecheck": "backstage-cli crew typecheck"
   },
   "dependencies": {

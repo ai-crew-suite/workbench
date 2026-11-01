@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { parseAllDocuments } from 'yaml';
+import { readFileSync, existsSync } from 'fs';
+import { resolve } from 'path';
+import { createBackendModule, coreServices } from '@backstage/backend-plugin-api';
 import {
   CatalogProcessor,
   CatalogProcessorEmit,
   catalogProcessingExtensionPoint,
 } from '@backstage/plugin-catalog-node';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
-import { createBackendModule, coreServices } from '@backstage/backend-plugin-api';
-import { readFileSync, existsSync } from 'fs';
-import { resolve } from 'path';
-import { parseAllDocuments } from 'yaml';
 
 export class OptionalLocalFixturesProcessor implements CatalogProcessor {
   getProcessorName(): string {

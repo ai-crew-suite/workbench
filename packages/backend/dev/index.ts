@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { startDevBackend } from '@ai-crew-suite/workbench-backend';
+import { startDevBackend } from '@ai-crew-suite/presets-backend';
 
 startDevBackend().catch(err => {
   console.error('Standalone platform workbench container collapsed:', err);

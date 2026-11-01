@@ -29,12 +29,28 @@ To hook a plugin into our server, calling sites add a simple `dev/index.ts` file
 
 These commands are for linting, typechecking, and testing the backend workbench backend dev server package itself within this repo.
 
+### Start the Dev Server
+
+To build the backstage dev server package:
+
+```bash
+yarn turbo run start --filter=@ai-crew-suite/presets-backend
+```
+
+### Stop the Dev Server
+
+To build the backstage dev server package:
+
+```bash
+yarn turbo run stop --filter=@ai-crew-suite/presets-backend
+```
+
 ### Building the Package
 
 To build the backstage dev server package:
 
 ```bash
-yarn turbo run build --filter=@ai-crew-suite/workbench-backend
+yarn turbo run build --filter=@ai-crew-suite/presets-backend
 ```
 
 ### Running Lint
@@ -42,7 +58,7 @@ yarn turbo run build --filter=@ai-crew-suite/workbench-backend
 To lint the backstage dev server package:
 
 ```bash
-yarn turbo run lint --filter=@ai-crew-suite/workbench-backend
+yarn turbo run lint --filter=@ai-crew-suite/presets-backend
 ```
 
 ### Running Typecheck
@@ -50,7 +66,7 @@ yarn turbo run lint --filter=@ai-crew-suite/workbench-backend
 To typecheck the backstage dev server package:
 
 ```bash
-yarn turbo run typecheck --filter=@ai-crew-suite/workbench-backend
+yarn turbo run typecheck --filter=@ai-crew-suite/presets-backend
 ```
 
 ### Running Unit Tests
@@ -58,7 +74,7 @@ yarn turbo run typecheck --filter=@ai-crew-suite/workbench-backend
 To run unit tests:
 
 ```bash
-yarn turbo run test:unit --filter=@ai-crew-suite/workbench-backend
+yarn turbo run test:unit --filter=@ai-crew-suite/presets-backend
 ```
 
 ### Debugging
@@ -96,7 +112,7 @@ Add the orchestrator package to your `devDependencies` and configure the `start`
     "start": "backstage-dev-server"
   },
   "devDependencies": {
-    "@ai-crew-suite/workbench-backend": "workspace:*"
+    "@ai-crew-suite/presets-backend": "workspace:*"
   }
 }
 ```
@@ -385,7 +401,7 @@ The Workbench backend dev server includes a very open default permission policy.
 Clients can replace the default policy with their own custom permission policy like this:
 
 ```typescript
-import { startDevBackend } from '@ai-crew-suite/workbench-backend';
+import { startDevBackend } from '@ai-crew-suite/presets-backend';
 import {
     PermissionPolicy,
     PolicyQuery,

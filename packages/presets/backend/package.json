@@ -1,5 +1,5 @@
 {
-  "name": "@ai-crew-suite/workbench-backend",
+  "name": "@ai-crew-suite/presets-backend",
   "description": "A published Backstage backend server for use in Dockerfiles",
   "version": "1.0.0",
   "license": "Apache-2.0",
@@ -42,8 +42,10 @@
     "launcher.js"
   ],
   "scripts": {
+    "format": "backstage-cli crew format",
     "lint": "backstage-cli crew lint",
-    "test:e2e": "backstage-cli crew test:e2e",
+    "start": "backstage-cli workbench compose start backend",
+    "stop": "backstage-cli workbench compose stop",
     "test:unit": "backstage-cli crew test:unit",
     "test:unit:coverage": "backstage-cli crew test:unit:coverage",
     "typecheck": "backstage-cli crew typecheck"

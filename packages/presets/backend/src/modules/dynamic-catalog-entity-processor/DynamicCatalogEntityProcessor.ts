@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 import { createBackendModule, coreServices } from '@backstage/backend-plugin-api';
-import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node';
-import { EntityProvider, EntityProviderConnection } from '@backstage/plugin-catalog-node';
+import {
+  catalogProcessingExtensionPoint,
+  EntityProvider,
+  EntityProviderConnection,
+} from '@backstage/plugin-catalog-node';
 import { getProgrammaticEntities } from '@ai-crew-suite/fixtures-catalog';
 import { getProgrammaticTemplates } from '@ai-crew-suite/fixtures-scaffolder';
 

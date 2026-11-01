@@ -1,5 +1,5 @@
 {
-  "name": "@ai-crew-suite/backend",
+  "name": "@ai-crew-suite/workbench-backend",
   "description": "An isolated, non-published local validation sandbox and testpad for testing the workbench backend dev server.",
   "private": true,
   "license": "Apache-2.0",
@@ -34,7 +34,7 @@
     "typecheck": "backstage-cli crew typecheck"
   },
   "dependencies": {
-    "@ai-crew-suite/workbench-backend": "workspace:*",
+    "@ai-crew-suite/presets-backend": "workspace:*",
     "@backstage/catalog-model": "backstage:^"
   },
   "devDependencies": {

@@ -28,6 +28,22 @@ To remove complex and brittle path mapping aliases inside your build tools, this
 
 These commands are for maintaining, linting, and running tests on this wrapper orchestrator library inside our core system platform repository.
 
+### Start the Dev Server
+
+To build the backstage dev server package:
+
+```bash
+yarn turbo run start --filter=@ai-crew-suite/presets-app
+```
+
+### Stop the Dev Server
+
+To build the backstage dev server package:
+
+```bash
+yarn turbo run stop --filter=@ai-crew-suite/presets-app
+```
+
 ### Running Lint
 
 To trigger the Crew CLI provided ESLint configuration, execute:

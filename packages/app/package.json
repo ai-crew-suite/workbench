@@ -1,5 +1,5 @@
 {
-  "name": "@ai-crew-suite/app",
+  "name": "@ai-crew-suite/workbench-app",
   "description": "An isolated, non-published local validation workspace and browser testpad executing UI/UX integration runs, visual sweeps, and hot-reloading diagnostics against the Backstage frontend application shell.",
   "version": "0.0.1",
   "license": "Apache-2.0",
@@ -37,7 +37,7 @@
     "typecheck": "backstage-cli crew typecheck"
   },
   "dependencies": {
-    "@ai-crew-suite/workbench-app": "workspace:*"
+    "@ai-crew-suite/presets-app": "workspace:*"
   },
   "devDependencies": {
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",

@@ -92,6 +92,8 @@ services:
 
   pgvector:
     image: pgvector/pgvector:pg18
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-15432}:5432"
     volumes:
       - pgdata_volume:/var/lib/postgresql
     environment:

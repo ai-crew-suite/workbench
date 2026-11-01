@@ -2,32 +2,71 @@
   "extends": ["//"],
   "tasks": {
     "format": {
-      "cache": true,
-      "dependsOn": [],
-      "inputs": [],
-      "outputs": []
+      "cache": false,
+      "persistent": true
     },
     "lint": {
       "cache": true,
       "dependsOn": [],
-      "inputs": [],
+      "inputs": [
+        "e2e-tests/**",
+        "public/**",
+        "skeleton/**",
+        "src/**",
+        "launcher.js",
+        "package.json",
+        "tsconfig.json"
+      ],
       "outputs": []
+    },
+    "start": {
+      "cache": false,
+      "persistent": true
+    },
+    "stop": {
+      "cache": false,
+      "persistent": true
     },
     "test": {
       "cache": true,
       "dependsOn": [],
-      "inputs": ["src/**"]
+      "inputs": [
+        "e2e-tests/**",
+        "public/**",
+        "skeleton/**",
+        "src/**",
+        "launcher.js",
+        "package.json",
+        "tsconfig.json"
+      ],
+      "outputs": []
     },
     "test:unit": {
       "cache": true,
       "dependsOn": [],
-      "inputs": ["src/**"],
+      "inputs": [
+        "e2e-tests/**",
+        "public/**",
+        "skeleton/**",
+        "src/**",
+        "launcher.js",
+        "package.json",
+        "tsconfig.json"
+      ],
       "outputs": []
     },
     "typecheck": {
       "cache": true,
       "dependsOn": [],
-      "inputs": ["src/**", "tsconfig.json"],
+      "inputs": [
+        "e2e-tests/**",
+        "public/**",
+        "skeleton/**",
+        "src/**",
+        "launcher.js",
+        "package.json",
+        "tsconfig.json"
+      ],
       "outputs": []
     }
   }

@@ -17,6 +17,11 @@ These commands are for maintaining and verifying the internal configuration stab
 - PostgreSQL's messages about database files being owned by `postgres` and fixing
   permissions during initialization are informational when followed by `ok`.
   The named volume is mounted at the PostgreSQL 18 data root and is retained.
+- PostgreSQL is exposed only on host loopback, at port `15432` by default.
+  `POSTGRES_PORT` overrides the host port used by both the backend and Compose;
+  Mem0 and Temporal always connect to port `5432` inside the Compose network.
+  Changing `POSTGRES_USER`, `POSTGRES_PASSWORD`, or `POSTGRES_DB` does not
+  update an existing PostgreSQL data volume.
 - Temporal initializes its main schema in `POSTGRES_DB` and its visibility
   schema in a separate database, `temporal_visibility` by default. Override the
   latter with `TEMPORAL_VISIBILITY_DB`; the PostgreSQL user must have permission
@@ -52,8 +57,12 @@ These commands are for maintaining and verifying the internal configuration stab
   tables are migrated into `POSTGRES_DB` on startup.
 
 Changes to the Mem0 and Temporal Dockerfiles or entrypoints require rebuilding
-and publishing their images before restarting the stack. Compose-only changes
-take effect when the affected service is recreated.
+and publishing their images before restarting the stack. The workbench launcher
+uses a cached, published Compose artifact and a repository-specific project,
+not the local Compose file's `workbench` project. After Compose changes, publish
+the artifact and run `workbench compose stop` before starting again so it is
+retrieved afresh. Stop retains named volumes; running `docker compose down -v`
+against the local file does not reset the launcher's database.
 
 The startup-script regression tests use mocked service binaries and do not
 start containers. They require Python 3, Bash, `jq`, and `envsubst`:

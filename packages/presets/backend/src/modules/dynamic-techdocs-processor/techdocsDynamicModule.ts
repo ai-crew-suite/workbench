@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createBackendModule, coreServices, HttpRouterService } from '@backstage/backend-plugin-api';
+import {
+  createBackendModule,
+  coreServices,
+  HttpRouterService,
+} from '@backstage/backend-plugin-api';
 import { getProgrammaticTechDocsPath } from '@ai-crew-suite/fixtures-techdocs';
 import express from 'express';
 import path from 'path';

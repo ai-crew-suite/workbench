@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { OptionalLocalFixturesProcessor } from '../OptionalLocalFixturesProcessor';
+import * as fs from 'fs';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
 import { CatalogProcessorEmit } from '@backstage/plugin-catalog-node';
-import * as fs from 'fs';
+import { OptionalLocalFixturesProcessor } from '../OptionalLocalFixturesProcessor';
 
 // Mock the native filesystem modules
 vi.mock('fs');
