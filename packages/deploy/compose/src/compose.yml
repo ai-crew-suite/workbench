@@ -19,6 +19,7 @@ name: workbench
 services:
   grafana:
     image: "${REGISTRY:-localhost:32443/ai-crew-suite}/grafana-container:${IMAGE_TAG:-latest}"
+    container_name: grafana-local
     depends_on:
       prometheus:
         condition: service_healthy
@@ -29,6 +30,9 @@ services:
     environment:
       GF_AUTH_ANONYMOUS_ENABLED: true
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: mysecurepassword
+      GF_AUTH_DISABLE_LOGIN_FORM: false
     ports:
       - "127.0.0.1:${GRAFANA_PORT:-3001}:3000"
     healthcheck:
