@@ -38,8 +38,8 @@ group.
 | `workbench code-generator <plugin-id>` | Generate and register a Backstage plugin or module. |
 | `workbench compose lint [target]` | Lint Compose files. |
 | `workbench compose publish` | Publish the Compose configuration as an OCI artifact. |
-| `workbench compose start <app\|backend>` | Start the shared Compose stack and one foreground dev server. |
-| `workbench compose stop` | Stop the managed dev servers and shared Compose stack. |
+| `workbench compose start` | Start or reconcile the shared Compose stack. |
+| `workbench compose stop` | Stop the shared Compose stack. |
 | `workbench image build [target]` | Build container images. |
 | `workbench image lint [target]` | Lint Dockerfiles. |
 | `workbench image publish [target]` | Publish container images. |
@@ -57,12 +57,16 @@ result. Images and containers are not force-removed.
 
 ## Compose development stack
 
-Docker with Compose support and Yarn must be available on `PATH`. The consuming
-repository must have `backstage.json`, `packages/app`, and
-`packages/backend`. Each package needs a `start:dev` script that runs its
-actual development server. To start the infrastructure automatically, its
-`start` script can invoke `yarn run -T backstage-cli workbench compose start
-app` (or `backend`). The orchestrator calls `start:dev`, avoiding recursion.
+Docker with Compose support and Yarn must be available on `PATH`. Run these
+commands from a repository containing `backstage.json`:
+
+```sh
+yarn backstage-cli workbench compose start
+yarn backstage-cli workbench compose stop
+```
+
+These commands manage infrastructure only. Start and stop frontend and backend
+development servers independently from their own directories.
 
 The first start retrieves the Compose artifact from
 `ghcr.io/ai-crew-suite/workbench-compose:latest` by default, then runs
@@ -75,17 +79,23 @@ not supported. Layer digests are checked, but artifact signatures are not
 verified. Published Compose configuration is executed by Docker: only use
 artifacts from registries and publishers you trust.
 
-App and backend can be started independently. They share a repository-specific
-Compose project and inherit the caller's environment. Stopping either foreground
-server does not stop the stack. Run `yarn backstage-cli workbench compose stop`
-from the repository to stop both managed servers and the stack; named volumes
-are retained. If teardown fails, fix the error and retry the command.
+Each OS user has one managed stack across their repositories. Starting again
+from its owning repository reconciles that stack; starting from a different
+repository reports the owner and refuses to start another. Any repository may
+stop it. A stack is bound to the Docker daemon on which it was started; switch
+back to that daemon before starting or stopping it. Stop retains named volumes
+and does not stop development servers. If teardown fails, fix the error and
+retry the command.
 
-The cached Compose file and fixed-name `workbench.pid` state file are stored in
-a private, repository-specific temporary directory. They contain process
-identities and the artifact reference, not registry credentials. The state must
-remain available until teardown completes. To change the artifact reference
-or registry transport, stop the existing stack first.
+The cached Compose file and `workbench.pid` state file are stored in the user's
+private `~/.workbench-compose` directory. They record the repository, Docker
+daemon, and artifact reference, not registry credentials. The state must remain
+available until teardown completes. To change the artifact reference or registry
+transport, stop the existing stack first. A previous repository-scoped stack is
+detected and must be stopped before a new shared stack can start. If multiple
+older stacks or missing state are reported, stop those projects individually
+using their original Compose project and configuration. Upgrade older CLI
+installations as well; they do not participate in the shared lock.
 
 ## Plugin generator
 

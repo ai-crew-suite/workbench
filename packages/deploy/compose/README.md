@@ -58,7 +58,7 @@ These commands are for maintaining and verifying the internal configuration stab
 
 Changes to the Mem0 and Temporal Dockerfiles or entrypoints require rebuilding
 and publishing their images before restarting the stack. The workbench launcher
-uses a cached, published Compose artifact and a repository-specific project,
+uses a cached, published Compose artifact and a per-user shared project,
 not the local Compose file's `workbench` project. After Compose changes, publish
 the artifact and run `workbench compose stop` before starting again so it is
 retrieved afresh. Stop retains named volumes; running `docker compose down -v`

@@ -20,10 +20,6 @@
       "cache": false,
       "persistent": true
     },
-    "stop": {
-      "cache": false,
-      "persistent": true
-    },
     "typecheck": {
       "cache": true,
       "dependsOn": [],

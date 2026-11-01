@@ -13,96 +13,82 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { spawn, type ChildProcess } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
 import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { createServer, type Server } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { setTimeout as delay } from 'node:timers/promises';
-import { afterEach, describe, expect, it } from 'vitest';
-import { LifecycleStore } from '../state';
-import { isSameProcess, processIdentity } from '../processes';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 const cli = resolve(process.cwd(), 'bin/backstage-cli-module-workbench');
 
-async function waitFor<T>(check: () => Promise<T | undefined>, timeout = 20000): Promise<T> {
-  const end = Date.now() + timeout;
-  while (Date.now() < end) {
-    const result = await check();
-    if (result !== undefined) return result;
-    await delay(50);
-  }
-  throw new Error('Timed out waiting for the lifecycle test.');
-}
-
-describe.skipIf(process.platform === 'win32')('Compose lifecycle integration', () => {
-  let root: string | undefined;
-  let stateDirectory: string | undefined;
-  let server: Server | undefined;
+describe.skipIf(process.platform === 'win32')('shared Compose lifecycle', () => {
+  let directory: string;
+  let home: string;
+  let first: string;
+  let second: string;
+  let log: string;
+  let projects: string;
+  let server: Server;
+  let registry: string;
   let env: NodeJS.ProcessEnv;
-  const children: ChildProcess[] = [];
+  let manifests: number;
 
-  function run(args: string[]): ChildProcess {
+  async function run(root: string, args: string[], overrides: NodeJS.ProcessEnv = {}) {
     const child = spawn(process.execPath, [cli, 'workbench', 'compose', ...args], {
-      cwd: root, env, stdio: ['ignore', 'pipe', 'pipe'],
+      cwd: root, env: { ...env, ...overrides }, stdio: ['ignore', 'pipe', 'pipe'],
     });
-    children.push(child);
-    return child;
+    let output = '';
+    child.stdout.on('data', chunk => { output += chunk.toString(); });
+    child.stderr.on('data', chunk => { output += chunk.toString(); });
+    const code = await new Promise<number | null>((resolveClose, reject) => {
+      child.once('error', reject);
+      child.once('close', resolveClose);
+    });
+    return { code, output };
   }
 
-  afterEach(async () => {
-    if (root && env) {
-      delete env['TEST_FAIL_DOWN'];
-      const stop = run(['stop']);
-      await new Promise<void>(resolveClose => stop.once('close', () => resolveClose()));
-    }
-    for (const child of children) {
-      if (child.exitCode === null && child.signalCode === null) child.kill('SIGTERM');
-    }
-    children.length = 0;
-    if (server) await new Promise<void>((resolveClose, reject) => server!.close(error => error ? reject(error) : resolveClose()));
-    if (root) await rm(root, { recursive: true, force: true });
-    if (stateDirectory) await rm(stateDirectory, { recursive: true, force: true });
-  });
-
-  it('shares the stack, handles Ctrl+C independently, and stops only tracked processes', async () => {
-    root = await mkdtemp(join(tmpdir(), 'workbench-lifecycle-test-'));
-    const bin = join(root, 'bin');
-    await mkdir(bin);
-    await writeFile(join(root, 'backstage.json'), '{}');
-    for (const target of ['app', 'backend']) {
-      await mkdir(join(root, 'packages', target), { recursive: true });
-      await writeFile(join(root, 'packages', target, 'package.json'), JSON.stringify({ scripts: { 'start:dev': 'fake' } }));
-    }
-    const log = join(root, 'docker.log');
+  beforeEach(async () => {
+    directory = await mkdtemp(join(tmpdir(), 'workbench-shared-test-'));
+    home = join(directory, 'home');
+    first = join(directory, 'first-repo');
+    second = join(directory, 'second-repo');
+    const bin = join(directory, 'bin');
+    for (const dir of [home, first, second, bin]) await mkdir(dir);
+    await writeFile(join(first, 'backstage.json'), '{}');
+    await writeFile(join(second, 'backstage.json'), '{}');
+    log = join(directory, 'docker.log');
+    projects = join(directory, 'projects.json');
+    await writeFile(projects, '[]');
+    const preload = join(directory, 'fake-home.cjs');
+    await writeFile(preload, [
+      "const os = require('node:os');",
+      'const original = os.userInfo;',
+      "os.userInfo = (...args) => ({ ...original(...args), homedir: process.env.TEST_HOME });",
+    ].join('\n'));
     const docker = join(bin, 'docker');
     await writeFile(docker, [
       '#!/usr/bin/env node',
-      "require('node:fs').appendFileSync(process.env.TEST_DOCKER_LOG, JSON.stringify(process.argv.slice(2)) + '\\n');",
-      "if (process.env.TEST_FAIL_DOWN && process.argv.includes('down')) process.exit(1);",
-    ].join('\n'));
-    const yarn = join(bin, 'yarn');
-    await writeFile(yarn, [
-      '#!/usr/bin/env node',
       "const fs = require('node:fs');",
-      "const { spawn } = require('node:child_process');",
-      "const name = require('node:path').basename(process.cwd());",
-      "const child = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], { stdio: 'ignore' });",
-      "fs.writeFileSync(require('node:path').join(process.env.TEST_ROOT, `${name}.pid`), String(child.pid));",
-      'setInterval(() => {}, 1000);',
+      "const args = process.argv.slice(2);",
+      "fs.appendFileSync(process.env.TEST_DOCKER_LOG, JSON.stringify(args) + '\\n');",
+      "if (args[0] === 'info') { console.log(process.env.TEST_DAEMON || 'daemon-one'); process.exit(0); }",
+      "if (args[1] === 'ls') { console.log(fs.readFileSync(process.env.TEST_PROJECTS, 'utf8')); process.exit(0); }",
+      "if (process.env.TEST_FAIL_DOWN && args.includes('down')) process.exit(1);",
+      "if (process.env.TEST_FAIL_UP && args.includes('up')) process.exit(1);",
+      "if (args.includes('up')) fs.writeFileSync(process.env.TEST_PROJECTS, JSON.stringify([{ Name: args[args.indexOf('--project-name') + 1], ConfigFiles: args[args.indexOf('-f') + 1] }]));",
+      "if (args.includes('down')) fs.writeFileSync(process.env.TEST_PROJECTS, '[]');",
     ].join('\n'));
     await chmod(docker, 0o755);
-    await chmod(yarn, 0o755);
     env = {
-      ...process.env, PATH: `${bin}:${process.env['PATH']}`, DOCKER_CONFIG: join(root, 'docker-config'),
-      TEST_ROOT: root, TEST_DOCKER_LOG: log,
+      ...process.env, HOME: home, PATH: `${bin}:${process.env['PATH']}`,
+      DOCKER_CONFIG: join(home, '.docker'), TEST_DOCKER_LOG: log, TEST_PROJECTS: projects, TEST_HOME: home,
+      NODE_OPTIONS: `${process.env['NODE_OPTIONS'] ?? ''} --require="${preload}"`,
     };
-
     const body = Buffer.from('services:\n  web:\n    image: nginx\n');
     const digest = `sha256:${createHash('sha256').update(body).digest('hex')}`;
-    let manifests = 0;
+    manifests = 0;
     server = createServer((request, response) => {
       if (request.url === '/v2/team/compose/manifests/latest') {
         manifests += 1;
@@ -115,55 +101,114 @@ describe.skipIf(process.platform === 'win32')('Compose lifecycle integration', (
         response.end(body);
       } else response.writeHead(404).end();
     });
-    await new Promise<void>(resolveListen => server!.listen(0, '127.0.0.1', resolveListen));
+    await new Promise<void>(resolveListen => server.listen(0, '127.0.0.1', resolveListen));
     const address = server.address();
     if (!address || typeof address === 'string') throw new Error('Missing registry address');
-    const registry = `127.0.0.1:${address.port}/team`;
-    const store = await LifecycleStore.create(root);
-    stateDirectory = store.directory;
-    const app = run(['start', 'app', '--registry', registry]);
-    const backend = run(['start', 'backend', '--registry', registry]);
-    const both = await waitFor(async () => {
-      const state = await store.read();
-      return state?.servers.app && state.servers.backend ? state : undefined;
-    });
+    registry = `127.0.0.1:${address.port}/team`;
+  });
+
+  afterEach(async () => {
+    if (server) await new Promise<void>((resolveClose, reject) => server.close(error => error ? reject(error) : resolveClose()));
+    if (directory) await rm(directory, { recursive: true, force: true });
+  });
+
+  it('serializes competing repositories, refuses the second, and permits cross-repository stop', async () => {
+    const [one, two] = await Promise.all([
+      run(first, ['start', '--registry', registry]),
+      run(second, ['start', '--registry', registry]),
+    ]);
+    expect([one.code, two.code].sort()).toEqual([0, 1]);
+    const owner = one.code === 0 ? first : second;
+    const other = owner === first ? second : first;
+    expect(one.code === 0 ? two.output : one.output).toContain(`reserved by ${owner.split('/').pop()}`);
     expect(manifests).toBe(1);
-    expect(both.phase).toBe('running');
-    expect(isSameProcess(both.servers.app!.child)).toBe(true);
-    expect(isSameProcess(both.servers.backend!.child)).toBe(true);
-    const appGrandchild = await waitFor(async () => existsSync(join(root!, 'app.pid'))
-      ? processIdentity(Number(await readFile(join(root!, 'app.pid'), 'utf8'))) : undefined);
-    const backendGrandchild = await waitFor(async () => existsSync(join(root!, 'backend.pid'))
-      ? processIdentity(Number(await readFile(join(root!, 'backend.pid'), 'utf8'))) : undefined);
-
-    const duplicate = run(['start', 'backend', '--registry', registry]);
-    expect(await new Promise<number | null>(resolveClose => duplicate.once('close', resolveClose))).not.toBe(0);
-
-    if (!app.pid) throw new Error('App supervisor did not start');
-    process.kill(app.pid, 'SIGINT');
-    await waitFor(async () => {
-      const state = await store.read();
-      return state && !state.servers.app && state.servers.backend ? state : undefined;
-    });
-    expect(isSameProcess(appGrandchild)).toBe(false);
-    expect(isSameProcess(both.servers.backend!.child)).toBe(true);
-    expect((await readFile(log, 'utf8')).split('\n').filter(Boolean).map(line => JSON.parse(line).at(-1))).not.toContain('down');
-
-    env['TEST_FAIL_DOWN'] = '1';
-    const failingStop = run(['stop']);
-    expect(await new Promise<number | null>(resolveClose => failingStop.once('close', resolveClose))).not.toBe(0);
-    expect((await store.read())?.phase).toBe('stopping');
-    expect(isSameProcess(backendGrandchild)).toBe(false);
-    delete env['TEST_FAIL_DOWN'];
-    const stop = run(['stop']);
-    const result = await new Promise<number | null>(resolveClose => stop.once('close', resolveClose));
-    expect(result).toBe(0);
-    expect(await store.read()).toBeUndefined();
-    expect(isSameProcess(both.servers.backend!.child)).toBe(false);
+    const state = JSON.parse(await readFile(join(home, '.workbench-compose', 'workbench.pid'), 'utf8'));
+    expect(state).toMatchObject({ root: owner, repository: owner.split('/').pop(), phase: 'running', daemonId: 'daemon-one' });
+    expect(state).not.toHaveProperty('servers');
+    const repeat = await run(owner, ['start', '--registry', registry]);
+    expect(repeat.code, repeat.output).toBe(0);
+    expect(manifests).toBe(1);
+    const stopped = await run(other, ['stop']);
+    expect(stopped.code, stopped.output).toBe(0);
     const calls: string[][] = (await readFile(log, 'utf8')).trim().split('\n').map(line => JSON.parse(line));
     expect(calls.filter(args => args.includes('up'))).toHaveLength(2);
-    expect(calls.filter(args => args.includes('down'))).toHaveLength(2);
-    expect(calls.at(-1)).not.toContain('--volumes');
-    expect(backend.pid).toBeDefined();
+    expect(calls.filter(args => args.includes('down'))).toHaveLength(1);
+    expect(calls.find(args => args.includes('down'))).not.toContain('--volumes');
+  }, 40000);
+
+  it('retains failed lifecycle state for retry and rejects a different daemon', async () => {
+    const failed = await run(first, ['start', '--registry', registry], { TEST_FAIL_UP: '1' });
+    expect(failed.code).not.toBe(0);
+    const path = join(home, '.workbench-compose', 'workbench.pid');
+    expect(JSON.parse(await readFile(path, 'utf8')).phase).toBe('starting');
+    expect((await run(second, ['stop'], { TEST_DAEMON: 'other-daemon' })).output).toContain('different Docker daemon');
+    const retry = await run(first, ['start', '--registry', registry]);
+    expect(retry.code, retry.output).toBe(0);
+    const failStop = await run(second, ['stop'], { TEST_FAIL_DOWN: '1' });
+    expect(failStop.code).not.toBe(0);
+    expect(JSON.parse(await readFile(path, 'utf8')).phase).toBe('stopping');
+    const stopped = await run(second, ['stop']);
+    expect(stopped.code, stopped.output).toBe(0);
+  }, 40000);
+
+  it('detects and stops an earlier repository-scoped stack without managing its servers', async () => {
+    const hash = createHash('sha256').update(home).update('\0').update(first).digest('hex').slice(0, 20);
+    const oldDirectory = join(directory, `workbench-compose-${hash}`);
+    await mkdir(oldDirectory, { mode: 0o700 });
+    const composeFile = join(oldDirectory, 'compose.yml');
+    const projectName = `workbench-${hash.slice(0, 12)}`;
+    await writeFile(composeFile, 'services: {}\n');
+    await writeFile(join(oldDirectory, 'workbench.pid'), JSON.stringify({
+      version: 1, root: first, composeFile, projectName, servers: { backend: { child: { pid: process.pid } } },
+    }));
+    await writeFile(projects, JSON.stringify([{ Name: projectName, ConfigFiles: composeFile }]));
+    const start = await run(second, ['start', '--registry', registry]);
+    expect(start.code).not.toBe(0);
+    expect(start.output).toContain('first-repo');
+    const stop = await run(second, ['stop']);
+    expect(stop.code, stop.output).toBe(0);
+    expect(manifests).toBe(0);
+  }, 40000);
+
+  it('does not launch or terminate independent development processes', async () => {
+    const marker = join(directory, 'yarn-called');
+    const yarn = join(directory, 'bin', 'yarn');
+    await writeFile(yarn, `#!/bin/sh\nprintf called > "${marker}"\nexit 1\n`);
+    await chmod(yarn, 0o755);
+    const independent = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], {
+      stdio: 'ignore',
+    });
+    try {
+      await new Promise<void>((resolveSpawn, reject) => {
+        independent.once('spawn', resolveSpawn);
+        independent.once('error', reject);
+      });
+      const start = await run(first, ['start', '--registry', registry]);
+      expect(start.code, start.output).toBe(0);
+      const stop = await run(second, ['stop']);
+      expect(stop.code, stop.output).toBe(0);
+      expect(independent.exitCode).toBeNull();
+      expect(independent.signalCode).toBeNull();
+      await expect(readFile(marker)).rejects.toMatchObject({ code: 'ENOENT' });
+    } finally {
+      independent.kill('SIGTERM');
+      await new Promise<void>(resolveClose => independent.once('close', () => resolveClose()));
+    }
+  }, 40000);
+
+  it('rejects obsolete server targets and does not launch a dev server', async () => {
+    const result = await run(first, ['start', 'backend', '--registry', registry]);
+    expect(result.code).not.toBe(0);
+    expect(result.output).toContain('too many arguments');
+  });
+
+  it('rejects malformed or lost shared state instead of starting another project', async () => {
+    const started = await run(first, ['start', '--registry', registry]);
+    expect(started.code, started.output).toBe(0);
+    const path = join(home, '.workbench-compose', 'workbench.pid');
+    await writeFile(path, JSON.stringify({ version: 2, root: first, repository: 'wrong' }));
+    expect((await run(second, ['stop'])).output).toContain('Invalid workbench lifecycle state');
+    await rm(path);
+    expect((await run(second, ['start', '--registry', registry])).output).toContain('exists without its state file');
   }, 40000);
 });

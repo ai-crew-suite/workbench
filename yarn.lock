@@ -134,6 +134,7 @@ __metadata:
     "@backstage/plugin-signals-backend": "backstage:^"
     "@backstage/plugin-techdocs-backend": "backstage:^"
     "@backstage/types": "backstage:^"
+    dotenv: "catalog:prod"
     pg: "catalog:prod"
     vitest: "catalog:dev"
     yaml: "catalog:prod"

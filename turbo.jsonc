@@ -51,6 +51,14 @@
       "inputs": [],
       "outputs": []
     },
+    "start": {
+      "cache": false,
+      "persistent": true
+    },
+    "stop": {
+      "cache": false,
+      "persistent": true
+    },
     /** Synchronizes TypeScript Project References alphabetically and heals roots */
     "sync": {
       "cache": false,

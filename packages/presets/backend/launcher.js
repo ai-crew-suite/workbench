@@ -16,10 +16,10 @@
 const { spawn } = require('child_process');
 const path = require('path');
 const os = require('os');
+const fs = require('fs');
 
 const currentPluginRoot = process.cwd();
 const skeletonPath = path.resolve(__dirname, './skeleton');
-//const configPath = path.resolve(skeletonPath, 'app-config.dev.yaml');
 const configPath = path.resolve(skeletonPath, 'empty-fallback.yaml');
 const absoluteEntrypointPath = path.resolve(__dirname, 'src/index.ts');
 
@@ -29,7 +29,19 @@ console.log(`[Dev-Backend] Plugin entrypoint: ${currentPluginRoot}`);
 
 const backstageCliBinary = require.resolve('@backstage/cli/bin/backstage-cli');
 
-const runArgs = ['package', 'start', '--config', configPath];
+// 1. Establish core arguments, explicitly linking the entrypoint file location
+const runArgs = ['package', 'start', '--config', configPath, '--entrypoint', absoluteEntrypointPath];
+
+// 2. Resolve optional consumer-level config overrides (mirroring your frontend strategy)
+const optionalLocalConfigPath = path.resolve(currentPluginRoot, 'dev/app-config.dev.yaml');
+if (fs.existsSync(optionalLocalConfigPath)) {
+  console.log(`[Dev-Backend] Loading local plugin config override: ${optionalLocalConfigPath}`);
+  runArgs.push('--config', optionalLocalConfigPath);
+}
+
+// 3. Forward node inspector flags down to allow step-through debugging
+if (process.argv.includes('--inspect')) runArgs.push('--inspect');
+if (process.argv.includes('--inspect-brk')) runArgs.push('--inspect-brk');
 
 const processEnv = {
   ...process.env,

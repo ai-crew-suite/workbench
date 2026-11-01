@@ -48,11 +48,8 @@ yarn turbo run typecheck --filter=@ai-crew-suite/testpad-frontend
 
 ### Running Local Frontend Validation Sweeps
 
-To fire up the underlying hot-reloaded dev server and mount your local test application components within a simulated browser view, run:
-
-```bash
-yarn turbo run start --filter=@ai-crew-suite/testpad-frontend
-```
+Start the frontend development server from this workspace independently of the
+workbench Compose stack.
 
 ## 📄 Compliance and Licensing
 

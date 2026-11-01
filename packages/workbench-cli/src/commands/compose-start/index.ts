@@ -17,19 +17,17 @@ import { Command, Option } from 'commander';
 import type { CliCommandContext } from '@backstage/cli-node';
 import { startCompose } from './src/runner';
 
-/** Starts the requested foreground development server and its shared stack. */
+/** Starts the shared Compose stack. */
 export default async function execute({ args, info }: CliCommandContext): Promise<void> {
   const program = new Command();
   program
     .name(info.usage)
-    .description('Start the shared Compose stack and an app or backend development server')
-    .argument('<target>', 'Development server: app or backend')
+    .description('Start the shared Compose stack')
     .addOption(new Option('-r, --registry <registry>', 'OCI registry and namespace').env('REGISTRY').default('ghcr.io/ai-crew-suite'))
     .addOption(new Option('-t, --tag <tag>', 'Compose artifact tag').env('IMAGE_TAG').default('latest'))
     .option('--plain-http', 'Use HTTP for an insecure registry (automatic for localhost)')
-    .action(async (target: string, options: { registry: string; tag: string; plainHttp?: boolean }) => {
-      if (target !== 'app' && target !== 'backend') throw new Error('Target must be app or backend.');
-      await startCompose({ target, ...options });
+    .action(async (options: { registry: string; tag: string; plainHttp?: boolean }) => {
+      await startCompose(options);
     });
   await program.parseAsync(args, { from: 'user' });
 }

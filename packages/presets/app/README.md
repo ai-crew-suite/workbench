@@ -30,19 +30,8 @@ These commands are for maintaining, linting, and running tests on this wrapper o
 
 ### Start the Dev Server
 
-To build the backstage dev server package:
-
-```bash
-yarn turbo run start --filter=@ai-crew-suite/presets-app
-```
-
-### Stop the Dev Server
-
-To build the backstage dev server package:
-
-```bash
-yarn turbo run stop --filter=@ai-crew-suite/presets-app
-```
+Start and stop the frontend development server independently from its
+workspace directory. The workbench Compose commands manage only infrastructure.
 
 ### Running Lint
 

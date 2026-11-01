@@ -29,8 +29,7 @@
   "scripts": {
     "format": "backstage-cli crew format",
     "lint": "backstage-cli crew lint",
-    "start": "backstage-cli workbench compose start backend",
-    "stop": "backstage-cli workbench compose stop",
+    "start": "backstage-dev-backend",
     "typecheck": "backstage-cli crew typecheck"
   },
   "dependencies": {

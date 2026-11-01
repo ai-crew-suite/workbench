@@ -15,7 +15,7 @@
  */
 const { spawn } = require('child_process');
 const path = require('path');
-const fs = require('fs'); // Added to check for optional local file existence
+const fs = require('fs');
 
 const currentPluginRoot = process.cwd();
 const skeletonPath = path.resolve(__dirname, './skeleton');
