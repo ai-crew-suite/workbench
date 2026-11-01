@@ -1,5 +1,15 @@
 # @TODOs
 
+Right now, the Compose stack is running, but neither a backend nor a frontend dev server is recorded as running for this repository. Nothing is listening on their default ports, 7007 and 3000. Grafana is listening on 3001.
+
+`--filter=@ai-crew-suite/workbench-backend` starts the stack and the backend only, normally at `http://localhost:7007`. A healthy Compose stack alone doesn’t establish that the backend finished starting.
+
+`--filter=@ai-crew-suite/workbench-app` starts the stack and the frontend only, normally at `http://localhost:3000`. It does not start the backend. Both are foreground dev servers; stopping a command leaves the Compose stack running.
+
+The second command’s Compose output is expected under the current implementation: it reads the PID state but still runs `docker compose up -d --wait` to reconcile the stack. That does not necessarily mean containers were restarted; I can’t determine that from the output described. See `runner.ts` and `cluster.ts`.
+
+Your proposed single-stack behavior differs from today’s design: `state.ts` derives a separate state directory and Compose project name from each repository path. The JSON already records the repository’s root path, but another repository looks in a different state directory and won’t consult it. A shared state location and lock, plus an owner/repository label for the message, would support the behavior you described.
+
 ## Break  current unit test workflow into two distinct Turbo tasks in `turbo.json`
 
 1. `build:image`: Compiles the Dockerfile and pushes it to a registry (Zot locally, Artifact Registry/ECR in CI).

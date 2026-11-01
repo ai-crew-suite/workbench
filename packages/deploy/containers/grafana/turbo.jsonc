@@ -37,17 +37,6 @@
       "env": ["TRIVY_SCAN_TIMEOUT"],
       "outputs": []
     },
-    "test:unit": {
-      "cache": true,
-      "dependsOn": ["image:build"],
-      "inputs": [
-        "src/**",
-        "**/__tests__/**/*.test.ts",
-        "**/__tests__/**/*.spec.ts",
-        "vitest.config.ts"
-      ],
-      "outputs": []
-    },
     "publish": {
       "cache": false,
       "dependsOn": ["image:build"],

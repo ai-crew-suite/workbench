@@ -65,7 +65,7 @@ function runPreload(testCase = '') {
     timeout: 10_000,
     env: {
       ...process.env,
-      PATH: `${bin}:${process.env.PATH}`,
+      PATH: `${bin}:${process.env['PATH']}`,
       OLLAMA_HOST: 'http://example.invalid:11434',
       OLLAMA_MODELS: path.join(dir, 'models'),
       TEST_LOG: log,

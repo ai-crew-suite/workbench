@@ -39,7 +39,7 @@
     },
     "test:unit": {
       "cache": true,
-      "dependsOn": ["image:build"],
+      "dependsOn": [],
       "inputs": [
         "src/**",
         "**/__tests__/**/*.test.ts",

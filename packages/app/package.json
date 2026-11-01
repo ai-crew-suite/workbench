@@ -32,8 +32,8 @@
   "scripts": {
     "format": "backstage-cli crew format",
     "lint": "backstage-cli crew lint",
-    "start": "yarn run -T backstage-cli workbench compose start app",
-    "start:dev": "backstage-dev-frontend",
+    "start": "backstage-cli workbench compose start app",
+    "stop": "backstage-cli workbench compose stop",
     "typecheck": "backstage-cli crew typecheck"
   },
   "dependencies": {

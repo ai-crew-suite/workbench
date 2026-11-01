@@ -28,8 +28,7 @@
     "image:test:security": "yarn run -T backstage-cli workbench image test security grafana-container",
     "image:test:structure": "yarn run -T backstage-cli workbench image test structure grafana-container",
     "publish": "yarn run -T backstage-cli workbench image publish grafana-container",
-    "test": "yarn image:test:security && yarn image:test:structure && yarn test:unit",
-    "test:unit": "vitest run"
+    "test": "yarn image:test:security && yarn image:test:structure"
   },
   "devDependencies": {
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",

@@ -43,6 +43,7 @@ export interface LifecycleState {
 
 function isIdentity(value: unknown): value is ProcessIdentity {
   if (typeof value !== 'object' || value === null || !('pid' in value) || !('started' in value)) return false;
+
   return typeof value.pid === 'number' && Number.isSafeInteger(value.pid) && value.pid > 1
     && typeof value.started === 'string' && value.started.length > 0;
 }
@@ -52,7 +53,13 @@ function isServerRecord(value: unknown): value is ServerRecord {
     && isIdentity(value.supervisor) && isIdentity(value.child);
 }
 
-/** Provides locked, atomic access to one repository's fixed-name PID file. */
+/**
+ * Provides locked, atomic access to one repository's fixed-name PID file. Follows the naming schema:
+ *
+ *  /tmp/workbench-compose-[20_character_hash]/workbench.pid
+ *
+ * The hash is derived from the user's home directory and the canonical repository root.
+ */
 export class LifecycleStore {
   private constructor(
     readonly root: string,
@@ -64,15 +71,30 @@ export class LifecycleStore {
   /** Resolves a canonical repository-specific private temporary directory. */
   static async create(root: string): Promise<LifecycleStore> {
     const canonicalRoot = await realpath(root);
+
     const hash = createHash('sha256').update(homedir()).update('\0').update(canonicalRoot).digest('hex').slice(0, 20);
+
     const directory = join(tmpdir(), `workbench-compose-${hash}`);
+
     await mkdir(directory, { recursive: true, mode: 0o700 });
+
     const info = await lstat(directory);
-    if (!info.isDirectory() || info.isSymbolicLink()
-      || (process.platform !== 'win32' && ((info.mode & 0o077) !== 0 || info.uid !== process.getuid?.()))) {
+
+    if (
+      !info.isDirectory() ||
+      info.isSymbolicLink() ||
+      (process.platform !== 'win32' && ((info.mode & 0o077) !== 0 ||
+      info.uid !== process.getuid?.()))
+    ) {
       throw new Error(`Unsafe workbench state directory: ${directory}`);
     }
-    return new LifecycleStore(canonicalRoot, directory, join(directory, 'compose.yml'), `workbench-${hash.slice(0, 12)}`);
+
+    return new LifecycleStore(
+      canonicalRoot,
+      directory,
+      join(directory, 'compose.yml'),
+      `workbench-${hash.slice(0, 12)}`
+    );
   }
 
   /** Serializes startup and shutdown across separate CLI invocations. */
@@ -82,8 +104,10 @@ export class LifecycleStore {
       update: 10000,
       retries: { retries: 300, minTimeout: 500, maxTimeout: 500, factor: 1 },
     });
+
     try {
       return await operation();
+
     } finally {
       await release();
     }
@@ -94,11 +118,15 @@ export class LifecycleStore {
     let text: string;
     try {
       text = await readFile(join(this.directory, 'workbench.pid'), 'utf8');
+
     } catch (error) {
       if (error instanceof Error && 'code' in error && error.code === 'ENOENT') return undefined;
+
       throw error;
     }
+
     const value: unknown = JSON.parse(text);
+
     if (typeof value !== 'object' || value === null
       || !('version' in value) || value.version !== 1
       || !('root' in value) || value.root !== this.root
@@ -112,15 +140,18 @@ export class LifecycleStore {
         !['app', 'backend'].includes(kind) || !isServerRecord(record))) {
       throw new Error(`Invalid workbench lifecycle state in ${this.directory}; refusing to manage processes.`);
     }
+
     return value as LifecycleState;
   }
 
   /** Atomically records lifecycle state without persisting credentials. */
   async write(state: LifecycleState): Promise<void> {
     const temporary = join(this.directory, `state-${randomUUID()}.tmp`);
+
     try {
       await writeFile(temporary, JSON.stringify(state, null, 2), { mode: 0o600, flag: 'wx' });
       await rename(temporary, join(this.directory, 'workbench.pid'));
+
     } finally {
       await rm(temporary, { force: true });
     }
