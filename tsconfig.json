@@ -10,12 +10,6 @@
       "path": "./packages/backend"
     },
     {
-      "path": "./packages/backstage/app"
-    },
-    {
-      "path": "./packages/backstage/backend"
-    },
-    {
       "path": "./packages/dependencies/app"
     },
     {
@@ -68,6 +62,12 @@
     },
     {
       "path": "./packages/fixtures/techdocs"
+    },
+    {
+      "path": "./packages/presets/app"
+    },
+    {
+      "path": "./packages/presets/backend"
     },
     {
       "path": "./packages/workbench-cli"

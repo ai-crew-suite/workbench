@@ -77,14 +77,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ai-crew-suite/crew-cli@npm:^0.0.6":
-  version: 0.0.6
-  resolution: "@ai-crew-suite/crew-cli@npm:0.0.6"
+"@ai-crew-suite/crew-cli@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@ai-crew-suite/crew-cli@npm:1.0.1"
   dependencies:
-    "@backstage/cli": "npm:^0.36.4"
+    "@backstage/cli": "npm:^0.36.6"
+    "@backstage/cli-common": "npm:^0.3.1"
+    "@backstage/cli-node": "npm:^0.3.4"
     "@backstage/core-components": "npm:^0.18.14"
     "@backstage/core-plugin-api": "npm:^1.12.10"
-    "@backstage/eslint-plugin": "npm:^0.3.1"
+    "@backstage/eslint-plugin": "npm:^0.3.2"
     "@backstage/test-utils": "npm:^1.7.22"
     "@backstage/theme": "npm:^0.7.3"
     "@material-ui/core": "npm:^4.12.4"
@@ -97,7 +99,6 @@ __metadata:
     "@typescript-eslint/parser": "npm:^8.71.0"
     "@vitest/coverage-v8": "npm:^5.0.3"
     chalk: "npm:^6.0.1"
-    commander: "npm:^15.0.0"
     eslint: "npm:^10.12.0"
     eslint-config-prettier: "npm:^10.1.8"
     eslint-plugin-header: "npm:^3.1.1"
@@ -122,9 +123,7 @@ __metadata:
     vite: "npm:^8.3.1"
     vite-plugin-tsconfig-paths: "npm:^1.4.1"
     vitest: "npm:^5.0.3"
-  bin:
-    crew: ./dist/bin/crew.js
-  checksum: 10c0/6f21053f6da670135a0baee9092ed2782e6c45fd8a4589b4fab51211ebe214d5039d7c353c0a847a8c323b7ede6a35ac1897ec27d966c7c93be268a7c6021688
+  checksum: 10c0/4092f94515e54d47bf8ca86499e5d0ecb514710326b9babcebf81ad47de4f1b16d86ff9b06e0966cc7443a43ceefb017a45dffa230e26bb2716be70d6d947fef
   languageName: node
   linkType: hard
 
@@ -340,16 +339,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ai-crew-suite/typescript-shared-config@npm:^0.0.4":
-  version: 0.0.4
-  resolution: "@ai-crew-suite/typescript-shared-config@npm:0.0.4"
-  checksum: 10c0/24cd5ee953f803eecfd2e0cbbfaceb4749e1e77697e1653b1476031809b03c91e8e75c31f38bd83b0b0b9c551e5e21e7f800ef318660df02b4d10e8558ef84ba
+"@ai-crew-suite/typescript-shared-config@npm:^0.0.5":
+  version: 0.0.5
+  resolution: "@ai-crew-suite/typescript-shared-config@npm:0.0.5"
+  checksum: 10c0/a5f97041196a99ab7f686b09d22fba44c6b49dee66579c6e0b39f3c6aca0725db62d1f96e99dd925c00c7875eb80800eb568f4c295ff959b595484b87e224eb6
   languageName: node
   linkType: hard
 
-"@ai-crew-suite/workbench-app@workspace:*, @ai-crew-suite/workbench-app@workspace:packages/backstage/app":
+"@ai-crew-suite/workbench-app@workspace:*, @ai-crew-suite/workbench-app@workspace:packages/presets/app":
   version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/workbench-app@workspace:packages/backstage/app"
+  resolution: "@ai-crew-suite/workbench-app@workspace:packages/presets/app"
   dependencies:
     "@ai-crew-suite/dependencies-frontend": "workspace:^"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
@@ -365,9 +364,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ai-crew-suite/workbench-backend@workspace:*, @ai-crew-suite/workbench-backend@workspace:packages/backstage/backend":
+"@ai-crew-suite/workbench-backend@workspace:*, @ai-crew-suite/workbench-backend@workspace:packages/presets/backend":
   version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/workbench-backend@workspace:packages/backstage/backend"
+  resolution: "@ai-crew-suite/workbench-backend@workspace:packages/presets/backend"
   dependencies:
     "@ai-crew-suite/dependencies-backend": "workspace:^"
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
@@ -1596,7 +1595,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@backstage/cli-common@npm:^0.3.2":
+"@backstage/cli-common@npm:^0.3.1, @backstage/cli-common@npm:^0.3.2":
   version: 0.3.2
   resolution: "@backstage/cli-common@npm:0.3.2"
   dependencies:
@@ -2039,7 +2038,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@backstage/cli@backstage:^::backstage=1.55.3&npm=0.36.6, @backstage/cli@npm:^0.36.4, @backstage/cli@npm:^0.36.6":
+"@backstage/cli@backstage:^::backstage=1.55.3&npm=0.36.6, @backstage/cli@npm:^0.36.6":
   version: 0.36.7
   resolution: "@backstage/cli@npm:0.36.7"
   dependencies:
@@ -2287,7 +2286,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@backstage/eslint-plugin@npm:^0.3.1, @backstage/eslint-plugin@npm:^0.3.3":
+"@backstage/eslint-plugin@npm:^0.3.2, @backstage/eslint-plugin@npm:^0.3.3":
   version: 0.3.3
   resolution: "@backstage/eslint-plugin@npm:0.3.3"
   dependencies:

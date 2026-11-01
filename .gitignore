@@ -13,6 +13,7 @@
 ehthumbs.db
 Log.txt
 Thumbs.db
+**/.terraform/
 
 # ==========================================
 # 2. Local Configuration & Environment Files

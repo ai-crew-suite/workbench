@@ -23,7 +23,23 @@ Workspace Initialization
 To download target cloud provider plugins, build internal lock files, and initialize your local configuration workspace from the monorepo root, execute:
 
 ```bash
-yarn tf:init
+yarn turbo run tf:init --filter=@ai-crew-suite/deploy-terraform
+```
+
+### Lint
+
+To lint Terraform files, run:
+
+```bash
+yarn turbo run lint --filter=@ai-crew-suite/deploy-terraform
+```
+
+### Fix Lint Errors
+
+To format TF files, run:
+
+```bash
+yarn turbo run format --filter=@ai-crew-suite/deploy-terraform
 ```
 
 ### Static Configuration Validation
@@ -31,7 +47,7 @@ yarn tf:init
 To run quick validation syntax checks locally and verify your infrastructure blocks pass schema rules without querying live cloud endpoints, run:
 
 ```bash
-yarn tf:validate
+yarn turbo run tf:validate --filter=@ai-crew-suite/deploy-terraform
 ```
 
 ### Simulating Cloud State Plans
@@ -39,7 +55,7 @@ yarn tf:validate
 To execute a non-interactive dry-run evaluation pass and inspect the exact modifications Terraform plans to commit to your cloud cluster, run:
 
 ```bash
-yarn tf:plan
+yarn turbo run tf:plan --filter=@ai-crew-suite/deploy-terraform
 ```
 
 ## Consumer Integration Checklist

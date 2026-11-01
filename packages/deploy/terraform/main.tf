@@ -50,18 +50,18 @@ resource "aws_db_subnet_group" "db_subnets" {
 }
 
 resource "aws_db_instance" "platform_database" {
-  identifier             = "${var.environment}-crew-platform-db"
-  allocated_storage      = 20
-  max_allocated_storage  = 100 # Auto-scaling engine tracking
-  engine                 = "postgres"
-  engine_version         = "17.1" # Standard PostgreSQL engine supporting pgvector 0.8+
-  instance_class         = "db.t4g.medium"
-  db_name                = "backstage_plugin_catalog"
-  username               = "backstage"
-  password               = var.database_secure_password
-  db_subnet_group_name   = aws_db_subnet_group.db_subnets.name
-  skip_final_snapshot    = var.environment == "dev" ? true : false
-  storage_encrypted      = true # Mandatory KMS encryption for HIPAA and SOC 2 data protection
+  identifier            = "${var.environment}-crew-platform-db"
+  allocated_storage     = 20
+  max_allocated_storage = 100 # Auto-scaling engine tracking
+  engine                = "postgres"
+  engine_version        = "17.1" # Standard PostgreSQL engine supporting pgvector 0.8+
+  instance_class        = "db.t4g.medium"
+  db_name               = "backstage_plugin_catalog"
+  username              = "backstage"
+  password              = var.database_secure_password
+  db_subnet_group_name  = aws_db_subnet_group.db_subnets.name
+  skip_final_snapshot   = var.environment == "dev" ? true : false
+  storage_encrypted     = true # Mandatory KMS encryption for HIPAA and SOC 2 data protection
 
   tags = {
     Environment = var.environment
