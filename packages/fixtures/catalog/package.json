@@ -45,7 +45,6 @@
     "@backstage/cli": "backstage:^",
     "@backstage/types": "backstage:^",
     "typescript": "catalog:dev",
-    "vitest": "catalog:dev",
-    "zod": "catalog:dev"
+    "vitest": "catalog:dev"
   }
 }

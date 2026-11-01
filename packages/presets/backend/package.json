@@ -55,6 +55,7 @@
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
     "@backstage/backend-test-utils": "backstage:^",
     "@backstage/cli": "backstage:^",
+    "@backstage/plugin-catalog-node": "backstage:^",
     "typescript": "catalog:dev",
     "vitest": "catalog:dev"
   }

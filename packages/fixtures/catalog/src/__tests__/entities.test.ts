@@ -14,53 +14,46 @@
  * limitations under the License.
  */
 import { describe, it, expect } from 'vitest';
-import { z } from 'zod';
+import {
+  apiEntityV1alpha1Validator,
+  componentEntityV1alpha1Validator,
+  domainEntityV1alpha1Validator,
+  entitySchemaValidator,
+  groupEntityV1alpha1Validator,
+  locationEntityV1alpha1Validator,
+  resourceEntityV1alpha1Validator,
+  systemEntityV1alpha1Validator,
+  userEntityV1alpha1Validator,
+  type KindValidator,
+} from '@backstage/catalog-model';
 import { getProgrammaticEntities } from '../index';
 
-// Define a strict schema aligning with Backstage Catalog Entity boundaries
-const backstageEntitySchema = z.object({
-  apiVersion: z.string().startsWith('backstage.io/'),
-  kind: z.enum(['Component', 'API', 'Resource', 'System', 'Domain', 'Location']),
-  metadata: z.object({
-    name: z.string()
-      .min(1)
-      .max(63)
-      .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, {
-        message: 'Must be valid DNS subdomain format (lowercase letters, numbers, and hyphens only)',
-      }),
-    namespace: z.string().default('default'),
-    description: z.string().optional(),
-    annotations: z.record(z.string(), z.string()).optional(),
-    labels: z.record(z.string(), z.string()).optional(),
-  }),
-  spec: z.object({
-    type: z.string().min(1),
-    lifecycle: z.string().min(1),
-    owner: z.string().min(1),
-  }).catchall(z.unknown()), // Allows extra spec properties per entity kind
-});
+const kindValidators: Record<string, KindValidator> = {
+  API: apiEntityV1alpha1Validator,
+  Component: componentEntityV1alpha1Validator,
+  Domain: domainEntityV1alpha1Validator,
+  Group: groupEntityV1alpha1Validator,
+  Location: locationEntityV1alpha1Validator,
+  Resource: resourceEntityV1alpha1Validator,
+  System: systemEntityV1alpha1Validator,
+  User: userEntityV1alpha1Validator,
+};
 
 describe('Catalog Entity Fixtures Structural Integrity Tests', () => {
-  it('should validate all programmatic entities against Backstage core specifications', () => {
+  it('should validate all programmatic entities against Backstage core specifications', async () => {
     const entities = getProgrammaticEntities();
 
     // Ensure our mock infrastructure generation is populated
     expect(entities.length).toBeGreaterThan(0);
 
-    entities.forEach(entity => {
-      // Validate the object structure using our Zod schema
-      const parseResult = backstageEntitySchema.safeParse(entity);
+    const validateEntity = entitySchemaValidator();
+    for (const entity of entities) {
+      const entityRef = `${entity.kind}:${entity.metadata.name}`;
+      expect(() => validateEntity(entity), `Invalid entity envelope: ${entityRef}`).not.toThrow();
 
-      if (!parseResult.success) {
-        // Pretty-print formatting errors to pinpoint exactly which field broke compliance
-        console.error(
-          `❌ Structural validation failed for entity: "${entity.metadata?.name || 'UNKNOWN'}"`,
-          JSON.stringify(parseResult.error.format(), null, 2)
-        );
-      }
-
-      // Assert validation passes
-      expect(parseResult.success).toBe(true);
-    });
+      const validator = kindValidators[entity.kind];
+      if (!validator) throw new Error(`No Backstage kind validator is configured for ${entityRef}.`);
+      await expect(validator.check(entity), `Invalid entity specification: ${entityRef}`).resolves.toBe(true);
+    }
   });
 });

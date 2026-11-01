@@ -22,8 +22,8 @@ const root = findRepoRoot();
 const workspaces = [
   'app',
   'backend',
-  'backstage/app',
-  'backstage/backend',
+  'presets/app',
+  'presets/backend',
   'fixtures/annotations',
   'fixtures/catalog',
   'fixtures/external',

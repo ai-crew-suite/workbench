@@ -6,11 +6,6 @@
     "rootDir": "src"
   },
   "include": [
-    "src*"
-  ],
-  "references": [
-    {
-      "path": "../../backstage/app"
-    }
+    "src/**/*"
   ]
 }

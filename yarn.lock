@@ -26,6 +26,7 @@ __metadata:
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
     "@ai-crew-suite/workbench-app": "workspace:*"
     "@backstage/cli": "backstage:^"
+    vitest: "catalog:dev"
   languageName: unknown
   linkType: soft
 
@@ -37,6 +38,7 @@ __metadata:
     "@ai-crew-suite/workbench-backend": "workspace:*"
     "@backstage/catalog-model": "backstage:^"
     "@backstage/cli": "backstage:^"
+    vitest: "catalog:dev"
   languageName: unknown
   linkType: soft
 
@@ -224,7 +226,6 @@ __metadata:
     "@backstage/types": "backstage:^"
     typescript: "catalog:dev"
     vitest: "catalog:dev"
-    zod: "catalog:dev"
   languageName: unknown
   linkType: soft
 
@@ -372,6 +373,7 @@ __metadata:
     "@ai-crew-suite/typescript-shared-config": "catalog:dev"
     "@backstage/backend-test-utils": "backstage:^"
     "@backstage/cli": "backstage:^"
+    "@backstage/plugin-catalog-node": "backstage:^"
     typescript: "catalog:dev"
     vitest: "catalog:dev"
   bin:
@@ -2668,6 +2670,30 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 10c0/901d38ce7d86fc1f4a845f572467024927253d48517b965f9e33457846ca477c6b1f2029b47497cf19c9328c999330b6668d23ec9d525659562f9bb68b0da97a
+  languageName: node
+  linkType: hard
+
+"@backstage/plugin-catalog-node@backstage:^::backstage=1.55.3&npm=2.2.5, @backstage/plugin-catalog-node@npm:^2.2.5":
+  version: 2.2.6
+  resolution: "@backstage/plugin-catalog-node@npm:2.2.6"
+  dependencies:
+    "@backstage/backend-plugin-api": "npm:^1.11.0"
+    "@backstage/catalog-client": "npm:^1.16.3"
+    "@backstage/catalog-model": "npm:^1.10.2"
+    "@backstage/errors": "npm:^1.3.2"
+    "@backstage/plugin-catalog-common": "npm:^1.2.1"
+    "@backstage/plugin-permission-common": "npm:^0.9.12"
+    "@backstage/plugin-permission-node": "npm:^0.11.5"
+    "@backstage/types": "npm:^1.2.2"
+    "@opentelemetry/api": "npm:^1.9.0"
+    lodash: "npm:^4.17.21"
+    yaml: "npm:^2.0.0"
+  peerDependencies:
+    "@backstage/backend-test-utils": ^1.11.8
+  peerDependenciesMeta:
+    "@backstage/backend-test-utils":
+      optional: true
+  checksum: 10c0/1d08123127ab5ae8648d671a3067edb999c8d2caa33b6ad5108769559dbdfd1b41137797d0975766cbb5e0fbcbb2c0499e2a45a5bb280237f2a39791142aee90
   languageName: node
   linkType: hard
 

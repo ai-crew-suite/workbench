@@ -26,48 +26,51 @@ const mocks = vi.hoisted(() => {
 
 // 1. Mock the defaults and engine configurations
 vi.mock('@backstage/frontend-defaults', () => ({ createApp: mocks.createApp }));
-vi.mock('../plugins/nav/plugin', () => ({ customNavModule: 'navigation' }));
+vi.mock('../plugins/nav', () => ({ customNavModule: 'navigation' }));
 
 // 2. Mock out every complex upstream feature plugin imported by App.tsx
 vi.mock('@backstage/plugin-catalog/alpha', () => ({ default: 'catalog' }));
+vi.mock('@backstage/plugin-api-docs/alpha', () => ({ default: 'api-docs' }));
+vi.mock('@backstage/plugin-catalog-graph/alpha', () => ({ default: 'catalog-graph' }));
+vi.mock('@backstage/plugin-kubernetes/alpha', () => ({ default: 'kubernetes' }));
 vi.mock('@backstage/plugin-notifications/alpha', () => ({ default: 'notifications' }));
+vi.mock('@backstage/plugin-org/alpha', () => ({ default: 'org' }));
+vi.mock('@backstage/plugin-scaffolder/alpha', () => ({ default: 'scaffolder' }));
 vi.mock('@backstage/plugin-search/alpha', () => ({ default: 'search' }));
+vi.mock('@backstage/plugin-signals/alpha', () => ({ default: 'signals' }));
+vi.mock('@backstage/plugin-techdocs/alpha', () => ({ default: 'techdocs' }));
 vi.mock('@backstage/plugin-user-settings/alpha', () => ({ default: 'user-settings' }));
 vi.mock('@backstage/plugin-app-visualizer', () => ({ default: 'app-visualizer' }));
 
-vi.mock('@backstage/plugin-app-react/alpha', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@backstage/plugin-app-react')>();
-  return {
-    ...actual,
-    AppRootWrapperBlueprint: {
-      make: vi.fn(() => createExtension({
-        kind: 'app',
-        name: 'mocked-root-wrapper',
-        attachTo: { id: 'app/root', input: 'components' },
-        output: [],
-        factory: () => [],
-      })),
-    },
-    SignInPageBlueprint: {
-      make: vi.fn(() => createExtension({
-        kind: 'sign-in-page',
-        name: 'mocked-sign-in',
-        attachTo: { id: 'app/root', input: 'components' },
-        output: [],
-        factory: () => [],
-      })),
-    },
-    ThemeBlueprint: {
-      make: vi.fn(() => createExtension({
-        kind: 'theme',
-        name: 'mocked-theme',
-        attachTo: { id: 'app/root', input: 'components' },
-        output: [],
-        factory: () => [],
-      })),
-    },
-  };
-});
+vi.mock('@backstage/plugin-app-react', () => ({
+  AppRootWrapperBlueprint: {
+    make: vi.fn(() => createExtension({
+      kind: 'app',
+      name: 'mocked-root-wrapper',
+      attachTo: { id: 'app/root', input: 'components' },
+      output: [],
+      factory: () => [],
+    })),
+  },
+  SignInPageBlueprint: {
+    make: vi.fn(() => createExtension({
+      kind: 'sign-in-page',
+      name: 'mocked-sign-in',
+      attachTo: { id: 'app/root', input: 'components' },
+      output: [],
+      factory: () => [],
+    })),
+  },
+  ThemeBlueprint: {
+    make: vi.fn(({ name }: { name: string }) => createExtension({
+      kind: 'theme',
+      name: `mocked-theme-${name}`,
+      attachTo: { id: 'app/root', input: 'components' },
+      output: [],
+      factory: () => [],
+    })),
+  },
+}));
 
 vi.mock('@backstage/theme', () => ({
   createUnifiedTheme: vi.fn(() => ({})),

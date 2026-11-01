@@ -29,9 +29,6 @@
   "scripts": {
     "format": "backstage-cli crew format",
     "lint": "backstage-cli crew lint",
-    "test:e2e": "backstage-cli crew test:e2e",
-    "test:unit": "backstage-cli crew test:unit",
-    "test:unit:coverage": "backstage-cli crew test:unit:coverage",
     "start": "yarn run -T backstage-cli workbench compose start backend",
     "start:dev": "backstage-dev-server",
     "typecheck": "backstage-cli crew typecheck"
@@ -42,6 +39,7 @@
   },
   "devDependencies": {
     "@ai-crew-suite/typescript-shared-config": "catalog:dev",
-    "@backstage/cli": "backstage:^"
+    "@backstage/cli": "backstage:^",
+    "vitest": "catalog:dev"
   }
 }
