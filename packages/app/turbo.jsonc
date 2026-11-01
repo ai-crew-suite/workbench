@@ -1,12 +1,39 @@
 {
   "extends": ["//"],
   "tasks": {
-    // Long-running dev server task: must never be cached, or turbo replays a
-    // previous run's logs and never boots the server on subsequent starts.
+    "format": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "cache": true,
+      "dependsOn": [],
+      "inputs": [
+        "dev/**",
+        "src/**",
+        "package.json",
+        "tsconfig.json"
+      ],
+      "outputs": []
+    },
     "start": {
       "cache": false,
-      "persistent": true,
-      "dependsOn": []
+      "persistent": true
+    },
+    "stop": {
+      "cache": false,
+      "persistent": true
+    },
+    "typecheck": {
+      "cache": true,
+      "dependsOn": [],
+      "inputs": [
+        "dev/**",
+        "src/**",
+        "package.json",
+        "tsconfig.json"
+      ],
+      "outputs": []
     }
   }
 }

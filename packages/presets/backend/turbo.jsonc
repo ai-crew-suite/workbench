@@ -19,14 +19,6 @@
       ],
       "outputs": []
     },
-    "start": {
-      "cache": false,
-      "persistent": true
-    },
-    "stop": {
-      "cache": false,
-      "persistent": true
-    },
     "test": {
       "cache": true,
       "dependsOn": [],
