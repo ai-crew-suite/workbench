@@ -1,5 +1,3 @@
-name: workbench
-
 x-healthcheck: &healthcheck
   interval: 5s
   timeout: 3s
@@ -16,9 +14,11 @@ x-postgres-env: &postgres-env
   POSTGRES_HOST: pgvector
   POSTGRES_PORT: "5432"
 
+name: workbench
+
 services:
   grafana:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/grafana-container:${IMAGE_TAG:-latest}
+    image: "${REGISTRY:-localhost:32443/ai-crew-suite}/grafana-container:${IMAGE_TAG:-latest}"
     depends_on:
       prometheus:
         condition: service_healthy
@@ -27,16 +27,24 @@ services:
     volumes:
       - grafana_data_volume:/var/lib/grafana
     environment:
-      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ENABLED: true
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
     ports:
       - "127.0.0.1:${GRAFANA_PORT:-3001}:3000"
     healthcheck:
       <<: *healthcheck
-      test: [CMD, curl, --fail, --silent, --show-error, http://127.0.0.1:3000]
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "--silent",
+          "--show-error",
+          "http://127.0.0.1:3000",
+        ]
 
   mem0:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/mem0-container:${IMAGE_TAG:-latest}
+    image: "${REGISTRY:-localhost:32443/ai-crew-suite}/mem0-container:${IMAGE_TAG:-latest}"
     depends_on:
       ollama:
         condition: service_healthy
@@ -57,26 +65,26 @@ services:
       POSTGRES_COLLECTION_NAME: "${POSTGRES_COLLECTION_NAME:-memories}"
       JWT_SECRET: "${MEM0_JWT_SECRET:-}"
       AUTH_DISABLED: "${MEM0_AUTH_DISABLED:-true}"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     networks:
       default:
         aliases:
           - mem0-service
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       <<: *healthcheck
-      test: [CMD, nc, -z, 127.0.0.1, "8000"]
+      test: ["CMD", "nc", "-z", "127.0.0.1", "8000"]
 
   ollama:
-    image: ${OLLAMA_IMAGE_REPOSITORY:-local/ollama-container}:${IMAGE_TAG:-latest}
+    image: "${OLLAMA_IMAGE_REPOSITORY:-local/ollama-container}:${IMAGE_TAG:-latest}"
     environment:
       OLLAMA_HOST: "0.0.0.0:11434"
     healthcheck:
       <<: *healthcheck
-      test: [CMD-SHELL, "OLLAMA_HOST=127.0.0.1:11434 ollama list >/dev/null"]
+      test: ["CMD-SHELL", "OLLAMA_HOST=127.0.0.1:11434 ollama list >/dev/null"]
 
   otel-collector:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/otel-container:${IMAGE_TAG:-latest}
+    image: "${REGISTRY:-localhost:32443/ai-crew-suite}/otel-container:${IMAGE_TAG:-latest}"
     depends_on:
       tempo:
         condition: service_started
@@ -91,15 +99,15 @@ services:
     healthcheck:
       <<: *healthcheck
       test:
-        [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+        ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
 
   prometheus:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/prometheus-container:${IMAGE_TAG:-latest}
+    image: "${REGISTRY:-localhost:32443/ai-crew-suite}/prometheus-container:${IMAGE_TAG:-latest}"
     ports:
       - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
     healthcheck:
       <<: *healthcheck
-      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:9090]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9090"]
 
   redis:
     image: redis:8.10-alpine
@@ -107,7 +115,7 @@ services:
       - redis_volume:/data
     healthcheck:
       <<: *healthcheck
-      test: [CMD, redis-cli, ping]
+      test: ["CMD", "redis-cli", "ping"]
 
   redis-exporter:
     image: oliver006/redis_exporter:v1.96.0-alpine
@@ -118,18 +126,18 @@ services:
       REDIS_ADDR: redis://redis:6379
     healthcheck:
       <<: *healthcheck
-      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:9121]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9121"]
 
   tempo:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/tempo-container:${IMAGE_TAG:-latest}
-    command: ["-config.file=/etc/tempo.yaml"]
+    image: "${REGISTRY:-localhost:32443/ai-crew-suite}/tempo-container:${IMAGE_TAG:-latest}"
     networks:
       default:
         aliases:
           - tempo-backend
+    command: ["-config.file=/etc/tempo.yaml"]
 
   temporal:
-    image: ${REGISTRY:-localhost:32443/ai-crew-suite}/temporal-container:${IMAGE_TAG:-latest}
+    image: "${REGISTRY:-localhost:32443/ai-crew-suite}/temporal-container:${IMAGE_TAG:-latest}"
     depends_on:
       pgvector:
         condition: service_healthy
@@ -142,7 +150,7 @@ services:
           - temporal-cluster
     healthcheck:
       <<: *healthcheck
-      test: [CMD, nc, -z, 127.0.0.1, "7233"]
+      test: ["CMD", "nc", "-z", "127.0.0.1", "7233"]
       retries: 24
       start_period: 20s
 
@@ -163,7 +171,7 @@ services:
       - --enable-stub-cors
     healthcheck:
       <<: *healthcheck
-      test: [CMD, nc, -z, 127.0.0.1, "8080"]
+      test: ["CMD", "nc", "-z", "127.0.0.1", "8080"]
 
 volumes:
   grafana_data_volume:
