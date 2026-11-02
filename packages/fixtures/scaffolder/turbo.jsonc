@@ -1,0 +1,10 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "release": {
+      "cache": false,
+      "dependsOn": ["build"],
+      "inputs": ["dist/**", "package.json", "README.md"]
+    }
+  }
+}

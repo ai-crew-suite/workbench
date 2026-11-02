@@ -18,6 +18,11 @@
       "inputs": ["$TURBO_DEFAULT$"],
       "outputs": []
     },
+    "release": {
+      "cache": false,
+      "dependsOn": ["build"],
+      "inputs": ["src/**", "package.json", "tsconfig.json"]
+    },
     "test:unit": {
       "cache": true,
       "dependsOn": [],

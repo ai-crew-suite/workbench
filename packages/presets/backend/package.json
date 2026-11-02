@@ -3,7 +3,6 @@
   "description": "A published Backstage backend server for use in Dockerfiles",
   "version": "1.0.0",
   "license": "Apache-2.0",
-  "private": true,
   "main": "src/index.ts",
   "types": "src/index.ts",
   "bin": {
@@ -44,6 +43,7 @@
   "scripts": {
     "format": "backstage-cli crew format",
     "lint": "backstage-cli crew lint",
+    "release": "npm publish --access public",
     "test:unit": "backstage-cli crew test:unit",
     "test:unit:coverage": "backstage-cli crew test:unit:coverage",
     "typecheck": "backstage-cli crew typecheck"

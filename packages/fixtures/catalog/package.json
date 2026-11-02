@@ -16,6 +16,10 @@
     "sandbox-environment",
     "data-blueprints"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -33,7 +37,7 @@
     "build": "tsc -b --force",
     "format": "backstage-cli crew format",
     "lint": "backstage-cli crew lint",
-    "test:e2e": "backstage-cli crew test:e2e",
+    "release": "npm publish --access public",
     "test:unit": "backstage-cli crew test:unit",
     "test:unit:coverage": "backstage-cli crew test:unit:coverage",
     "typecheck": "backstage-cli crew typecheck"

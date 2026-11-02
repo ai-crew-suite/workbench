@@ -23,7 +23,7 @@
     "build": "echo 'No compilation required for dependency manifest presets.'",
     "clean": "echo 'Nothing to clean.'",
     "lint": "echo 'No code files to lint.'",
-    "publish": "npm publish --access public",
+    "release": "npm publish --access public",
     "typecheck": "echo 'No typescript structures to evaluate.'",
     "test:unit": "echo 'No unit tests required.'"
   },

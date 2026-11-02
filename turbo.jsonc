@@ -30,7 +30,7 @@
     // Package tasks
     "build": {
       "cache": true,
-      "dependsOn": ["^build", "clean"],
+      "dependsOn": ["^build"],
       "inputs": ["src/**", "package.json"],
       "outputs": ["dist/**"],
       "env": ["FORCE_COLOR"]
@@ -41,15 +41,13 @@
     },
     "format": {
       "cache": true,
-      "dependsOn": ["^build"],
-      "inputs": [],
-      "outputs": []
+      "dependsOn": [],
+      "inputs": ["src/**", "package.json"]
     },
     "lint": {
       "cache": true,
       "dependsOn": ["^build"],
-      "inputs": [],
-      "outputs": []
+      "inputs": ["$TURBO_DEFAULT$"]
     },
     "start": {
       "cache": false,

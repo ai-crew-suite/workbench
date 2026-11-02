@@ -47,6 +47,12 @@ To run isolated package validation checks and ensure entities conform to core sc
 yarn turbo run test:unit --filter=@ai-crew-suite/fixtures-catalog
 ```
 
+### Publishing
+
+```bash
+yarn turbo run release --filter=@ai-crew-suite/fixtures-catalog
+```
+
 ## Consumer Data Checklist
 
 When introducing new mock data schemas to this package, ensure they adhere to the following checklist requirements:

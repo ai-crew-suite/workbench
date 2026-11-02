@@ -20,7 +20,7 @@ yarn install
 To check that your structure conforms to syntax rules and does not introduce duplicate object properties or structural regressions, execute:
 
 ```bash
-yarn turbo run lint --filter=@ai-crew-suite/fixtures-catalog
+yarn turbo run lint --filter=@ai-crew-suite/fixtures-annotations
 ```
 
 ### Automated Code Style Fixing
@@ -28,7 +28,7 @@ yarn turbo run lint --filter=@ai-crew-suite/fixtures-catalog
 To automatically fix formatting errors, trailing spaces, or indentation variations inside your mock assets instantly, run:
 
 ```bash
-yarn turbo run format --filter=@ai-crew-suite/fixtures-catalog
+yarn turbo run format --filter=@ai-crew-suite/fixtures-annotations
 ```
 
 ### Typecheck
@@ -36,7 +36,7 @@ yarn turbo run format --filter=@ai-crew-suite/fixtures-catalog
 To typecheck code, run:
 
 ```bash
-yarn turbo run typecheck --filter=@ai-crew-suite/fixtures-catalog
+yarn turbo run typecheck --filter=@ai-crew-suite/fixtures-annotations
 ```
 
 ### Validating Fixture Integrity
@@ -44,7 +44,13 @@ yarn turbo run typecheck --filter=@ai-crew-suite/fixtures-catalog
 To verify that all factory functions accurately produce valid entity fragments and that JSON payloads stringify without errors, run the test suites:
 
 ```bash
-yarn turbo run test:unit --filter=@ai-crew-suite/fixtures-catalog
+yarn turbo run test:unit --filter=@ai-crew-suite/fixtures-annotations
+```
+
+### Publishing
+
+```bash
+yarn turbo run release --filter=@ai-crew-suite/fixtures-annotations
 ```
 
 ## Consumer Data Checklist

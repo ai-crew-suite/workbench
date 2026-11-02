@@ -12,6 +12,12 @@ Centralized backend version governance, server-side package abstractions, and un
 
 Because this workspace operates strictly as a declarative dependency bundle and lacks discrete runtime processes, it does not expose manual orchestration commands.
 
+### Publishing
+
+```bash
+yarn turbo run release --filter=@ai-crew-suite/dependencies-backend
+```
+
 ## 📄 Compliance and Licensing
 
 Copyright © 2026 The AI Crew Suite Authors.

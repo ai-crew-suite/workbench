@@ -14,7 +14,6 @@
   "packageManager": "yarn@4.18.1",
   "publishConfig": {
     "access": "public",
-    "provenance": true,
     "main": "dist/index.cjs.js",
     "types": "dist/index.d.ts"
   },
@@ -43,7 +42,7 @@
     "build": "tsc --emitDeclarationOnly --outDir ../../dist-types/packages/workbench-cli && backstage-cli package build && node -e \"require('node:fs').cpSync('src/commands/code-generator/templates', 'dist/templates', { recursive: true })\"",
     "clean": "rimraf dist",
     "lint": "backstage-cli crew lint",
-    "test:e2e": "backstage-cli crew test:e2e",
+    "release": "npm publish --access public",
     "test:unit": "backstage-cli crew test:unit",
     "test:unit:coverage": "backstage-cli crew test:unit:coverage",
     "typecheck": "backstage-cli crew typecheck"

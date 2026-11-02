@@ -1,8 +1,10 @@
 {
   "extends": ["//"],
   "tasks": {
-    "build": {
-      "inputs": ["src/**", "package.json", "tsconfig.json", "tsconfig.build.json"]
+    "release": {
+      "cache": false,
+      "dependsOn": ["build"],
+      "inputs": ["dist/**", "package.json", "README.md"]
     }
   }
 }

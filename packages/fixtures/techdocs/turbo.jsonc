@@ -1,20 +1,25 @@
 {
   "extends": ["//"],
   "tasks": {
-    "build": {
-      "dependsOn": ["build:ts", "build:techdocs"],
-      "cache": true
-    },
     "build:ts": {
+      "cache": true,
       "dependsOn": ["^build"],
-      "inputs": ["src/**/*.ts", "tsconfig.json"],
-      "outputs": ["dist/**"],
-      "cache": true
+      "inputs": ["src/**", "tsconfig.json"],
+      "outputs": ["dist/**"]
     },
     "build:techdocs": {
-      "inputs": ["markdown/**/*"],
-      "outputs": ["static-compiled/**"],
-      "cache": true
+      "cache": true,
+      "inputs": ["markdown/**", "scripts/build-techdocs.sh", "scripts/mkdocs-container.sh"],
+      "outputs": ["static-compiled/**"]
+    },
+    "build": {
+      "cache": true,
+      "dependsOn": ["build:ts", "build:techdocs"]
+    },
+    "release": {
+      "cache": false,
+      "dependsOn": ["build"],
+      "inputs": ["dist/**", "package.json", "README.md"]
     }
   }
 }

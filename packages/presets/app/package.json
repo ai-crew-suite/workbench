@@ -2,6 +2,7 @@
   "name": "@ai-crew-suite/presets-app",
   "bundled": true,
   "license": "Apache-2.0",
+  "version": "0.0.1",
   "keywords": [
     "agentic workflow",
     "ai-crew-suite",
@@ -22,6 +23,10 @@
     "src",
     "launcher.js"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "bugs": {
     "url": "https://github.com/ai-crew-suite/workbench/issues",
     "email": "support@ai-crew-suite.dev"
@@ -34,6 +39,7 @@
   "scripts": {
     "format": "backstage-cli crew format",
     "lint": "backstage-cli crew lint",
+    "release": "npm publish --access public",
     "test:unit": "backstage-cli crew test:unit",
     "test:unit:coverage": "backstage-cli crew test:unit:coverage",
     "typecheck": "backstage-cli crew typecheck"

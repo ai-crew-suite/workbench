@@ -58,6 +58,24 @@ To trigger parallel compilation tasks (TypeScript code compilation and the under
 yarn turbo run build --filter=@ai-crew-suite/fixtures-techdocs
 ```
 
+To build only the documentation, run:
+
+```bash
+yarn turbo run build:techdocs --filter=@ai-crew-suite/fixtures-techdocs
+```
+
+The build requires the Docker CLI and an accessible Docker-compatible engine.
+It uses `spotify/techdocs:latest` to run MkDocs and writes the generated site
+to `static-compiled/default/component/platform`. The TechDocs CLI prepares a
+temporary copy of the source, so its MkDocs configuration changes do not modify
+the checked-in files. Previous output is retained if generation fails.
+
+The container runs as its default user on rootless engines, where that user maps
+to the host user, and as the current UID and GID on rootful engines. MkDocs is
+run through the Docker CLI to avoid an intermittent Podman auto-removal race in
+the TechDocs CLI's Docker runner. The selected Docker context or `DOCKER_HOST`
+still controls which engine is used.
+
 ## 📄 Compliance and Licensing
 
 Copyright © 2026 The AI Crew Suite Authors.

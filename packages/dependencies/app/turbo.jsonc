@@ -5,7 +5,7 @@
       "cache": true,
       "inputs": ["package.json"]
     },
-    "publish": {
+    "release": {
       "cache": false,
       "dependsOn": ["build"],
       "inputs": ["package.json", "README.md"]

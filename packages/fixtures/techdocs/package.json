@@ -18,6 +18,10 @@
     "dist",
     "static-compiled"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "bugs": {
     "url": "https://github.com/ai-crew-suite/workbench/issues",
     "email": "support@ai-crew-suite.dev"
@@ -34,6 +38,7 @@
     "clean": "rimraf dist static-compiled",
     "format": "backstage-cli crew format",
     "lint": "backstage-cli crew lint",
+    "release": "npm publish --access public",
     "test:unit": "backstage-cli crew test:unit",
     "test:unit:coverage": "backstage-cli crew test:unit:coverage",
     "typecheck": "backstage-cli crew typecheck"

@@ -15,7 +15,7 @@ Because this workspace operates strictly as a declarative dependency bundle and 
 ### Publishing
 
 ```bash
-yarn turbo run publish --filter=@ai-crew-suite/dependencies-frontend
+yarn turbo run release --filter=@ai-crew-suite/dependencies-frontend
 ```
 
 ## 📄 Compliance and Licensing
