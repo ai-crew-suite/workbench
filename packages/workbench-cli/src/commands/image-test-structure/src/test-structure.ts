@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import fs from 'node:fs';
-import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import chalk from 'chalk';
+import Docker from 'dockerode';
 import { discoverContainerTargets, findRepoRoot } from '../../../utils/workspace';
+import { readImageReceipt, structureConfigDigest, structureConfigPath, withImageLock, writeImageReceipt } from '../../../utils/oci/image-receipt';
+import { runProcess } from '../../../utils/run-process';
 
+/** Target selection for structure tests. */
 export interface StructureTestOptions {
   target?: string;
-  registry: string;
 }
 
 /**
@@ -33,49 +34,38 @@ function hasBinary(binaryName: string): boolean {
   return result.status === 0;
 }
 
-/**
- * Executes a structural blueprint validation check on a targeted image profile
- */
-function executeStructureTest(targetName: string, targetDir: string, options: StructureTestOptions, useLocalBinary: boolean): void {
-  const configFile = path.join(targetDir, '__tests__', `${targetName}.cst.yaml`);
-  const imageRef = `${options.registry}/workbench-${targetName}:latest`;
-
-  if (!fs.existsSync(configFile)) {
-    console.log(chalk.gray(`ℹ️  No structural test blueprint found at ${path.basename(configFile)}, skipping.`));
-    return;
-  }
-
-  console.log(`🧱 Validating container structure for [${chalk.yellow(targetName)}] -> ${chalk.cyan(targetName + '.cst.yaml')}...`);
-
+/** Runs the target's structure test against an exact local ID or registry digest. */
+export async function testImageStructure(targetName: string, configFile: string, imageRef: string, useLocalBinary = hasBinary('container-structure-test')): Promise<void> {
+  console.log(`🧱 Validating container structure for [${chalk.yellow(targetName)}] -> ${chalk.cyan(configFile)}...`);
   if (useLocalBinary) {
-    const result = spawnSync('container-structure-test', [
-      'test',
-      '--image', imageRef,
-      '--config', configFile
-    ], { stdio: 'inherit' });
-
-    if (result.status !== 0) {
-      throw new Error(`Structural assertions failed on local binary execution for target ${targetName}`);
-    }
+    await runProcess('container-structure-test', ['test', '--image', imageRef, '--config', configFile]);
   } else {
     console.log(chalk.yellow('⚠️  container-structure-test binary not found. Executing via Docker...'));
-
-    const args = [
-      'run', '--rm',
-      '-v', '/var/run/docker.sock:/var/run/docker.sock',
-      '-v', `${configFile}:/config.yaml`,
-      'gcr.io/container-structure-test/container-structure-test:latest',
-      'test',
-      '--image', imageRef,
-      '--config', '/config.yaml'
-    ];
-
-    const result = spawnSync('docker', args, { stdio: 'inherit' });
-
-    if (result.status !== 0) {
-      throw new Error(`Structural assertions failed on Docker runtime container bridge for target ${targetName}`);
-    }
+    await runProcess('docker', [
+      'run', '--rm', '-v', '/var/run/docker.sock:/var/run/docker.sock',
+      '-v', `${configFile}:/config.yaml`, 'gcr.io/container-structure-test/container-structure-test:latest',
+      'test', '--image', imageRef, '--config', '/config.yaml'
+    ]);
   }
+}
+
+async function executeStructureTest(targetName: string, targetDir: string, useLocalBinary: boolean): Promise<void> {
+  await withImageLock(targetDir, async () => {
+    const receipt = readImageReceipt(targetDir, targetName);
+    const configFile = structureConfigPath(targetDir);
+    const configDigest = structureConfigDigest(configFile);
+    delete receipt.structureTest;
+    delete receipt.publicationTests;
+    writeImageReceipt(targetDir, receipt);
+    const inspection = await new Docker().getImage(receipt.imageId).inspect();
+    if (inspection.Id !== receipt.imageId) throw new Error(`Local image identity mismatch for ${targetName}.`);
+    await testImageStructure(targetName, configFile, receipt.imageId, useLocalBinary);
+    if (configDigest !== structureConfigDigest(configFile)) {
+      throw new Error(`Structure test configuration changed during the test for ${targetName}.`);
+    }
+    receipt.structureTest = { imageId: receipt.imageId, configDigest };
+    writeImageReceipt(targetDir, receipt);
+  });
 }
 
 /**
@@ -94,12 +84,12 @@ export async function runStructureTests(options: StructureTestOptions): Promise<
       throw new Error(`Target tracking mapping failure for ${options.target}`);
     }
 
-    executeStructureTest(options.target, targetDir, options, useLocalBinary);
+    await executeStructureTest(options.target, targetDir, useLocalBinary);
   } else {
     console.log(chalk.blue('🧱 Commencing full container structure validation cascade...'));
 
     for (const [targetName, targetDir] of validTargets.entries()) {
-      executeStructureTest(targetName, targetDir, options, useLocalBinary);
+      await executeStructureTest(targetName, targetDir, useLocalBinary);
     }
   }
 

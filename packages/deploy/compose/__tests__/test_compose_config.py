@@ -33,7 +33,9 @@ class ComposeConfigTests(unittest.TestCase):
 
         ollama = services["ollama"]
         mem0 = services["mem0"]
-        self.assertEqual(ollama["image"], "local/ollama-container:latest")
+        self.assertEqual(ollama["image"], "localhost:32443/ai-crew-suite/ollama-container:latest")
+        for service in ("grafana", "mem0", "ollama", "otel-collector", "prometheus", "tempo", "temporal"):
+            self.assertEqual(services[service]["pull_policy"], "always")
         self.assertEqual(ollama["environment"]["OLLAMA_HOST"], "0.0.0.0:11434")
         self.assertNotIn("ports", ollama)
         self.assertNotIn("volumes", ollama)
@@ -83,6 +85,13 @@ class ComposeConfigTests(unittest.TestCase):
             services["mem0"]["environment"]["OLLAMA_BASE_URL"],
             "http://host.docker.internal:11434",
         )
+
+    def test_ollama_uses_the_configured_registry(self):
+        with tempfile.TemporaryDirectory() as directory:
+            empty_env = Path(directory) / "empty.env"
+            empty_env.touch()
+            services = self.config(empty_env, REGISTRY="registry.example/team")
+        self.assertEqual(services["ollama"]["image"], "registry.example/team/ollama-container:latest")
 
 
 if __name__ == "__main__":

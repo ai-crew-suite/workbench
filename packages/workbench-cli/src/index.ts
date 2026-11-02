@@ -56,6 +56,7 @@ export default createCliModule({
     registry.addCommand(command(['image', 'build'], 'Build container images', () => import('./commands/image-build')));
     registry.addCommand(command(['image', 'lint'], 'Lint Dockerfiles', () => import('./commands/image-lint')));
     registry.addCommand(command(['image', 'publish'], 'Publish container images', () => import('./commands/image-publish')));
+    registry.addCommand(command(['image', 'promote'], 'Promote a published image by digest', () => import('./commands/image-promote')));
     registry.addCommand(command(['image', 'test', 'security'], 'Scan container images for vulnerabilities', () => import('./commands/image-security-scanner')));
     registry.addCommand(command(['image', 'test', 'structure'], 'Run container structure tests', () => import('./commands/image-test-structure')));
     registry.addCommand(command(['wiremock', 'seeder'], 'Seed WireMock mappings', () => import('./commands/wiremock-seeder')));

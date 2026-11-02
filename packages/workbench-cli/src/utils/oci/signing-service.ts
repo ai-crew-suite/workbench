@@ -62,7 +62,7 @@ export class SigningService {
       spawnEnv = { ...process.env, COSIGN_PASSWORD: cosignPass };
     }
 
-    const result = spawnSync('cosign', cosignArgs, { stdio: 'inherit', env: spawnEnv });
+    const result = spawnSync('cosign', cosignArgs, { stdio: 'inherit', env: spawnEnv, timeout: 60000 });
 
     const guidance = isCI
       ? ' Check that Cosign has a supported non-interactive OIDC identity and registry write credentials (for GitHub Actions, grant id-token: write and packages: write).'

@@ -23,15 +23,28 @@ vi.mock('node:child_process', () => ({
   spawnSync: vi.fn(),
 }));
 
-import { spawnSync } from 'node:child_process';
 import { setupOrchestratorTestContext } from '../../../../utils/test-utils';
 import { runSecurityScanner } from '../scanner';
+import { writeImageReceipt } from '../../../../utils/oci/image-receipt';
+import { runProcess } from '../../../../utils/run-process';
+
+vi.mock('../../../../utils/run-process', () => ({ runProcess: vi.fn() }));
 
 describe('runSecurityScanner Engine & Router', () => {
+  const imageId = `sha256:${'a'.repeat(64)}`;
   let repoRoot: string;
   const testContext = setupOrchestratorTestContext();
+  function prepareTarget(servicePath: string, target: string): void {
+    mkdirSync(servicePath, { recursive: true });
+    writeFileSync(join(servicePath, 'Dockerfile'), 'FROM scratch', 'utf8');
+    writeImageReceipt(servicePath, {
+      version: 1, target, imageId, localTag: `local/${target}:sha256-${'a'.repeat(64)}`,
+      platform: 'linux/amd64', publications: {},
+    });
+  }
 
   beforeEach(() => {
+    vi.mocked(runProcess).mockResolvedValue(undefined);
     repoRoot = mkdtempSync(join(tmpdir(), 'crew-security-test-'));
     writeFileSync(join(repoRoot, 'backstage.json'), '{}', 'utf8');
     vi.spyOn(process, 'cwd').mockReturnValue(repoRoot);
@@ -44,54 +57,50 @@ describe('runSecurityScanner Engine & Router', () => {
 
   it('runs localized native trivy execution path if binary is discovered on target host', async () => {
     const servicePath = join(repoRoot, 'packages/secure-service');
-    mkdirSync(servicePath, { recursive: true });
-    writeFileSync(join(servicePath, 'Dockerfile'), 'FROM scratch', 'utf8');
+    prepareTarget(servicePath, 'secure-service');
 
     // First call check finding system path binary passes (0), runner process executes successfully (0)
-    testContext.mockSequenceStatuses(0, 0);
+    testContext.mockSequenceStatuses(0);
 
     await runSecurityScanner({ target: 'secure-service', scanTimeout: '15m' });
 
-    expect(spawnSync).toHaveBeenCalledWith(
+    expect(runProcess).toHaveBeenCalledWith(
       'trivy',
-      ['image', '--timeout', '15m', '--severity', 'HIGH,CRITICAL', '--exit-code', '1', 'local/secure-service:latest'],
-      expect.any(Object)
+      ['image', '--timeout', '15m', '--severity', 'HIGH,CRITICAL', '--exit-code', '1', imageId]
     );
   });
 
   it('falls back seamlessly to docker mounting bridge if host binaries are absent', async () => {
     const servicePath = join(repoRoot, 'packages/fallback-service');
-    mkdirSync(servicePath, { recursive: true });
-    writeFileSync(join(servicePath, 'Dockerfile'), 'FROM scratch', 'utf8');
+    prepareTarget(servicePath, 'fallback-service');
 
     // First call binary check returns not found (1), fallback runtime process completes with zero error output (0)
-    testContext.mockSequenceStatuses(1, 0);
+    testContext.mockSequenceStatuses(1);
 
     await runSecurityScanner({ target: 'fallback-service', scanTimeout: '10m' });
 
-    expect(spawnSync).toHaveBeenCalledWith(
+    expect(runProcess).toHaveBeenCalledWith(
       'docker',
       [
         'run', '--rm',
         '-v', '/var/run/docker.sock:/var/run/docker.sock',
         '-v', expect.stringContaining('.cache/trivy:/root/.cache'),
         'aquasec/trivy:latest',
-        'image', '--timeout', '10m', '--severity', 'HIGH,CRITICAL', '--exit-code', '1', 'local/fallback-service:latest'
-      ],
-      expect.any(Object)
+        'image', '--timeout', '10m', '--severity', 'HIGH,CRITICAL', '--exit-code', '1', imageId
+      ]
     );
   });
 
   it('aborts process and throws error immediately if vulnerability issues are flagged', async () => {
     const servicePath = join(repoRoot, 'packages/vulnerable-service');
-    mkdirSync(servicePath, { recursive: true });
-    writeFileSync(join(servicePath, 'Dockerfile'), 'FROM scratch', 'utf8');
+    prepareTarget(servicePath, 'vulnerable-service');
 
     // Host check passes (0), but scanner returns violation rule code (1)
-    testContext.mockSequenceStatuses(0, 1);
+    testContext.mockSequenceStatuses(0);
+    vi.mocked(runProcess).mockRejectedValueOnce(new Error('trivy failed'));
 
     await expect(runSecurityScanner({ target: 'vulnerable-service', scanTimeout: '15m' })).rejects.toThrow(
-      'Security validation checks found policy violations on target vulnerable-service'
+      'trivy failed'
     );
   });
 });

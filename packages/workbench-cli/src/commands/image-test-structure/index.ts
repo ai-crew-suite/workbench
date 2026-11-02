@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Command, Option } from 'commander';
+import { Command } from 'commander';
 import chalk from 'chalk';
 import type { CliCommandContext } from '@backstage/cli-node';
 import { runStructureTests } from './src/test-structure';
@@ -26,8 +26,7 @@ export default async function execute({ args, info }: CliCommandContext): Promis
     .name(info.usage)
     .description('Validate built image compliance profiles against declarative .cst.yaml tests')
     .argument('[target]', 'Specific container directory package to validate (omitting runs all targets sequentially)')
-    .addOption(new Option('-r, --registry <registry>', 'Container registry path source').env('REGISTRY').default('localhost:32443/ai-crew-suite'))
-    .action(async (target, options) => {
+    .action(async target => {
       try {
         console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
         console.log(`${chalk.magenta('│ 🧱 WORKBENCH CLI: Container Structure Assertions       │')}`);
@@ -35,7 +34,6 @@ export default async function execute({ args, info }: CliCommandContext): Promis
 
         await runStructureTests({
           target,
-          registry: options.registry,
         });
 
       } catch (error) {

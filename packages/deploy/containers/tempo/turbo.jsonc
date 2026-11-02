@@ -1,47 +1,56 @@
 {
-  "extends": ["//"],
+  "extends": [
+    "//"
+  ],
   "tasks": {
     "build": {
       "cache": false,
+      "dependsOn": [],
       "inputs": [
         "**/Dockerfile",
         "**/src/**/*",
         "**/requirements.txt",
         "scripts/build.sh"
       ],
-      "env": ["REGISTRY", "IMAGE_TAG", "CI"],
       "outputs": []
-    },
-    "image:build": {
-      "cache": true,
-      "dependsOn": ["^build"],
-      "inputs": ["Dockerfile", "package.json"],
-      "env": ["REGISTRY", "IMAGE_TAG", "CI"],
-      "outputs": [".turbo.build.lock"]
     },
     "image:lint": {
       "cache": true,
-      "inputs": ["Dockerfile"],
+      "inputs": [
+        "Dockerfile"
+      ],
       "outputs": []
     },
     "image:test:structure": {
-      "cache": true,
-      "dependsOn": ["image:build"],
-      "inputs": ["__tests__/**/*.cst.yaml", "Dockerfile"],
+      "cache": false,
+      "dependsOn": [],
+      "inputs": [
+        "__tests__/**/*.cst.yaml"
+      ],
       "outputs": []
     },
     "image:test:security": {
-      "cache": true,
-      "dependsOn": ["image:build"],
-      "inputs": ["Dockerfile"],
-      "env": ["TRIVY_SCAN_TIMEOUT"],
+      "cache": false,
+      "dependsOn": [],
+      "env": [
+        "TRIVY_SCAN_TIMEOUT"
+      ],
       "outputs": []
     },
     "publish": {
       "cache": false,
-      "dependsOn": ["image:build"],
-      "inputs": ["Dockerfile"],
-      "env": ["REGISTRY", "IMAGE_TAG"],
+      "dependsOn": [],
+      "env": [
+        "REGISTRY"
+      ],
+      "outputs": []
+    },
+    "image:promote": {
+      "cache": false,
+      "dependsOn": [],
+      "env": [
+        "REGISTRY"
+      ],
       "outputs": []
     }
   }

@@ -19,6 +19,7 @@ name: workbench
 services:
   grafana:
     image: "${REGISTRY:-localhost:32443/ai-crew-suite}/grafana-container:${IMAGE_TAG:-latest}"
+    pull_policy: always
     container_name: grafana-local
     depends_on:
       prometheus:
@@ -49,6 +50,7 @@ services:
 
   mem0:
     image: "${REGISTRY:-localhost:32443/ai-crew-suite}/mem0-container:${IMAGE_TAG:-latest}"
+    pull_policy: always
     depends_on:
       ollama:
         condition: service_healthy
@@ -80,7 +82,8 @@ services:
       test: ["CMD", "nc", "-z", "127.0.0.1", "8000"]
 
   ollama:
-    image: "${OLLAMA_IMAGE_REPOSITORY:-local/ollama-container}:${IMAGE_TAG:-latest}"
+    image: "${OLLAMA_IMAGE_REPOSITORY:-${REGISTRY:-localhost:32443/ai-crew-suite}/ollama-container}:${IMAGE_TAG:-latest}"
+    pull_policy: always
     environment:
       OLLAMA_HOST: "0.0.0.0:11434"
     healthcheck:
@@ -89,6 +92,7 @@ services:
 
   otel-collector:
     image: "${REGISTRY:-localhost:32443/ai-crew-suite}/otel-container:${IMAGE_TAG:-latest}"
+    pull_policy: always
     depends_on:
       tempo:
         condition: service_started
@@ -109,6 +113,7 @@ services:
 
   prometheus:
     image: "${REGISTRY:-localhost:32443/ai-crew-suite}/prometheus-container:${IMAGE_TAG:-latest}"
+    pull_policy: always
     ports:
       - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
     healthcheck:
@@ -136,6 +141,7 @@ services:
 
   tempo:
     image: "${REGISTRY:-localhost:32443/ai-crew-suite}/tempo-container:${IMAGE_TAG:-latest}"
+    pull_policy: always
     networks:
       default:
         aliases:
@@ -144,6 +150,7 @@ services:
 
   temporal:
     image: "${REGISTRY:-localhost:32443/ai-crew-suite}/temporal-container:${IMAGE_TAG:-latest}"
+    pull_policy: always
     depends_on:
       pgvector:
         condition: service_healthy

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Command, Option } from 'commander';
+import { Command } from 'commander';
 import chalk from 'chalk';
 import type { CliCommandContext } from '@backstage/cli-node';
 import { runImagesBuild } from './src/build';
@@ -24,21 +24,15 @@ export default async function execute({ args, info }: CliCommandContext): Promis
 
   program
     .name(info.usage)
-    .description('Build workspace container images via Docker Buildx')
+    .description('Build workspace container images and record their immutable identity')
     .argument('[target]', 'Specific container directory to build (omitting builds all targets sequentially)')
-    .addOption(new Option('-r, --registry <registry>', 'Target container registry').env('REGISTRY').default('local'))
-    .addOption(new Option('-t, --tag <tag>', 'Docker image tag version').env('IMAGE_TAG').default('latest'))
-    .action(async (target, options) => {
+    .action(async target => {
       try {
         console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
         console.log(`${chalk.magenta('│ 🐳 WORKBENCH CLI: Container Compilation Sequence       │')}`);
         console.log(`${chalk.magenta('└────────────────────────────────────────────────────────┘')}`);
 
-        await runImagesBuild({
-          target,
-          registry: options.registry,
-          imageTag: options.tag,
-        });
+        await runImagesBuild({ target });
 
       } catch (error) {
         console.error(`\n${chalk.red('❌ Critical Engine Orchestration Failure:')}`, error);

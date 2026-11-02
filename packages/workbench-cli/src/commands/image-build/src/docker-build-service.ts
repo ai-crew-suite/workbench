@@ -78,15 +78,20 @@ export class DockerBuildService {
     await this.docker.pruneImages({ filters: JSON.stringify({ dangling: ['true'] }) });
   }
 
-  /**
-   * Pushes the compiled image to a remote registry context if execution occurs inside CI boundaries
-   */
-  async pushImage(imageTag: string): Promise<void> {
-    const image = this.docker.getImage(imageTag);
-    const stream = (await image.push({})) as unknown as NodeJS.ReadableStream;
-
-    await new Promise<void>((resolve, reject) => {
-      this.docker.modem.followProgress(stream, (err, _res) => (err ? reject(err) : resolve()));
-    });
+  /** Inspects a built image and assigns its content-derived local tag. */
+  async identifyImage(temporaryTag: string, target: string): Promise<{ imageId: string; localTag: string; platform: string }> {
+    const image = this.docker.getImage(temporaryTag);
+    const inspection = await image.inspect();
+    if (!/^sha256:[a-f0-9]{64}$/.test(inspection.Id) || !inspection.Os || !inspection.Architecture) {
+      throw new Error(`Docker returned an invalid image identity for ${temporaryTag}.`);
+    }
+    const tag = `sha256-${inspection.Id.slice(7)}`;
+    await this.docker.getImage(inspection.Id).tag({ repo: `local/${target}`, tag });
+    await image.remove();
+    return {
+      imageId: inspection.Id,
+      localTag: `local/${target}:${tag}`,
+      platform: `${inspection.Os}/${inspection.Architecture}${inspection.Variant ? `/${inspection.Variant}` : ''}`,
+    };
   }
 }

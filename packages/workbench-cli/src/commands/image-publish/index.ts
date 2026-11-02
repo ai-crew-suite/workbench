@@ -24,10 +24,10 @@ export default async function execute({ args, info }: CliCommandContext): Promis
 
   program
     .name(info.usage)
-    .description('Manually tag and push built container images to Zot or GHCR distribution registries')
+    .description('Publish a structure-tested image under its content-derived candidate tag')
     .argument('[target]', 'Specific container package directory to push (omitting pushes all targets sequentially)')
     .addOption(new Option('-r, --registry <registry>', 'Target registry destination override').env('REGISTRY').default('localhost:32443/ai-crew-suite'))
-    .addOption(new Option('-t, --tag <tag>', 'Docker image tag version').env('IMAGE_TAG').default('latest'))
+    .option('--plain-http', 'Use HTTP for an insecure registry')
     .action(async (target, options) => {
       try {
         console.log(`\n${chalk.magenta('┌────────────────────────────────────────────────────────┐')}`);
@@ -37,7 +37,7 @@ export default async function execute({ args, info }: CliCommandContext): Promis
         await runImagesPublish({
           target,
           registry: options.registry,
-          imageTag: options.tag,
+          plainHttp: options.plainHttp,
         });
 
       } catch (error) {

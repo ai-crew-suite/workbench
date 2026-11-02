@@ -13,80 +13,64 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import fs from 'node:fs';
-import path from 'node:path';
-import { spawnSync } from 'node:child_process';
-import chalk from 'chalk';
-import { findRepoRoot, discoverContainerTargets, hasBinary } from '../../../../utils/workspace';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { readImageReceipt, writeImageReceipt } from '../../../../utils/oci/image-receipt';
+import { runStructureTests } from '../test-structure';
 
-export interface StructureTestOptions {
-  target?: string;
-  registry: string;
-}
+const mocks = vi.hoisted(() => ({ spawn: vi.fn(), run: vi.fn(), inspect: vi.fn() }));
+vi.mock('node:child_process', () => ({ spawnSync: mocks.spawn }));
+vi.mock('../../../../utils/run-process', () => ({ runProcess: mocks.run }));
+vi.mock('dockerode', () => ({
+  default: class {
+    getImage() { return { inspect: mocks.inspect }; }
+  },
+}));
 
-function executeStructureTest(targetName: string, targetDir: string, options: StructureTestOptions, useLocalBinary: boolean): void {
-  const configFile = path.join(targetDir, '__tests__', `${targetName}.cst.yaml`);
-  const imageRef = `${options.registry}/workbench-${targetName}:latest`;
+describe('structure-test evidence', () => {
+  const imageId = `sha256:${'a'.repeat(64)}`;
+  let root: string;
+  let targetDir: string;
+  beforeEach(() => {
+    vi.resetAllMocks();
+    root = mkdtempSync(join(tmpdir(), 'image-structure-test-'));
+    targetDir = join(root, 'packages/example');
+    mkdirSync(join(targetDir, '__tests__'), { recursive: true });
+    writeFileSync(join(root, 'backstage.json'), '{}');
+    writeFileSync(join(targetDir, 'Dockerfile'), 'FROM scratch');
+    writeFileSync(join(targetDir, '__tests__/example.cst.yaml'), 'schemaVersion: "2.0.0"');
+    writeImageReceipt(targetDir, {
+      version: 1, target: 'example', imageId, localTag: `local/example:sha256-${'a'.repeat(64)}`,
+      platform: 'linux/amd64', publications: {},
+    });
+    vi.spyOn(process, 'cwd').mockReturnValue(root);
+    mocks.inspect.mockResolvedValue({ Id: imageId });
+    mocks.spawn.mockReturnValue({ status: 0 });
+    mocks.run.mockResolvedValue(undefined);
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    rmSync(root, { recursive: true, force: true });
+  });
 
-  if (!fs.existsSync(configFile)) {
-    console.log(chalk.gray(`ℹ️  No structural test blueprint found at ${path.basename(configFile)}, skipping.`));
-    return;
-  }
+  it('tests the image ID and records evidence for that image', async () => {
+    await runStructureTests({ target: 'example' });
+    expect(mocks.run).toHaveBeenCalledWith('container-structure-test',
+      expect.arrayContaining(['--image', imageId]));
+    expect(readImageReceipt(targetDir, 'example').structureTest?.imageId).toBe(imageId);
+  });
 
-  console.log(`🧱 Validating container structure for [${chalk.yellow(targetName)}] -> ${chalk.cyan(targetName + '.cst.yaml')}...`);
+  it('clears prior evidence when a re-test fails', async () => {
+    await runStructureTests({ target: 'example' });
+    mocks.run.mockRejectedValueOnce(new Error('structure test failed'));
+    await expect(runStructureTests({ target: 'example' })).rejects.toThrow('structure test failed');
+    expect(readImageReceipt(targetDir, 'example').structureTest).toBeUndefined();
+  });
 
-  if (useLocalBinary) {
-    const result = spawnSync('container-structure-test', [
-      'test',
-      '--image', imageRef,
-      '--config', configFile
-    ], { stdio: 'inherit' });
-
-    if (result.status !== 0) {
-      throw new Error(`Structural assertions failed on local binary execution for target ${targetName}`);
-    }
-  } else {
-    console.log(chalk.yellow('⚠️  container-structure-test binary not found. Executing via Docker...'));
-
-    const args = [
-      'run', '--rm',
-      '-v', '/var/run/docker.sock:/var/run/docker.sock',
-      '-v', `${configFile}:/config.yaml`,
-      'gcr.io/container-structure-test/container-structure-test:latest',
-      'test',
-      '--image', imageRef,
-      '--config', '/config.yaml'
-    ];
-
-    const result = spawnSync('docker', args, { stdio: 'inherit' });
-
-    if (result.status !== 0) {
-      throw new Error(`Structural assertions failed on Docker runtime container bridge for target ${targetName}`);
-    }
-  }
-}
-
-export async function runStructureTests(options: StructureTestOptions): Promise<void> {
-  const repoRoot = findRepoRoot();
-  const validTargets = discoverContainerTargets(repoRoot);
-  const useLocalBinary = hasBinary('container-structure-test');
-
-  if (options.target) {
-    const targetDir = validTargets.get(options.target);
-    if (!targetDir) {
-      console.error(chalk.red(`\n❌ Error: Invalid structure test target '${options.target}'.`));
-      console.error(`👉 Available options inside workspace: ${chalk.cyan([...validTargets.keys()].join(', '))}\n`);
-      throw new Error(`Target tracking mapping failure for ${options.target}`);
-    }
-
-    executeStructureTest(options.target, targetDir, options, useLocalBinary);
-  } else {
-    console.log(chalk.blue('🧱 Commencing full container structure validation cascade...'));
-
-    for (const [targetName, targetDir] of validTargets.entries()) {
-      executeStructureTest(targetName, targetDir, options, useLocalBinary);
-    }
-  }
-
-  console.log(chalk.green('\n✅ All structural configurations match expectations!'));
-}
+  it('rejects a missing test configuration', async () => {
+    rmSync(join(targetDir, '__tests__/example.cst.yaml'));
+    await expect(runStructureTests({ target: 'example' })).rejects.toThrow('exactly one structure test');
+  });
+});

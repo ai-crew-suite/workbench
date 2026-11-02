@@ -1,8 +1,11 @@
 {
-  "extends": ["//"],
+  "extends": [
+    "//"
+  ],
   "tasks": {
     "build": {
-      "cache": true,
+      "cache": false,
+      "dependsOn": [],
       "inputs": [
         "**/Dockerfile",
         "**/src/**/*",
@@ -10,30 +13,34 @@
         "scripts/build.sh",
         "package.json"
       ],
-      "env": ["REGISTRY", "IMAGE_TAG", "CI"],
       "outputs": []
     },
     "image:lint": {
       "cache": true,
-      "inputs": ["Dockerfile"],
+      "inputs": [
+        "Dockerfile"
+      ],
       "outputs": []
     },
     "image:test:structure": {
-      "cache": true,
-      "dependsOn": ["build"],
-      "inputs": ["__tests__/**/*.cst.yaml", "Dockerfile"],
+      "cache": false,
+      "dependsOn": [],
+      "inputs": [
+        "__tests__/**/*.cst.yaml"
+      ],
       "outputs": []
     },
     "image:test:security": {
-      "cache": true,
-      "dependsOn": ["build"],
-      "inputs": ["Dockerfile"],
-      "env": ["TRIVY_SCAN_TIMEOUT"],
+      "cache": false,
+      "dependsOn": [],
+      "env": [
+        "TRIVY_SCAN_TIMEOUT"
+      ],
       "outputs": []
     },
     "test:unit": {
       "cache": true,
-      "dependsOn": ["build"],
+      "dependsOn": [],
       "inputs": [
         "src/**",
         "**/__tests__/**/*.test.ts",
@@ -44,9 +51,18 @@
     },
     "publish": {
       "cache": false,
-      "dependsOn": ["build"],
-      "inputs": ["Dockerfile"],
-      "env": ["REGISTRY", "IMAGE_TAG"],
+      "dependsOn": [],
+      "env": [
+        "REGISTRY"
+      ],
+      "outputs": []
+    },
+    "image:promote": {
+      "cache": false,
+      "dependsOn": [],
+      "env": [
+        "REGISTRY"
+      ],
       "outputs": []
     }
   }

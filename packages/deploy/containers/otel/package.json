@@ -23,11 +23,12 @@
     "directory": "packages/containers/otel"
   },
   "scripts": {
-    "build": "yarn run -T backstage-cli workbench image build grafana-container",
-    "lint": "yarn run -T backstage-cli workbench image lint grafana-container",
-    "image:test:security": "yarn run -T backstage-cli workbench image test security grafana-container",
-    "image:test:structure": "yarn run -T backstage-cli workbench image test structure grafana-container",
-    "publish": "yarn run -T backstage-cli workbench image publish grafana-container",
+    "build": "yarn run -T backstage-cli workbench image build otel-container",
+    "lint": "yarn run -T backstage-cli workbench image lint otel-container",
+    "image:test:security": "yarn run -T backstage-cli workbench image test security otel-container",
+    "image:test:structure": "yarn run -T backstage-cli workbench image test structure otel-container",
+    "publish": "yarn run -T backstage-cli workbench image publish otel-container",
+    "image:promote": "yarn run -T backstage-cli workbench image promote otel-container",
     "test": "yarn image:test:security && yarn image:test:structure"
   },
   "devDependencies": {

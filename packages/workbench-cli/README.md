@@ -40,9 +40,10 @@ group.
 | `workbench compose publish` | Publish the Compose configuration as an OCI artifact. |
 | `workbench compose start` | Start or reconcile the shared Compose stack. |
 | `workbench compose stop` | Stop the shared Compose stack. |
-| `workbench image build [target]` | Build container images. |
+| `workbench image build [target]` | Build container images and record their local identities. |
 | `workbench image lint [target]` | Lint Dockerfiles. |
-| `workbench image publish [target]` | Publish container images. |
+| `workbench image publish [target]` | Publish structure-tested image candidates. |
+| `workbench image promote <target>` | Promote a tested, published image by digest. |
 | `workbench image test security [target]` | Scan images with Trivy. |
 | `workbench image test structure [target]` | Run container structure tests. |
 | `workbench wiremock seeder [source]` | Seed WireMock using fixtures or a JSON file. |
@@ -54,6 +55,72 @@ existing environment variables take precedence.
 Image builds clean temporary build directories and attempt to prune dangling
 images. Prune failures are reported as warnings and do not change the build
 result. Images and containers are not force-removed.
+
+## Container image delivery
+
+Build, test, publish, and promotion are separate operations. For example, from
+the repository root:
+
+```sh
+yarn backstage-cli workbench image build grafana-container
+yarn backstage-cli workbench image test structure grafana-container
+yarn backstage-cli workbench image publish grafana-container
+yarn backstage-cli workbench image promote grafana-container
+```
+
+The corresponding workspace tasks can also be run with Turborepo:
+
+```sh
+yarn turbo run build --filter=@ai-crew-suite/grafana-container
+yarn turbo run image:test:structure --filter=@ai-crew-suite/grafana-container
+yarn turbo run publish --filter=@ai-crew-suite/grafana-container
+yarn turbo run image:promote --filter=@ai-crew-suite/grafana-container
+```
+
+Use the target's container package name in place of `grafana-container`.
+Build and test must be run before publish; publish and promotion do not trigger
+builds. An optional `image test security` command scans the recorded local
+image with Trivy, but the publication gate requires the structure test. Each
+target must have exactly one `.cst.yaml` structure-test configuration.
+
+After a successful build, the local image is tagged
+`local/<target>:sha256-<image-id-hex>`. The image ID, platform, optional
+Turborepo task hash, test results, and published registry digests are recorded
+in the target workspace's `.turbo/image-receipt.json`. A receipt does not
+restore the image into Docker: structure tests and publishing require that
+image to be present in the current daemon. Builds and tests are not restored
+from Turbo's file cache, but Docker's layer cache still applies.
+
+Publishing requires a passing structure test for the recorded image and the
+current test configuration. It creates a candidate tag
+`<registry>/<target>:sha256-<image-id-hex>`, records its registry manifest
+digest, and does not update `latest`. If the engine changes the image
+configuration during push, publishing pulls the resulting digest and reruns the
+structure test against that published artifact. A failed test leaves the
+candidate unapproved. Re-running the local structure test clears prior
+publication test evidence, so publish again before promoting.
+
+Promotion uses the recorded, tested registry digest and does not rebuild or
+require the local image. It defaults to `latest`; `--tag` selects another
+mutable channel. Both publish and promote require ORAS on `PATH` and default to
+`localhost:32443/ai-crew-suite` unless `REGISTRY` or `--registry` selects
+another destination. Loopback registries use HTTP automatically; use
+`--plain-http` for another insecure registry. Docker must also be configured
+to push and pull from that registry. Switching registries for publication does
+not trigger a build.
+
+CI publishes candidates and stores their receipts in the `image-receipts`
+workflow artifact; it does not automatically promote them. To promote one
+elsewhere, restore the receipt to the corresponding workspace and use the same
+structure-test configuration. Receipts are local bookkeeping, not signed test
+attestations, so use only receipts from a trusted source.
+
+Hash-shaped tags are still mutable unless the registry enforces immutability.
+The CLI checks existing candidate tags but cannot prevent concurrent writers
+from racing a push. For production deployments, prefer the recorded registry
+digest over `latest`. The Turbo hash is an input fingerprint, not the image
+identity, and external build inputs must be pinned for reproducible builds. The
+current build produces single-platform images.
 
 ## Compose development stack
 
@@ -86,6 +153,12 @@ stop it. A stack is bound to the Docker daemon on which it was started; switch
 back to that daemon before starting or stopping it. Stop retains named volumes
 and does not stop development servers. If teardown fails, fix the error and
 retry the command.
+
+The Compose file uses promoted image tags and pulls managed images on startup.
+After changing the Compose file, publish its OCI artifact and stop the existing
+shared stack before starting again so the updated artifact is fetched. Promote
+the required container images, including Ollama, in the registry used by that
+Compose configuration.
 
 The cached Compose file and `workbench.pid` state file are stored in the user's
 private `~/.workbench-compose` directory. They record the repository, Docker

@@ -15,7 +15,7 @@
     "clean": "turbo run clean",
     "helm:lint": "turbo run helm:lint",
     "helm:template": "turbo run helm:template",
-    "image:build": "turbo run image:build --filter=@ai-crew-suite/containers",
+    "image:build": "turbo run build --filter='{packages/deploy/containers/*}'",
     "infra:up": "turbo run compose:up --filter=@ai-crew-suite/compose",
     "infra:down": "turbo run compose:down --filter=@ai-crew-suite/compose",
     "infra:logs": "yarn workspace @ai-crew-suite/compose compose:logs",

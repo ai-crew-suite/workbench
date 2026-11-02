@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 import { existsSync, rmSync, readFileSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
 import { join, relative } from 'node:path';
 import chalk from 'chalk';
 import * as tar from 'tar';
 import { discoverContainerTargets, findRepoRoot } from '../../../utils/workspace';
 import { DockerBuildService } from './docker-build-service';
+import { imageReceiptPath, withImageLock, writeImageReceipt } from '../../../utils/oci/image-receipt';
 
+/** Image build target selection. */
 export interface BuildOptions {
   target?: string;
-  registry: string;
-  imageTag: string;
 }
 
 export class ImageBuilder {
@@ -95,48 +96,45 @@ export class ImageBuilder {
   /**
    * Compiles a singular localized Docker target image
    */
-  async compileImage(repoRoot: string, targetName: string, targetDir: string, options: BuildOptions): Promise<void> {
-    const { imageTag } = options;
-    const isCI = process.env['CI'] === 'true';
-    const fullImageTag = `local/${targetName}:${imageTag}`;
+  async compileImage(repoRoot: string, targetName: string, targetDir: string): Promise<void> {
+    await withImageLock(targetDir, async () => {
+      const temporaryTag = `local/${targetName}:build-${randomUUID()}`;
+      rmSync(imageReceiptPath(targetDir), { force: true });
 
-    const relativeDockerfilePath = relative(repoRoot, join(targetDir, 'Dockerfile')).replace(/\\/g, '/');
-    const labels = this.resolveMetadataLabels(targetName, targetDir);
+      const relativeDockerfilePath = relative(repoRoot, join(targetDir, 'Dockerfile')).replace(/\\/g, '/');
+      const labels = this.resolveMetadataLabels(targetName, targetDir);
 
-    try {
-      console.log(
-        `\n📦 [${chalk.blue(targetName)}] Stream-packing build context to Docker Engine...`
-      );
+      try {
+        console.log(
+          `\n📦 [${chalk.blue(targetName)}] Stream-packing build context to Docker Engine...`
+        );
 
-      // Compress workspace on the fly using a streaming layout to match build context conventions
-      const contextStream = tar.c(
-        {
-          cwd: repoRoot,
-          gzip: false, // Docker expects a raw un-gzip tar context layer stream
-        },
-        ['.']
-      ) as any; // Explicit typecast resolves signature mismatch between tar.Pack and NodeJS.ReadableStream
+        // Compress workspace on the fly using a streaming layout to match build context conventions
+        const contextStream = tar.c(
+          {
+            cwd: repoRoot,
+            gzip: false, // Docker expects a raw un-gzip tar context layer stream
+          },
+          ['.']
+        ) as any; // Explicit typecast resolves signature mismatch between tar.Pack and NodeJS.ReadableStream
 
-      await this.buildService.build(contextStream, {
-        t: fullImageTag,
-        dockerfile: relativeDockerfilePath,
-        labels,
-      });
+        await this.buildService.build(contextStream, {
+          t: temporaryTag,
+          dockerfile: relativeDockerfilePath,
+          labels,
+        });
 
-      console.log(chalk.green(
-        `\n✅ ${targetName} image compiled successfully as: ${fullImageTag}`
-      ));
-
-      if (isCI) {
-        console.log(chalk.blue(
-          `🚀 CI context detected. Out-of-band streaming push triggered for: ${fullImageTag}`
-        ));
-
-        await this.buildService.pushImage(fullImageTag);
+        const identity = await this.buildService.identifyImage(temporaryTag, targetName);
+        writeImageReceipt(targetDir, {
+          version: 1, target: targetName, ...identity,
+          ...(process.env['TURBO_HASH'] ? { turboHash: process.env['TURBO_HASH'] } : {}),
+          publications: {},
+        });
+        console.log(chalk.green(`\n✅ ${targetName} image compiled successfully as: ${identity.localTag}`));
+      } finally {
+        await this.executeCleanup(repoRoot, targetName);
       }
-    } finally {
-      await this.executeCleanup(repoRoot, targetName);
-    }
+    });
   }
 
   /**
@@ -161,7 +159,7 @@ export class ImageBuilder {
         throw new Error(`Target tracking mapping failure for ${options.target}`);
       }
 
-      await this.compileImage(repoRoot, options.target, targetDir, options);
+      await this.compileImage(repoRoot, options.target, targetDir);
 
     } else {
       console.log(chalk.blue(
@@ -173,7 +171,7 @@ export class ImageBuilder {
           `\n🔨 Triggering build process for: ${chalk.yellow(targetName)}`
         ));
 
-        await this.compileImage(repoRoot, targetName, targetDir, options);
+        await this.compileImage(repoRoot, targetName, targetDir);
       }
     }
   }

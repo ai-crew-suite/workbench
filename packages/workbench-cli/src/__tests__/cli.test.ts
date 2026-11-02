@@ -49,6 +49,7 @@ describe('Backstage CLI module integration', () => {
     ['image build', ['image', 'build']],
     ['image lint', ['image', 'lint']],
     ['image publish', ['image', 'publish']],
+    ['image promote', ['image', 'promote']],
     ['image test security', ['image', 'test', 'security']],
     ['image test structure', ['image', 'test', 'structure']],
     ['wiremock seeder', ['wiremock', 'seeder']],

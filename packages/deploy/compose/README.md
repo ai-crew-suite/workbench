@@ -34,9 +34,9 @@ These commands are for maintaining and verifying the internal configuration stab
 - Compose starts the Ollama image and waits for it to be healthy before
   starting Mem0. `OLLAMA_BASE_URL` defaults to `http://ollama:11434`, using
   Compose service discovery; Ollama's port is not published to the host.
-  The service uses `local/ollama-container:${IMAGE_TAG:-latest}` by default,
-  matching the local image build. Set `OLLAMA_IMAGE_REPOSITORY` to use a
-  published repository instead. Models baked into the image are available
+  The service uses `${REGISTRY:-localhost:32443/ai-crew-suite}/ollama-container`
+  by default. Set `OLLAMA_IMAGE_REPOSITORY` to override the repository.
+  Models baked into the image are available
   without a volume; models pulled into a running container are lost when it
   is recreated.
 - To use a host Ollama server instead, override `OLLAMA_BASE_URL` with a
@@ -56,8 +56,9 @@ These commands are for maintaining and verifying the internal configuration stab
   `MEM0_TELEMETRY=false` to opt out of anonymous telemetry. Its application
   tables are migrated into `POSTGRES_DB` on startup.
 
-Changes to the Mem0 and Temporal Dockerfiles or entrypoints require rebuilding
-and publishing their images before restarting the stack. The workbench launcher
+Changes to images require building, structure-testing, publishing, and manually
+promoting the candidate before restarting the stack. Managed images use
+`pull_policy: always`, so Compose fetches the promoted tag on startup. The workbench launcher
 uses a cached, published Compose artifact and a per-user shared project,
 not the local Compose file's `workbench` project. After Compose changes, publish
 the artifact and run `workbench compose stop` before starting again so it is

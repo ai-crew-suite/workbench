@@ -53,10 +53,10 @@ yarn turbo run image:test:structure --filter=@ai-crew-suite/ollama-container
 yarn turbo run image:test:security --filter=@ai-crew-suite/ollama-container
 ```
 
-### Integration Smoke Testing
+### Workspace Unit Tests
 
 ```bash
-yarn turbo run image:test:unit --filter=@ai-crew-suite/ollama-container
+yarn turbo run test:unit --filter=@ai-crew-suite/ollama-container
 ```
 
 ### Artifact Distribution
@@ -64,6 +64,8 @@ yarn turbo run image:test:unit --filter=@ai-crew-suite/ollama-container
 ```bash
 yarn turbo run publish --filter=@ai-crew-suite/ollama-container
 ```
+
+Publishing requires a successful structure test; promotion to `latest` is a separate manual step. See the [image delivery workflow](../grafana/README.md#manual-promotion).
 
 ## ⚖ Compliance and Licensing
 

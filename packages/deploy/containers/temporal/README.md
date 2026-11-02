@@ -37,17 +37,13 @@ yarn turbo run image:test:structure --filter=@ai-crew-suite/temporal-container
 yarn turbo run image:test:security --filter=@ai-crew-suite/temporal-container
 ```
 
-### Integration Smoke Testing
-
-```bash
-yarn turbo run image:test:unit --filter=@ai-crew-suite/temporal-container
-```
-
 ### Artifact Distribution
 
 ```bash
 yarn turbo run publish --filter=@ai-crew-suite/temporal-container
 ```
+
+Publishing requires a successful structure test; promotion to `latest` is a separate manual step. See the [image delivery workflow](../grafana/README.md#manual-promotion).
 
 ## ⚖ Compliance and Licensing
 

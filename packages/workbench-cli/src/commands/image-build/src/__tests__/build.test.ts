@@ -38,7 +38,14 @@ vi.mock('tar', () => ({
   c: vi.fn().mockReturnValue('mock-tar-stream'),
 }));
 
+vi.mock('../../../../utils/oci/image-receipt', () => ({
+  imageReceiptPath: vi.fn((dir: string) => `${dir}/.turbo/image-receipt.json`),
+  writeImageReceipt: vi.fn(),
+  withImageLock: vi.fn(async (_dir: string, operation: () => Promise<void>) => operation()),
+}));
+
 import { existsSync, readFileSync, rmSync } from 'node:fs';
+import { writeImageReceipt } from '../../../../utils/oci/image-receipt';
 
 describe('ImageBuilder Unified Core Suite', () => {
   let mockBuildService: any;
@@ -50,7 +57,11 @@ describe('ImageBuilder Unified Core Suite', () => {
     mockBuildService = {
       build: vi.fn().mockResolvedValue(undefined),
       pruneImages: vi.fn().mockResolvedValue(undefined),
-      pushImage: vi.fn().mockResolvedValue(undefined),
+      identifyImage: vi.fn().mockResolvedValue({
+        imageId: `sha256:${'a'.repeat(64)}`,
+        localTag: `local/worker-service:sha256-${'a'.repeat(64)}`,
+        platform: 'linux/amd64',
+      }),
     };
   });
 
@@ -78,20 +89,21 @@ describe('ImageBuilder Unified Core Suite', () => {
     expect(labels['org.opencontainers.image.source']).toBe('https://github.com');
   });
 
-  it('triggers a sequential out-of-band registry push when operating in CI environment frames', async () => {
+  it('records the image identity after building even in CI without pushing', async () => {
     vi.stubEnv('CI', 'true');
     vi.mocked(readFileSync).mockReturnValue('{}');
 
     const builder = new ImageBuilder(mockBuildService as unknown as DockerBuildService);
     vi.spyOn(builder, 'resolveMetadataLabels').mockReturnValue({});
 
-    await builder.compileImage('/root', 'worker-service', '/root/packages/worker-service', {
-      registry: 'ghcr.io/ai-crew-suite',
-      imageTag: 'latest',
-    });
+    await builder.compileImage('/root', 'worker-service', '/root/packages/worker-service');
 
     expect(mockBuildService.build).toHaveBeenCalled();
-    expect(mockBuildService.pushImage).toHaveBeenCalledWith('local/worker-service:latest');
+    expect(mockBuildService.identifyImage).toHaveBeenCalled();
+    expect(writeImageReceipt).toHaveBeenCalledWith('/root/packages/worker-service', expect.objectContaining({
+      imageId: `sha256:${'a'.repeat(64)}`,
+      publications: {},
+    }));
   });
 
   it('warns without failing a successful build when pruning encounters an image in use', async () => {
@@ -103,10 +115,7 @@ describe('ImageBuilder Unified Core Suite', () => {
     vi.spyOn(builder, 'resolveMetadataLabels').mockReturnValue({});
 
     await expect(
-      builder.compileImage('/root', 'mem0-container', '/root/packages/mem0', {
-        registry: 'local',
-        imageTag: 'latest',
-      })
+      builder.compileImage('/root', 'mem0-container', '/root/packages/mem0')
     ).resolves.toBeUndefined();
 
     expect(vi.mocked(rmSync)).toHaveBeenCalledWith('/root/out-mem0-container', { recursive: true, force: true });
@@ -114,7 +123,7 @@ describe('ImageBuilder Unified Core Suite', () => {
     expect(warning).toHaveBeenCalledWith(expect.stringContaining('Unable to prune dangling images'), pruneError);
   });
 
-  it.each(['build', 'pushImage'] as const)(
+  it.each(['build', 'identifyImage'] as const)(
     'preserves a %s failure when image pruning also fails',
     async (operation) => {
       vi.stubEnv('CI', 'true');
@@ -127,13 +136,11 @@ describe('ImageBuilder Unified Core Suite', () => {
       vi.spyOn(builder, 'resolveMetadataLabels').mockReturnValue({});
 
       await expect(
-        builder.compileImage('/root', 'mem0-container', '/root/packages/mem0', {
-          registry: 'local',
-          imageTag: 'latest',
-        })
+        builder.compileImage('/root', 'mem0-container', '/root/packages/mem0')
       ).rejects.toBe(operationError);
 
       expect(mockBuildService.pruneImages).toHaveBeenCalledOnce();
+      expect(writeImageReceipt).not.toHaveBeenCalled();
       expect(warning).toHaveBeenCalledWith(expect.stringContaining('Unable to prune dangling images'), pruneError);
     }
   );

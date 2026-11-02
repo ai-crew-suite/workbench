@@ -106,6 +106,7 @@ describe('SigningService Unit Suite', () => {
     expect(spawnSync).toHaveBeenCalledWith('cosign', ['sign', '--yes', imageDigest], {
       stdio: 'inherit',
       env: undefined,
+      timeout: 60000,
     });
   });
 
@@ -120,7 +121,7 @@ describe('SigningService Unit Suite', () => {
     expect(spawnSync).toHaveBeenCalledWith(
       'cosign',
       ['sign', '--yes', imageDigest, '--allow-http-registry=true'],
-      { stdio: 'inherit', env: undefined },
+      { stdio: 'inherit', env: undefined, timeout: 60000 },
     );
   });
 

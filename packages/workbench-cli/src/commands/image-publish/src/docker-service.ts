@@ -42,6 +42,52 @@ export class DockerService {
     await image.tag({ repo, tag });
   }
 
+  /** Confirms the requested image ID is present in the current daemon. */
+  async requireImage(imageId: string): Promise<void> {
+    const image = await this.docker.getImage(imageId).inspect();
+    if (image.Id !== imageId) throw new Error(`Local image identity mismatch for ${imageId}.`);
+  }
+
+  /** Refuses to replace an existing alias belonging to another image. */
+  async prepareAlias(imageId: string, target: string): Promise<boolean> {
+    try {
+      const current = await this.docker.getImage(target).inspect();
+      if (current.Id !== imageId) throw new Error(`Local registry alias ${target} already belongs to another image.`);
+      return false;
+    } catch (error) {
+      if (!(error && typeof error === 'object' && 'statusCode' in error && error.statusCode === 404)) throw error;
+    }
+    await this.tagImage(imageId, target);
+    return true;
+  }
+
+  /** Removes only a temporary registry alias, leaving the content-derived local tag. */
+  async removeAlias(target: string): Promise<void> {
+    await this.docker.getImage(target).remove();
+  }
+
+  /** Pulls an immutable registry reference and reports whether it was already present. */
+  async pullDigest(reference: string): Promise<boolean> {
+    let existed = false;
+    try {
+      await this.docker.getImage(reference).inspect();
+      existed = true;
+    } catch (error) {
+      if (!(error && typeof error === 'object' && 'statusCode' in error && error.statusCode === 404)) throw error;
+    }
+    const authconfig = resolveRegistryAuth(registryHostFromImageReference(reference));
+    const stream = await this.docker.pull(reference, authconfig ? { authconfig } : {});
+    let streamError: string | undefined;
+    await new Promise<void>((resolve, reject) => {
+      this.docker.modem.followProgress(stream, error => error ? reject(error) : resolve(), event => {
+        if (event.errorDetail || event.error) streamError = event.errorDetail?.message ?? event.error;
+      });
+    });
+    if (streamError) throw new Error(`Registry image pull failed: ${streamError}`);
+    await this.docker.getImage(reference).inspect();
+    return existed;
+  }
+
   /**
    * Streams layer blobs to the target registry and returns the definitive RepoDigest.
    *

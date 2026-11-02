@@ -33,6 +33,9 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
+      - name: Install ORAS
+        uses: oras-project/setup-oras@22ce207df3b08e061f537244349aac6ae1d214f6 # v1
+
       # 0. Authenticate against Docker Hub before any build runs. The image build service
       #    forwards these credentials as the daemon auth header so base-image pulls use
       #    the account's dedicated quota instead of shared per-IP anonymous limits that
@@ -48,11 +51,7 @@ jobs:
 
       # 1. Compile all independent container packages sequentially into local runner engine storage
       - name: Build All Container Workspaces Locally
-        env:
-          REGISTRY: local
-          IMAGE_TAG: latest
-          CI: "false" # Directs build action to use --load strategy for downstream validation stages
-        run: yarn turbo run build --filter="...{packages/deploy/containers/*}"
+        run: yarn turbo run build --filter="{packages/deploy/containers/*}"
 
       # 2. Reify external execution providers and verify structural / functional compliance
       - name: Install container-structure-test binary
@@ -63,10 +62,10 @@ jobs:
           container-structure-test version
 
       - name: Execute Container Structure Assertion Matrix
-        run: yarn turbo run image:test:structure --filter="...{packages/deploy/containers/*}"
+        run: yarn turbo run image:test:structure --filter="{packages/deploy/containers/*}"
 
-      - name: Execute Integration Smoke Test Specs
-        run: yarn turbo run image:test:unit --filter="...{packages/deploy/containers/*}"
+      - name: Execute Container Workspace Unit Tests
+        run: yarn turbo run test:unit --filter="{packages/deploy/containers/*}"
 
       # 3. Authenticate, retag with dynamic OCI annotations, sign layers, and distribute to GHCR.
       #    This login also feeds the dockerode-based publish push (registry credentials are
@@ -81,7 +80,12 @@ jobs:
       - name: Publish and Cryptographically Sign Verified Container Packages
         env:
           REGISTRY: ghcr.io/${{ github.repository }}
-          IMAGE_TAG: latest
-          # FIXED: Bypassed COSIGN_PRIVATE_KEY and COSIGN_PASSWORD.
-          # Bypassing these forces our publish script's "cosign sign" command to run in keyless mode.
-        run: yarn turbo run publish --filter="...{packages/deploy/containers/*}"
+        run: yarn turbo run publish --filter="{packages/deploy/containers/*}"
+
+      - name: Save candidate receipts for manual promotion
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: image-receipts
+          path: packages/deploy/containers/*/.turbo/image-receipt.json
+          include-hidden-files: true
+          if-no-files-found: error

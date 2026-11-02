@@ -25,6 +25,7 @@
     "image:test:security": "yarn run -T backstage-cli workbench image test security ollama-container",
     "image:test:structure": "yarn run -T backstage-cli workbench image test structure ollama-container",
     "publish": "yarn run -T backstage-cli workbench image publish ollama-container",
+    "image:promote": "yarn run -T backstage-cli workbench image promote ollama-container",
     "test": "yarn image:test:security && yarn image:test:structure && yarn test:unit ollama-container",
     "test:unit": "vitest run"
   },
