@@ -1,0 +1,14 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "cache": true,
+      "inputs": ["package.json"]
+    },
+    "publish": {
+      "cache": false,
+      "dependsOn": ["build"],
+      "inputs": ["package.json", "README.md"]
+    }
+  }
+}

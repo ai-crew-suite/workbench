@@ -1,12 +1,14 @@
 {
   "name": "@ai-crew-suite/dependencies-frontend",
   "description": "Shared frontend dependency bundle for the AI Crew Suite platform",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "license": "Apache-2.0",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "files": [
+    "package.json",
+    "README.md"
+  ],
   "publishConfig": {
-    "directory": "."
+    "access": "public"
   },
   "bugs": {
     "url": "https://github.com/ai-crew-suite/workbench/issues",
@@ -16,6 +18,14 @@
     "type": "git",
     "url": "https://github.com/ai-crew-suite/workbench",
     "directory": "packages/shared"
+  },
+  "scripts": {
+    "build": "echo 'No compilation required for dependency manifest presets.'",
+    "clean": "echo 'Nothing to clean.'",
+    "lint": "echo 'No code files to lint.'",
+    "publish": "npm publish --access public",
+    "typecheck": "echo 'No typescript structures to evaluate.'",
+    "test:unit": "echo 'No unit tests required.'"
   },
   "dependencies": {
     "@backstage/frontend-defaults": "backstage:^",

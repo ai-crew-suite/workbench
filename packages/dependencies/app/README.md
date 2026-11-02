@@ -12,6 +12,12 @@ Centralized frontend version governance, unified package boundaries, and immutab
 
 Because this workspace operates strictly as a declarative dependency bundle and lacks discrete runtime processes, it does not expose manual orchestration commands.
 
+### Publishing
+
+```bash
+yarn turbo run publish --filter=@ai-crew-suite/dependencies-frontend
+```
+
 ## 📄 Compliance and Licensing
 
 Copyright © 2026 The AI Crew Suite Authors.
